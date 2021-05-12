@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
 
         connectButton.setOnClickListener(vw -> {
             if(checkMyDevice()){
-
+                connect();
             };
 
             /*if(device == null) {

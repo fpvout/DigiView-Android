@@ -29,8 +29,8 @@ public class UsbMaskConnection extends InputStream {
         Log.d("GET_USB_INTERFACE","Interface #3 (" + mUsbInterface.getName() + ")");
         usbConnection.claimInterface(mUsbInterface,true);
         getEndPoints(mUsbInterface);
-        AndroidUSBInputStream mInputStream = new AndroidUSBInputStream(mInEndpoint,usbConnection);
-        AndroidUSBOutputStream mOutputStream = new AndroidUSBOutputStream(mOutEndpoint,usbConnection);
+        mInputStream = new AndroidUSBInputStream(mInEndpoint,usbConnection);
+        mOutputStream = new AndroidUSBOutputStream(mOutEndpoint,usbConnection);
 
     }
 

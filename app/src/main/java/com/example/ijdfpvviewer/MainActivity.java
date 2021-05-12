@@ -25,17 +25,18 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import android.view.SurfaceView;
-import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String ACTION_USB_PERMISSION = "ACTION_USB_PERMISSION";
     UsbManager mUsbManager;
     UsbDevice device;
     boolean usbConnected;
@@ -75,13 +76,17 @@ public class MainActivity extends AppCompatActivity {
         };
 
         connectButton.setOnClickListener(vw -> {
-            if(device == null) {
+            if(checkMyDevice()){
+
+            };
+
+            /*if(device == null) {
                 Log.d("DEVICE", "no device !");
                 Toast.makeText(getApplicationContext(), "no device !", Toast.LENGTH_SHORT).show();
             }else{
                 Log.d("DEVICE", device.getDeviceName() + " " +device.getManufacturerName()+ " " +device.getProductName());
                 Toast.makeText(getApplicationContext(), device.getDeviceName() + " " +device.getManufacturerName()+ " " +device.getProductName(), Toast.LENGTH_SHORT).show();
-            }
+            }*/
         });
         Log.d("INITIALIZED", "app running !");
 
@@ -101,6 +106,30 @@ public class MainActivity extends AppCompatActivity {
             canvas.drawBitmap(f, frameRect,zone,new Paint(Color.BLUE));
             v.getHolder().unlockCanvasAndPost(canvas);
         }
+    }
+
+    private boolean checkMyDevice() {
+        HashMap<String, UsbDevice> deviceList = mUsbManager.getDeviceList();
+        Log.d("USB_SIZE", ("usbdevice size=" + deviceList.size() + ""));
+        if (deviceList.size() <= 0) {
+            device = null;
+            Toast.makeText(getApplicationContext(), "no device !", Toast.LENGTH_SHORT).show();
+
+            return false;
+        }
+        for (UsbDevice d : deviceList.values()) {
+            Log.d("USB_DEVICE","VID=" + d.getVendorId() + " PID=" + d.getProductId() + "");
+            Toast.makeText(getApplicationContext(), d.getDeviceName() + " " +d.getManufacturerName()+ " " +d.getProductName(), Toast.LENGTH_SHORT).show();
+
+            if (d.getVendorId() == 11427 && d.getProductId() == 31) {
+                device = d;
+                if (mUsbManager.hasPermission(device)) {
+                    return true;
+                } else Log.d("USB_PERM:","No Permission");
+                mUsbManager.requestPermission(d, PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(ACTION_USB_PERMISSION), 0));
+            }
+        }
+        return false;
     }
 
     @Override
@@ -180,8 +209,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private static final String ACTION_USB_PERMISSION =
-            "com.android.example.USB_PERMISSION";
     private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
 
         public void onReceive(Context context, Intent intent) {

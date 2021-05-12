@@ -4,8 +4,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
-
-import org.bytedeco.ffmpeg.avcodec.AVCodec;
 import org.bytedeco.ffmpeg.global.avcodec;
 import org.bytedeco.javacv.AndroidFrameConverter;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
@@ -38,18 +36,13 @@ public class VideoReader {
                 public void run() {
                     av_log_set_level(AV_LOG_TRACE);
                     FFmpegLogCallback.set(); // debug ffmpeg message
-
-                    FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(inputStream);
+                    FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(inputStream,0);
                     grabber.setVideoStream(0);
-                    //grabber.setOption("fflags", "nobuffer");
                     grabber.setFormat("h264");
                     grabber.setVideoCodec(avcodec.AV_CODEC_ID_H264);
                     grabber.setOption("fflags", "nobuffer");
-                    grabber.setOption("preset", "ultrafast");
-                    grabber.setFrameRate(60);
-                    //grabber.setVideoBitrate(25000);
+                    grabber.setVideoOption("probesize", "32");
                     grabber.setVideoOption("tune", "zerolatency");
-
 
                     Log.d("GRABBER","initialized");
 
@@ -62,6 +55,7 @@ public class VideoReader {
                         Frame frame = null;
                         do  {
                             frame = grabber.grabImage();
+                            //Log.d("GRABBER","frame !");
                             m.obj = converterToBitmap.convert(frame);;
                             mHandler.dispatchMessage(m);
                         } while (frame != null);

@@ -68,9 +68,9 @@ public class MainActivity extends AppCompatActivity {
                 double frameRatio = 16.0 / 9.0;
 
                 Rect r = new Rect(0,
-                        b.getHeight(),
-                        fpvView.getWidth(),
-                        (int) (fpvView.getWidth() / frameRatio));
+                        0,
+                        (int) (fpvView.getHeight() * frameRatio),
+                        fpvView.getHeight());
                 displayFrame(fpvView, b, r);
             }
         };

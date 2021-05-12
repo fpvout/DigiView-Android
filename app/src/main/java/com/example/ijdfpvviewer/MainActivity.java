@@ -25,6 +25,8 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import android.view.SurfaceView;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -36,28 +38,33 @@ public class MainActivity extends AppCompatActivity {
 
     UsbManager mUsbManager;
     UsbDevice device;
+    boolean usbConnected;
+    Handler frameHandler;
 
     protected void initialize() {
+        Log.d("INIT", "init !");
         mUsbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
         PendingIntent mPermissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
-        IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
         registerReceiver(mUsbReceiver, filter);
-
         setContentView(R.layout.activity_main);
 
-        device = (UsbDevice) this.getIntent().getParcelableExtra(UsbManager.EXTRA_DEVICE);
-        mUsbManager.requestPermission(device, mPermissionIntent);
+        run();
     }
 
     protected void run() {
-        SurfaceView fpvView = (SurfaceView) findViewById(R.id.fpvView);
-        final Handler frameHandler = new Handler(Looper.myLooper()) {
+        Log.d("RUN", "run !");
+
+        SurfaceView fpvView = findViewById(R.id.fpvView);
+        Button connectButton = findViewById(R.id.connectButton);
+        frameHandler = new Handler(Looper.myLooper()) {
             @Override
             public void handleMessage(Message msg) {
                 Log.d("NEW_FRAME", "got a new frame !");
                 super.handleMessage(msg);
                 Bitmap b = (Bitmap) msg.obj;
-                float frameRatio = 16 / 9;
+                double frameRatio = 16.0 / 9.0;
 
                 Rect r = new Rect(0,
                         b.getHeight(),
@@ -66,9 +73,25 @@ public class MainActivity extends AppCompatActivity {
                 displayFrame(fpvView, b, r);
             }
         };
+
+        connectButton.setOnClickListener(vw -> {
+            if(device == null) {
+                Log.d("DEVICE", "no device !");
+                Toast.makeText(getApplicationContext(), "no device !", Toast.LENGTH_SHORT).show();
+            }else{
+                Log.d("DEVICE", device.getDeviceName() + " " +device.getManufacturerName()+ " " +device.getProductName());
+                Toast.makeText(getApplicationContext(), device.getDeviceName() + " " +device.getManufacturerName()+ " " +device.getProductName(), Toast.LENGTH_SHORT).show();
+            }
+        });
+        Log.d("INITIALIZED", "app running !");
+
+    }
+
+    private void connect(){
         UsbMaskConnection mUsbMaskConnection = new UsbMaskConnection(mUsbManager.openDevice(device), device);
         mUsbMaskConnection.start();
         VideoReader mVideoReader = new VideoReader(mUsbMaskConnection,frameHandler);
+        mVideoReader.start();
     }
 
     protected void displayFrame(SurfaceView v, Bitmap f, Rect zone){
@@ -86,6 +109,22 @@ public class MainActivity extends AppCompatActivity {
         checkPermissions();
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        Intent intent = getIntent();
+        Log.d("ON_RESUME", "intent: " + intent);
+        String action = intent.getAction();
+
+
+        if (!usbConnected ) {
+            //check to see if USB is now connected
+            Log.d("RESUME_USB_CONNECTED", "not connected");
+        }
+    }
+
+
     // permissions request code
     private final static int REQUEST_CODE_ASK_PERMISSIONS = 1;
 
@@ -100,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     protected void checkPermissions() {
-        final List<String> missingPermissions = new ArrayList<String>();
+        final List<String> missingPermissions = new ArrayList<>();
         // check all required dynamic permissions
         for (final String permission : REQUIRED_SDK_PERMISSIONS) {
             final int result = ContextCompat.checkSelfPermission(this, permission);
@@ -122,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         switch (requestCode) {
             case REQUEST_CODE_ASK_PERMISSIONS:
@@ -135,6 +174,8 @@ public class MainActivity extends AppCompatActivity {
                         return;
                     }
                 }
+                // all permissions were granted
+                initialize();
                 break;
         }
     }
@@ -145,14 +186,18 @@ public class MainActivity extends AppCompatActivity {
 
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (ACTION_USB_PERMISSION.equals(action)) {
-                synchronized (this) {
-                    UsbDevice device = (UsbDevice)intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+            Log.d("ON_USB_ACTION",action);
 
+            Toast.makeText(context, action,Toast.LENGTH_SHORT).show();
+            if (UsbManager.ACTION_USB_DEVICE_DETACHED.equals(action)) {
+                usbConnected=false;
+            } else if (ACTION_USB_PERMISSION.equals(action)) {
+                synchronized (this) {
+                    device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
                     if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
                         if(device != null){
                             //call method to set up device communication
-                            run();
+                            connect();
                         }
                     }
                     else {

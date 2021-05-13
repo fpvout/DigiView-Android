@@ -41,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     UsbDevice device;
     boolean usbConnected;
     Handler frameHandler;
+    SurfaceView fpvView;
 
     protected void initialize() {
         Log.d("INIT", "init !");
@@ -57,23 +58,23 @@ public class MainActivity extends AppCompatActivity {
     protected void run() {
         Log.d("RUN", "run !");
 
-        SurfaceView fpvView = findViewById(R.id.fpvView);
+        fpvView = findViewById(R.id.fpvView);
         Button connectButton = findViewById(R.id.connectButton);
-        frameHandler = new Handler(Looper.myLooper()) {
-            @Override
-            public void handleMessage(Message msg) {
-                //Log.d("NEW_FRAME", "got a new frame !");
-                super.handleMessage(msg);
-                Bitmap b = (Bitmap) msg.obj;
-                double frameRatio = 16.0 / 9.0;
-
-                Rect r = new Rect(0,
-                        0,
-                        (int) (fpvView.getHeight() * frameRatio),
-                        fpvView.getHeight());
-                displayFrame(fpvView, b, r);
-            }
-        };
+//        frameHandler = new Handler(Looper.myLooper()) {
+//            @Override
+//            public void handleMessage(Message msg) {
+//                //Log.d("NEW_FRAME", "got a new frame !");
+//                super.handleMessage(msg);
+//                Bitmap b = (Bitmap) msg.obj;
+//                double frameRatio = 16.0 / 9.0;
+//
+//                Rect r = new Rect(0,
+//                        0,
+//                        (int) (fpvView.getHeight() * frameRatio),
+//                        fpvView.getHeight());
+//                displayFrame(fpvView, b, r);
+//            }
+//        };
 
         connectButton.setOnClickListener(vw -> {
             if(checkMyDevice()){
@@ -95,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
     private void connect(){
         UsbMaskConnection mUsbMaskConnection = new UsbMaskConnection(mUsbManager.openDevice(device), device);
         mUsbMaskConnection.start();
-        VideoReader mVideoReader = new VideoReader(mUsbMaskConnection,frameHandler);
+        VideoReaderExoplayer mVideoReader = new VideoReaderExoplayer(mUsbMaskConnection.mInputStream, fpvView, getApplicationContext());
         mVideoReader.start();
     }
 

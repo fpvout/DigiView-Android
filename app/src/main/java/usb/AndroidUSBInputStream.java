@@ -121,7 +121,9 @@ public class AndroidUSBInputStream extends InputStream {
 	public long skip(long byteCount) throws IOException {
 		if (readBuffer == null)
 			throw new IOException(ERROR_THREAD_NOT_INITIALIZED);
-
+		if(byteCount <= 0){
+			return 0;
+		}
 		return readBuffer.skip((int)byteCount);
 	}
 

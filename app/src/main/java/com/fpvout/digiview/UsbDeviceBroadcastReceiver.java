@@ -1,4 +1,4 @@
-package com.example.ijdfpvviewer;
+package com.fpvout.digiview;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

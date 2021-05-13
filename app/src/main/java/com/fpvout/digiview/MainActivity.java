@@ -1,4 +1,4 @@
-package com.example.ijdfpvviewer;
+package com.fpvout.digiview;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,7 +18,7 @@ import android.widget.Toast;
 import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity implements UsbDeviceListener {
-    private static final String ACTION_USB_PERMISSION = "com.example.ijdfpvviewer.USB_PERMISSION";
+    private static final String ACTION_USB_PERMISSION = "com.fpvout.digiview.USB_PERMISSION";
     private static final int VENDOR_ID = 11427;
     private static final int PRODUCT_ID = 31;
     PendingIntent permissionIntent;

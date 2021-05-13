@@ -1,4 +1,4 @@
-package com.example.ijdfpvviewer;
+package com.fpvout.digiview;
 
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.Format;

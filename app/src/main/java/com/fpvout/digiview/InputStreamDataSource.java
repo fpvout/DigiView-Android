@@ -1,8 +1,7 @@
-package com.example.ijdfpvviewer;
+package com.fpvout.digiview;
 
 import android.content.Context;
 import android.net.Uri;
-import android.util.Log;
 
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.upstream.DataSource;

@@ -1,4 +1,4 @@
-package com.example.ijdfpvviewer;
+package com.fpvout.digiview;
 
 import android.hardware.usb.UsbDevice;
 

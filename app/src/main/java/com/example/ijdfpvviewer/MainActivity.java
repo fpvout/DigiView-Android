@@ -25,7 +25,9 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     UsbDeviceBroadcastReceiver usbDeviceBroadcastReceiver;
     UsbManager usbManager;
     UsbDevice usbDevice;
-    boolean usbConnected;
+    UsbMaskConnection mUsbMaskConnection;
+    VideoReaderExoplayer mVideoReader;
+    boolean usbConnected = false;
     SurfaceView fpvView;
 
     @Override
@@ -54,7 +56,9 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
 
         fpvView = findViewById(R.id.fpvView);
 
-        if (searchDevice()) {
+        mUsbMaskConnection = new UsbMaskConnection();
+        mVideoReader = new VideoReaderExoplayer(fpvView, this);
+        if (searchDevice() && !usbConnected) {
             connect();
         }
     }
@@ -71,9 +75,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     public void usbDeviceDetached() {
         Log.d("USB", "usbDevice detached");
         Toast.makeText(getApplicationContext(), "usb detached", Toast.LENGTH_SHORT).show();
-
-        // todo : properly stop threads/listeners?
-        usbConnected = false;
+        this.onStop();
     }
 
     private boolean searchDevice() {
@@ -98,9 +100,10 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     }
 
     private void connect(){
-        UsbMaskConnection mUsbMaskConnection = new UsbMaskConnection(usbManager.openDevice(usbDevice), usbDevice);
+        usbConnected = true;
+        mUsbMaskConnection.setUsbDevice(usbManager.openDevice(usbDevice), usbDevice);
         mUsbMaskConnection.start();
-        VideoReaderExoplayer mVideoReader = new VideoReaderExoplayer(mUsbMaskConnection.mInputStream, fpvView, getApplicationContext());
+        mVideoReader.setInputStream(mUsbMaskConnection.mInputStream);
         mVideoReader.start();
     }
 
@@ -108,15 +111,27 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     public void onResume() {
         super.onResume();
 
-        Intent intent = getIntent();
-        Log.d("ON_RESUME", "intent: " + intent);
-        String action = intent.getAction();
-
-
-        if (!usbConnected ) {
-            //check to see if USB is now connected
+        if (searchDevice() && !usbConnected) {
             Log.d("RESUME_USB_CONNECTED", "not connected");
+            connect();
         }
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        mUsbMaskConnection.stop();
+        mVideoReader.stop();
+        usbConnected = false;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        mUsbMaskConnection.stop();
+        mVideoReader.stop();
+        usbConnected = false;
+    }
 }

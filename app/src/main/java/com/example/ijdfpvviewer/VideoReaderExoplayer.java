@@ -27,6 +27,7 @@ public class VideoReaderExoplayer {
 
             mPlayer.setVideoSurfaceView(videoSurface);
             mPlayer.setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
+            mPlayer.setWakeMode(C.WAKE_MODE_LOCAL);
 
             DataSpec dataSpec = new DataSpec(Uri.parse(""),0,C.LENGTH_UNSET);
 

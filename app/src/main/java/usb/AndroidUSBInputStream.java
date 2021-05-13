@@ -131,39 +131,39 @@ public class AndroidUSBInputStream extends InputStream {
 	 * Starts the USB input stream read thread to start reading data from the
 	 * USB Android connection.
 	 * 
-	 * @see #stopReadThread()
+	 * @see #close()
 	 */
 	public void startReadThread() {
-		if (!working) {
-			readBuffer = new CircularByteBuffer(READ_BUFFER_SIZE);
-			receiveThread = new Thread() {
-				@Override
-				public void run() {
-					working = true;
-					while (working) {
-						byte[] buffer = new byte[1024];
-						int receivedBytes = usbConnection.bulkTransfer(receiveEndPoint, buffer, buffer.length, READ_TIMEOUT) - OFFSET;
-						if (receivedBytes > 0) {
-							byte[] data = new byte[receivedBytes];
-							System.arraycopy(buffer, OFFSET, data, 0, receivedBytes);
-							//Log.d("USBInputStream","Message received: " + data.toString());
-							readBuffer.write(buffer, OFFSET, receivedBytes);
-						}
+		working = true;
+		readBuffer = new CircularByteBuffer(READ_BUFFER_SIZE);
+		receiveThread = new Thread() {
+			@Override
+			public void run() {
+				while (working) {
+					byte[] buffer = new byte[1024];
+					int receivedBytes = usbConnection.bulkTransfer(receiveEndPoint, buffer, buffer.length, READ_TIMEOUT) - OFFSET;
+					if (receivedBytes > 0) {
+						byte[] data = new byte[receivedBytes];
+						System.arraycopy(buffer, OFFSET, data, 0, receivedBytes);
+						//Log.d("USBInputStream","Message received: " + data.toString());
+						readBuffer.write(buffer, OFFSET, receivedBytes);
 					}
-				};
-			};
-			receiveThread.start();
-		}
+				}
+			}
+		};
+		receiveThread.start();
 	}
 
 	/**
 	 * Stops the USB input stream read thread.
-	 * 
+	 *
 	 * @see #startReadThread()
 	 */
-	public void stopReadThread() {
+	@Override
+	public void close() throws IOException {
 		working = false;
 		if (receiveThread != null)
 			receiveThread.interrupt();
+		super.close();
 	}
 }

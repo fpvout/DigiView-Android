@@ -2,41 +2,36 @@ package com.example.ijdfpvviewer;
 
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
-import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
 import android.util.Log;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import usb.AndroidUSBInputStream;
 import usb.AndroidUSBOutputStream;
 
-public class UsbMaskConnection extends InputStream {
+public class UsbMaskConnection {
 
     private byte[] magicPacket = "RMVT".getBytes();
-    private UsbInterface mUsbInterface;
-    private UsbEndpoint mInEndpoint;
-    private UsbEndpoint mOutEndpoint;
     private UsbDeviceConnection usbConnection;
+    private UsbDevice device;
+    private UsbInterface usbInterface;
     AndroidUSBInputStream mInputStream;
     AndroidUSBOutputStream mOutputStream;
 
-    public UsbMaskConnection(UsbDeviceConnection c, UsbDevice device) {
-        usbConnection = c;
-        mUsbInterface = device.getInterface(3);
-        Log.d("GET_USB_INTERFACE","Interface #3 (" + mUsbInterface.getName() + ")");
-        usbConnection.claimInterface(mUsbInterface,true);
-        getEndPoints(mUsbInterface);
-        mInputStream = new AndroidUSBInputStream(mInEndpoint,usbConnection);
-        mOutputStream = new AndroidUSBOutputStream(mOutEndpoint,usbConnection);
-
+    public UsbMaskConnection() {
     }
 
-    private void getEndPoints(UsbInterface u) {
-        Log.d("GET_USB_ENDPOINTS","Endpoint Count " + u.getEndpointCount());
-        mOutEndpoint = u.getEndpoint(0);
-        mInEndpoint = u.getEndpoint(1);
+    public void setUsbDevice(UsbDeviceConnection c, UsbDevice d) {
+        usbConnection = c;
+        device = d;
+        usbInterface = device.getInterface(3);
+
+        Log.d("GET_USB_INTERFACE","Interface #3 (" + usbInterface.getName() + ")");
+        usbConnection.claimInterface(usbInterface,true);
+
+        mOutputStream = new AndroidUSBOutputStream(usbInterface.getEndpoint(0), usbConnection);
+        mInputStream = new AndroidUSBInputStream(usbInterface.getEndpoint(1), usbConnection);
     }
 
     public void start(){
@@ -44,9 +39,20 @@ public class UsbMaskConnection extends InputStream {
         mInputStream.startReadThread();
     }
 
-    @Override
-    public int read() throws IOException {
-        return mInputStream.read();
-    }
+    public void stop() {
+        try {
+            if (mInputStream != null)
+                mInputStream.close();
 
+            if (mOutputStream != null)
+                mOutputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if (usbConnection != null) {
+            usbConnection.releaseInterface(usbInterface);
+            usbConnection.close();
+        }
+    }
 }

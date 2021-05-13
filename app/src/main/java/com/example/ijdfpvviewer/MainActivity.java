@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
         frameHandler = new Handler(Looper.myLooper()) {
             @Override
             public void handleMessage(Message msg) {
-                Log.d("NEW_FRAME", "got a new frame !");
+                //Log.d("NEW_FRAME", "got a new frame !");
                 super.handleMessage(msg);
                 Bitmap b = (Bitmap) msg.obj;
                 double frameRatio = 16.0 / 9.0;

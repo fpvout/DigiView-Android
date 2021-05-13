@@ -20,7 +20,6 @@ import java.io.InputStream;
 
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
-import android.util.Log;
 
 /**
  * This class acts as a wrapper to read data from the USB Interface in Android
@@ -29,8 +28,8 @@ import android.util.Log;
 public class AndroidUSBInputStream extends InputStream {
 
 	// Constants.
-	private static final int READ_BUFFER_SIZE = 1024*1024;
-	private static final int OFFSET = 2;
+	private static final int READ_BUFFER_SIZE = 50 * 1024 * 1024;
+	private static final int OFFSET = 0;
 	private static final int READ_TIMEOUT = 100;
 
 	private static final String ERROR_THREAD_NOT_INITIALIZED = "Read thread not initialized, call first 'startReadThread()'";

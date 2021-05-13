@@ -34,16 +34,19 @@ public class VideoReader {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    av_log_set_level(AV_LOG_TRACE);
-                    FFmpegLogCallback.set(); // debug ffmpeg message
+                    //av_log_set_level(AV_LOG_TRACE);
+                    //FFmpegLogCallback.set(); // debug ffmpeg message
                     FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(inputStream,0);
                     grabber.setVideoStream(0);
+                    grabber.setFrameRate(60);
+                    grabber.setImageWidth(960);
+                    grabber.setImageHeight(720);
                     grabber.setFormat("h264");
                     grabber.setVideoCodec(avcodec.AV_CODEC_ID_H264);
                     grabber.setOption("fflags", "nobuffer");
                     grabber.setVideoOption("probesize", "32");
                     grabber.setVideoOption("tune", "zerolatency");
-
+                    grabber.setPixelFormat(AV_PIX_FMT_RGBA); // should accelerate the thing
                     Log.d("GRABBER","initialized");
 
                     Message m = new Message();

@@ -41,9 +41,7 @@ public class InputStreamDataSource implements DataSource {
             if (dataSpec.length != C.LENGTH_UNSET) {
                 bytesRemaining = dataSpec.length;
             } else {
-                bytesRemaining = inputStream.available();
-                if (bytesRemaining == Integer.MAX_VALUE)
-                    bytesRemaining = C.LENGTH_UNSET;
+                bytesRemaining = C.LENGTH_UNSET;
             }
         } catch (IOException e) {
             throw new IOException(e);
@@ -55,32 +53,7 @@ public class InputStreamDataSource implements DataSource {
 
     @Override
     public int read(byte[] buffer, int offset, int readLength) throws IOException {
-        if (readLength == 0) {
-            return 0;
-        } else if (bytesRemaining == 0) {
-            return C.RESULT_END_OF_INPUT;
-        }
-
-        int bytesRead;
-        try {
-            int bytesToRead = bytesRemaining == C.LENGTH_UNSET ? readLength
-                    : (int) Math.min(bytesRemaining, readLength);
-            bytesRead = inputStream.read(buffer, offset, bytesToRead);
-        } catch (IOException e) {
-            throw new IOException(e);
-        }
-
-        if (bytesRead == -1) {
-            if (bytesRemaining != C.LENGTH_UNSET) {
-                // End of stream reached having not read sufficient data.
-                throw new IOException(new EOFException());
-            }
-            return C.RESULT_END_OF_INPUT;
-        }
-        if (bytesRemaining != C.LENGTH_UNSET) {
-            bytesRemaining -= bytesRead;
-        }
-        return bytesRead;
+        return inputStream.read(buffer,offset,readLength);
     }
 
     @Override

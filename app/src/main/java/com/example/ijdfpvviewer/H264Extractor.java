@@ -19,22 +19,20 @@ import com.google.android.exoplayer2.util.Util;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 import static com.google.android.exoplayer2.extractor.ts.TsPayloadReader.FLAG_DATA_ALIGNMENT_INDICATOR;
-
 /**
  * Extracts data from H264 bitstreams.
  */
 public final class H264Extractor implements Extractor {
-
     /** Factory for {@link H264Extractor} instances. */
     public static final ExtractorsFactory FACTORY = () -> new Extractor[] {new H264Extractor()};
 
     private static final int MAX_SYNC_FRAME_SIZE = 30 * 1024;
     private static final int ID3_TAG = Util.getIntegerCodeForString("ID3");
 
-    private final long firstSampleTimestampUs;
+    private long firstSampleTimestampUs;
+    private long sampleTime = 200; // todo: try to lower this. it directly infer on speed and latency
     private final H264Reader reader;
     private final ParsableByteArray sampleData;
 
@@ -51,7 +49,6 @@ public final class H264Extractor implements Extractor {
     }
 
     // Extractor implementation.
-
     @Override
     public boolean sniff(ExtractorInput input) throws IOException {
         return true;
@@ -90,6 +87,8 @@ public final class H264Extractor implements Extractor {
             reader.packetStarted(firstSampleTimestampUs, FLAG_DATA_ALIGNMENT_INDICATOR);
             startedPacket = true;
         }
+        firstSampleTimestampUs+=sampleTime;
+        reader.packetStarted(firstSampleTimestampUs, FLAG_DATA_ALIGNMENT_INDICATOR);
         // TODO: Make it possible for the reader to consume the dataSource directly, so that it becomes
         // unnecessary to copy the data through packetBuffer.
         reader.consume(sampleData);

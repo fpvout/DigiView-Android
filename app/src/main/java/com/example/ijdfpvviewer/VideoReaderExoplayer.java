@@ -22,17 +22,17 @@ public class VideoReaderExoplayer {
         private SimpleExoPlayer mPlayer;
 
         VideoReaderExoplayer(InputStream input, SurfaceView videoSurface, Context c){
-            DefaultLoadControl loadControl = new DefaultLoadControl.Builder().setBufferDurationsMs(32*1024, 64*1024, 0, 0).createDefaultLoadControl();
+            DefaultLoadControl loadControl = new DefaultLoadControl.Builder().setBufferDurationsMs(32*1024, 64*1024, 0, 0).build();
             mPlayer = new SimpleExoPlayer.Builder(c).setLoadControl(loadControl).build();
 
             mPlayer.setVideoSurfaceView(videoSurface);
             mPlayer.setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
 
-            DataSpec dataSpec = new DataSpec(Uri.parse("test"));
+            DataSpec dataSpec = new DataSpec(Uri.parse(""),0,C.LENGTH_UNSET);
 
             DataSource.Factory  dataSourceFactory = () -> (DataSource) new InputStreamDataSource(c, dataSpec, input);
 
-            MediaSource mediaSource = new ProgressiveMediaSource.Factory(dataSourceFactory,H264Extractor.FACTORY).createMediaSource(MediaItem.fromUri(Uri.parse("test")));
+            MediaSource mediaSource = new ProgressiveMediaSource.Factory(dataSourceFactory,H264Extractor.FACTORY).createMediaSource(MediaItem.fromUri(Uri.parse("")));
             mPlayer.setMediaSource(mediaSource);
         }
 

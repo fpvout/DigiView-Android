@@ -12,6 +12,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.WindowManager;
+
 import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity implements UsbDeviceListener {
@@ -36,6 +38,9 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         decorView.setSystemUiVisibility(uiOptions);
         ActionBar actionBar = getSupportActionBar();
         actionBar.hide();
+
+        // Prevent screen from sleeping
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
         permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);

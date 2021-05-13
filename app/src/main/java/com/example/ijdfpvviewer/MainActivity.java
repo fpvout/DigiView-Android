@@ -58,6 +58,9 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
 
         mUsbMaskConnection = new UsbMaskConnection();
         mVideoReader = new VideoReaderExoplayer(fpvView, this);
+
+        Toast.makeText(getApplicationContext(), "waiting for usb connection...", Toast.LENGTH_SHORT).show();
+
         if (searchDevice() && !usbConnected) {
             connect();
         }

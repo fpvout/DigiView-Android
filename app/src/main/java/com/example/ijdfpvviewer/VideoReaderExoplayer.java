@@ -32,8 +32,7 @@ public class VideoReaderExoplayer {
 
             DataSource.Factory  dataSourceFactory = () -> (DataSource) new InputStreamDataSource(c, dataSpec, input);
 
-            MediaSource mediaSource = new ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(MediaItem.fromUri(Uri.parse("test")));
-
+            MediaSource mediaSource = new ProgressiveMediaSource.Factory(dataSourceFactory,H264Extractor.FACTORY).createMediaSource(MediaItem.fromUri(Uri.parse("test")));
             mPlayer.setMediaSource(mediaSource);
         }
 

@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     UsbDevice usbDevice;
     Handler frameHandler;
     boolean usbConnected;
+    SurfaceView fpvView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     private void connect(){
         UsbMaskConnection mUsbMaskConnection = new UsbMaskConnection(usbManager.openDevice(usbDevice), usbDevice);
         mUsbMaskConnection.start();
-        VideoReader mVideoReader = new VideoReader(mUsbMaskConnection,frameHandler);
+        VideoReaderExoplayer mVideoReader = new VideoReaderExoplayer(mUsbMaskConnection.mInputStream, fpvView, getApplicationContext());
         mVideoReader.start();
     }
 

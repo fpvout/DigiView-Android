@@ -21,21 +21,21 @@ import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSpec;
 
-import java.io.InputStream;
+import usb.AndroidUSBInputStream;
 
 public class VideoReaderExoplayer {
 
         private SimpleExoPlayer mPlayer;
         private SurfaceView surfaceView;
         private Context context;
-        private InputStream inputStream;
+        private AndroidUSBInputStream inputStream;
 
         VideoReaderExoplayer(SurfaceView videoSurface, Context c) {
             surfaceView = videoSurface;
             context = c;
         }
 
-        public void setInputStream(InputStream input) {
+        public void setInputStream(AndroidUSBInputStream input) {
             inputStream = input;
         }
 
@@ -63,6 +63,7 @@ public class VideoReaderExoplayer {
                             Log.e("PLAYER_SOURCE", "TYPE_SOURCE: " + error.getSourceException().getMessage());
                             Toast.makeText(context, "Video not ready", Toast.LENGTH_SHORT).show();
                             (new Handler(Looper.getMainLooper())).postDelayed(() -> {
+                                inputStream.startReadThread();
                                 start(); //retry in 10 sec
                             }, 10000);
                             break;

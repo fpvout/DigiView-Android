@@ -3,9 +3,15 @@ package com.example.ijdfpvviewer;
 import android.content.Context;
 import android.net.Uri;
 
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
 import android.view.SurfaceView;
+import android.widget.Toast;
 
 import com.google.android.exoplayer2.DefaultLoadControl;
+import com.google.android.exoplayer2.ExoPlaybackException;
+import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.C;
@@ -49,6 +55,20 @@ public class VideoReaderExoplayer {
 
             mPlayer.prepare();
             mPlayer.play();
+            mPlayer.addListener(new ExoPlayer.EventListener() {
+                @Override
+                public void onPlayerError(ExoPlaybackException error) {
+                    switch (error.type) {
+                        case ExoPlaybackException.TYPE_SOURCE:
+                            Log.e("PLAYER_SOURCE", "TYPE_SOURCE: " + error.getSourceException().getMessage());
+                            Toast.makeText(context, "Video not ready", Toast.LENGTH_SHORT).show();
+                            (new Handler(Looper.getMainLooper())).postDelayed(() -> {
+                                start(); //retry in 10 sec
+                            }, 10000);
+                            break;
+                    }
+                }
+            });
         }
 
         public void stop() {

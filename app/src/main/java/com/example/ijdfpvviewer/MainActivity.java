@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import java.util.HashMap;
 
@@ -66,12 +67,14 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     public void usbDeviceApproved(UsbDevice device) {
         Log.d("USB", "usbDevice approved");
         usbDevice = device;
+        Toast.makeText(getApplicationContext(), "usb attached", Toast.LENGTH_SHORT).show();
         connect();
     }
 
     @Override
     public void usbDeviceDetached() {
         Log.d("USB", "usbDevice detached");
+        Toast.makeText(getApplicationContext(), "usb detached", Toast.LENGTH_SHORT).show();
         this.onStop();
     }
 

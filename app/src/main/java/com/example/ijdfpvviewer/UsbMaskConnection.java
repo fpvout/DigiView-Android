@@ -9,7 +9,6 @@ import android.util.Log;
 import java.io.IOException;
 import java.io.InputStream;
 
-
 import usb.AndroidUSBInputStream;
 import usb.AndroidUSBOutputStream;
 
@@ -36,20 +35,8 @@ public class UsbMaskConnection extends InputStream {
 
     private void getEndPoints(UsbInterface u) {
         Log.d("GET_USB_ENDPOINTS","Endpoint Count " + u.getEndpointCount());
-        for (int i = 0; i < u.getEndpointCount(); i++) {
-            UsbEndpoint usbEndpoint = u.getEndpoint(i);
-            if (usbEndpoint.getAddress() == 3) {
-                mOutEndpoint = usbEndpoint;
-                Log.d("GET_USB_ENDPOINTS","mOutEndpoint FOUND : Type " + mOutEndpoint.getType() + " Direction " + mOutEndpoint.getDirection());
-            }
-
-            if (usbEndpoint.getAddress() == 132) {
-                mInEndpoint = usbEndpoint;
-                Log.d("GET_USB_ENDPOINTS","mInEndpoint FOUND : Type " + mInEndpoint.getType() + " Direction " + mInEndpoint.getDirection());
-            }
-
-
-        }
+        mOutEndpoint = u.getEndpoint(0);
+        mInEndpoint = u.getEndpoint(1);
     }
 
     public void start(){

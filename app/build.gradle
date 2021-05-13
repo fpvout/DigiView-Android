@@ -23,10 +23,6 @@ android {
         }
     }
 
-    packagingOptions {
-        exclude 'META-INF/native-image/**'
-    }
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -38,8 +34,6 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'com.google.android.material:material:1.3.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
-
-    //implementation group: 'org.bytedeco', name: 'javacv-platform', version: '1.5.5'
     implementation 'com.google.android.exoplayer:exoplayer:2.13.3'
 
     testImplementation 'junit:junit:4.+'

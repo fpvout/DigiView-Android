@@ -1,6 +1,7 @@
 # DigiView
 
 DigiView is a Android app that allow you to get a Live preview from your DJI FPV goggles (V1 & V2).
+Working with Android 7+ and devices supporting USB Host mode.
 
 ## Download
 You can get an **Alpha** Release [here](https://github.com/fpvout/fpv_viewer_android/releases)

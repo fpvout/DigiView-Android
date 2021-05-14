@@ -13,6 +13,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Digiview"
         >
+        <meta-data android:name="io.sentry.dsn" android:value="https://df6168678f2e4107abe5abb40cf3e648@o660067.ingest.sentry.io/5764247" />
 
         <activity
             android:name="com.fpvout.digiview.MainActivity"

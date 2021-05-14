@@ -4,7 +4,7 @@ DigiView is a Android app that allow you to get a Live preview from your DJI FPV
 Working with Android 7+ and devices supporting USB Host mode.
 
 ## Download
-You can get an **Alpha** Release [here](https://github.com/fpvout/fpv_viewer_android/releases)
+You can download the **Alpha** Release [here](https://github.com/fpvout/fpv_viewer_android/releases/download/v0.1.0/DigiView_0.1.0_ALPHA.apk)
 
 ## Instructions
 App is still in development so it will probably crash / stop working at some point. to get the best result :
@@ -32,9 +32,8 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 - [jlucidar](https://github.com/jlucidar) - Lead developer - [Donate](https://paypal.me/jlucidar)
 - [omouren](https://github.com/omouren) - Some really appreciated stability fixes !
 - [vinayselvaraj](https://github.com/vinayselvaraj) - stopped the screen from sleeping !
-- Joonas - Find the secret packet [Donate](https://www.buymeacoffee.com/fpv.wtf)
-- D3VL - Who is orchestrating all that stuff - [Donate](https://www.buymeacoffee.com/d3vl)
-
+- [Joonas](https://fpv.wtf/) - Find the secret packet [Donate](https://www.buymeacoffee.com/fpv.wtf)
+- [D3VL](https://d3vl.com) - Who is orchestrating all that stuff - [Donate](https://www.buymeacoffee.com/d3vl)
 
 Please make sure to check theses guys out ! And feel free to donate ;)
 

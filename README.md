@@ -29,7 +29,7 @@ If there is any issue, please check on our [Discord server](https://discord.gg/u
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
 ## They deserves some credits !
-- [jlucidar](https://github.com/jlucidar) - Lead developer - [Donate](https://paypal.me/jlucidar)
+- [jlucidar](https://github.com/jlucidar) - Lead developer - [Donate](https://paypal.me/jlucidar) - [Youtube](https://www.youtube.com/channel/UCBbyqtxntnlF6Cn_8ezkTLQ)
 - [omouren](https://github.com/omouren) - Some really appreciated stability fixes !
 - [vinayselvaraj](https://github.com/vinayselvaraj) - stopped the screen from sleeping !
 - [Joonas](https://fpv.wtf/) - Find the secret packet [Donate](https://www.buymeacoffee.com/fpv.wtf)

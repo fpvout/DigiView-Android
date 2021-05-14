@@ -30,9 +30,9 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 ## They deserves some credits !
 - [jlucidar](https://github.com/jlucidar) - Lead developer - [Donate](https://paypal.me/jlucidar) - [Youtube](https://www.youtube.com/channel/UCBbyqtxntnlF6Cn_8ezkTLQ)
-- [omouren](https://github.com/omouren) - Some really appreciated stability fixes !
+- [omouren](https://github.com/omouren) - Some really appreciated stability fixes ! - [Donate](https://paypal.me/omouren) - [Youtube](https://www.youtube.com/channel/UCJi-wllO8GY5f9k8gB_VGTg)
 - [vinayselvaraj](https://github.com/vinayselvaraj) - stopped the screen from sleeping !
-- [Joonas](https://fpv.wtf/) - Find the secret packet [Donate](https://www.buymeacoffee.com/fpv.wtf)
+- [Joonas](https://fpv.wtf/) - Found the secret packet - [Donate](https://www.buymeacoffee.com/fpv.wtf)
 - [D3VL](https://d3vl.com) - Who is orchestrating all that stuff - [Donate](https://www.buymeacoffee.com/d3vl)
 
 Please make sure to check theses guys out ! And feel free to donate ;)

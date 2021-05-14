@@ -16,6 +16,9 @@ App is still in development so it will probably crash / stop working at some poi
 
 If there is any issue, please check on our [Discord server](https://discord.gg/uGYMNByeTH), some people might help you there.
 
+## Known Issues
+- It is recommended you do not launch the app prior to plugging in, and to back out of app when done (not minimize). Currently this can result in multiple instances of the player.
+
 ## Development
  - We will put more info here in the near future.
 

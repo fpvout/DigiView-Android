@@ -45,6 +45,7 @@ public class VideoReaderExoplayer {
         }
 
         public void start() {
+            inputStream.startReadThread();
             DefaultLoadControl loadControl = new DefaultLoadControl.Builder().setBufferDurationsMs(32*1024, 64*1024, 0, 0).build();
             mPlayer = new SimpleExoPlayer.Builder(context).setLoadControl(loadControl).build();
             mPlayer.setVideoSurfaceView(surfaceView);

@@ -22,6 +22,7 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSpec;
 
 import usb.AndroidUSBInputStream;
+import usb.AndroidUSBOutputStream;
 
 public class VideoReaderExoplayer {
 
@@ -29,6 +30,7 @@ public class VideoReaderExoplayer {
         private SurfaceView surfaceView;
         private Context context;
         private AndroidUSBInputStream inputStream;
+        private AndroidUSBOutputStream outputStream;
 
         VideoReaderExoplayer(SurfaceView videoSurface, Context c) {
             surfaceView = videoSurface;
@@ -38,6 +40,9 @@ public class VideoReaderExoplayer {
         public void setInputStream(AndroidUSBInputStream input) {
             inputStream = input;
         }
+        public void setOutputStream(AndroidUSBOutputStream output) {
+        outputStream = output;
+    }
 
         public void start() {
             DefaultLoadControl loadControl = new DefaultLoadControl.Builder().setBufferDurationsMs(32*1024, 64*1024, 0, 0).build();
@@ -63,9 +68,10 @@ public class VideoReaderExoplayer {
                             Log.e("PLAYER_SOURCE", "TYPE_SOURCE: " + error.getSourceException().getMessage());
                             Toast.makeText(context, "Video not ready", Toast.LENGTH_SHORT).show();
                             (new Handler(Looper.getMainLooper())).postDelayed(() -> {
+                                outputStream.write("RMVT".getBytes());
                                 inputStream.startReadThread();
                                 start(); //retry in 10 sec
-                            }, 10000);
+                            }, 1000);
                             break;
                     }
                 }

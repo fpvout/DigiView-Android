@@ -35,7 +35,7 @@ public class UsbMaskConnection {
     }
 
     public void start(){
-        mOutputStream.write(magicPacket);
+        //mOutputStream.write(magicPacket);
         mInputStream.startReadThread();
     }
 

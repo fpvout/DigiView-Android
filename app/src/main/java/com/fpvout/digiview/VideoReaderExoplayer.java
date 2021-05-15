@@ -31,18 +31,18 @@ public class VideoReaderExoplayer {
         private Context context;
         private AndroidUSBInputStream inputStream;
         private AndroidUSBOutputStream outputStream;
+        private UsbMaskConnection mUsbMaskConnection;
 
         VideoReaderExoplayer(SurfaceView videoSurface, Context c) {
             surfaceView = videoSurface;
             context = c;
         }
 
-        public void setInputStream(AndroidUSBInputStream input) {
-            inputStream = input;
+        public void setUsbMaskConnection(UsbMaskConnection connection) {
+            mUsbMaskConnection = connection;
+            inputStream = mUsbMaskConnection.mInputStream;
+            outputStream = mUsbMaskConnection.mOutputStream;
         }
-        public void setOutputStream(AndroidUSBOutputStream output) {
-        outputStream = output;
-    }
 
         public void start() {
             DefaultLoadControl loadControl = new DefaultLoadControl.Builder().setBufferDurationsMs(32*1024, 64*1024, 0, 0).build();
@@ -68,9 +68,8 @@ public class VideoReaderExoplayer {
                             Log.e("PLAYER_SOURCE", "TYPE_SOURCE: " + error.getSourceException().getMessage());
                             Toast.makeText(context, "Video not ready", Toast.LENGTH_SHORT).show();
                             (new Handler(Looper.getMainLooper())).postDelayed(() -> {
-                                outputStream.write("RMVT".getBytes());
-                                inputStream.startReadThread();
-                                start(); //retry in 10 sec
+                                mUsbMaskConnection.start();
+                                start(); //retry in 1 sec
                             }, 1000);
                             break;
                     }

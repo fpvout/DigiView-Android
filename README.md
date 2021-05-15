@@ -22,6 +22,8 @@ If there is any issue, please check on our [Discord server](https://discord.gg/u
 
 ## Known Issues
 - It is recommended you do not launch the app prior to plugging in, and to back out of app when done (not minimize). Currently this can result in multiple instances of the player.
+- **You might need to set Autotemp off on your Vista/Air unit to get it to work**.
+- Some people reported it's working best in 50mbps mode
 - Concerning hardware, Usb-C to Usb-C cables sometimes don't work depending the phone you're using. in that case, USB OTG Adapters is the best option.
 - You *may* need to Activate Usb OTG in your Android settings to get the fpv goggles detected.
 

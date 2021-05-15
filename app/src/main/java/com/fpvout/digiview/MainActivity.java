@@ -111,8 +111,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     private void connect(){
         usbConnected = true;
         mUsbMaskConnection.setUsbDevice(usbManager.openDevice(usbDevice), usbDevice);
-        mUsbMaskConnection.start();
-        mVideoReader.setInputStream(mUsbMaskConnection.mInputStream);
+        mVideoReader.setUsbMaskConnection(mUsbMaskConnection);
         mVideoReader.start();
     }
 

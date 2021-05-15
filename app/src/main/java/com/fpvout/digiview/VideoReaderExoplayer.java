@@ -22,6 +22,7 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSpec;
 
 import usb.AndroidUSBInputStream;
+import usb.AndroidUSBOutputStream;
 
 public class VideoReaderExoplayer {
 
@@ -29,17 +30,22 @@ public class VideoReaderExoplayer {
         private SurfaceView surfaceView;
         private Context context;
         private AndroidUSBInputStream inputStream;
+        private AndroidUSBOutputStream outputStream;
+        private UsbMaskConnection mUsbMaskConnection;
 
         VideoReaderExoplayer(SurfaceView videoSurface, Context c) {
             surfaceView = videoSurface;
             context = c;
         }
 
-        public void setInputStream(AndroidUSBInputStream input) {
-            inputStream = input;
+        public void setUsbMaskConnection(UsbMaskConnection connection) {
+            mUsbMaskConnection = connection;
+            inputStream = mUsbMaskConnection.mInputStream;
+            outputStream = mUsbMaskConnection.mOutputStream;
         }
 
         public void start() {
+            inputStream.startReadThread();
             DefaultLoadControl loadControl = new DefaultLoadControl.Builder().setBufferDurationsMs(32*1024, 64*1024, 0, 0).build();
             mPlayer = new SimpleExoPlayer.Builder(context).setLoadControl(loadControl).build();
             mPlayer.setVideoSurfaceView(surfaceView);
@@ -63,9 +69,9 @@ public class VideoReaderExoplayer {
                             Log.e("PLAYER_SOURCE", "TYPE_SOURCE: " + error.getSourceException().getMessage());
                             Toast.makeText(context, "Video not ready", Toast.LENGTH_SHORT).show();
                             (new Handler(Looper.getMainLooper())).postDelayed(() -> {
-                                inputStream.startReadThread();
-                                start(); //retry in 10 sec
-                            }, 10000);
+                                mUsbMaskConnection.start();
+                                start(); //retry in 1 sec
+                            }, 1000);
                             break;
                     }
                 }

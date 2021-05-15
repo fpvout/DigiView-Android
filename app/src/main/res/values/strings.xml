@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">DigiView</string>
     <string name="connectButtonText">Connect</string>
+    <string name="welcome_text">Welcome to DigiView! This app allows you to display the video feed of your DJI FPV Goggles V1 &amp; V2 on your phone.</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

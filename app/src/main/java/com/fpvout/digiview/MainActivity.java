@@ -15,6 +15,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import com.fpvout.digiview.tutorial.TutorialActivity;
+
 import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity implements UsbDeviceListener {
@@ -34,6 +36,9 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        startActivity(new Intent(MainActivity.this, TutorialActivity.class));
+        finish();
 
         // Hide top bar and status bar
         View decorView = getWindow().getDecorView();

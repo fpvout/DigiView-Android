@@ -3,6 +3,7 @@
     package="com.fpvout.digiview">
 
     <uses-feature android:name="android.hardware.usb.host" />
+
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
@@ -11,29 +12,27 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_alpha_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Digiview"
-        >
-
+        android:theme="@style/Theme.Digiview">
+        <activity android:name=".tutorial.TutorialActivity"></activity>
         <activity
-            android:launchMode="singleTask"
-            android:name="com.fpvout.digiview.MainActivity"
-            android:screenOrientation="landscape"
-            android:configChanges="orientation|keyboardHidden">
+            android:name=".MainActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
             <intent-filter>
                 <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
                 <action android:name="android.hardware.usb.action.USB_DEVICE_DETACHED" />
             </intent-filter>
 
-            <meta-data android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
+            <meta-data
+                android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
                 android:resource="@xml/device_filter" />
-
-            <meta-data android:name="android.hardware.usb.action.USB_DEVICE_DETACHED"
+            <meta-data
+                android:name="android.hardware.usb.action.USB_DEVICE_DETACHED"
                 android:resource="@xml/device_filter" />
         </activity>
     </application>

@@ -8,7 +8,7 @@ import android.hardware.usb.UsbManager;
 import android.util.Log;
 
 public class UsbDeviceBroadcastReceiver extends BroadcastReceiver {
-    private static final String ACTION_USB_PERMISSION = "com.example.ijdfpvviewer.USB_PERMISSION";
+    private static final String ACTION_USB_PERMISSION = "com.fpvout.digiview.USB_PERMISSION";
     private final UsbDeviceListener listener;
 
     public UsbDeviceBroadcastReceiver(UsbDeviceListener listener ){

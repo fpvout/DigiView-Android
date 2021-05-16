@@ -14,10 +14,6 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
-import android.os.Handler;
-import android.os.Looper;
-
-import com.google.android.exoplayer2.ExoPlayer;
 
 import java.util.HashMap;
 
@@ -117,20 +113,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         mUsbMaskConnection.setUsbDevice(usbManager.openDevice(usbDevice), usbDevice);
         mVideoReader.setUsbMaskConnection(mUsbMaskConnection);
         mVideoReader.start();
-        mVideoReader.mPlayer.addListener(new ExoPlayer.EventListener() {
-            @Override
-            public void onIsLoadingChanged(boolean isLoading) {
-                if(!isLoading){
-                    Toast.makeText(getApplicationContext(), "Connection Lost, trying to Reconnect...", Toast.LENGTH_SHORT).show();
-                    (new Handler(Looper.getMainLooper())).postDelayed(() -> {
-                        mUsbMaskConnection.stop();
-                        mVideoReader.stop();
-                        connect();
-                    }, 5000);
-                }
 
-            }
-        });
     }
 
     @Override

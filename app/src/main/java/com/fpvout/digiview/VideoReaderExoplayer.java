@@ -26,7 +26,7 @@ import usb.AndroidUSBOutputStream;
 
 public class VideoReaderExoplayer {
 
-        public SimpleExoPlayer mPlayer;
+        private SimpleExoPlayer mPlayer;
         private SurfaceView surfaceView;
         private Context context;
         private AndroidUSBInputStream inputStream;
@@ -45,7 +45,14 @@ public class VideoReaderExoplayer {
         }
 
         public void start() {
-            inputStream.startReadThread();
+            if(inputStream!=null){
+                inputStream.startReadThread();
+            }
+            else{
+                mUsbMaskConnection.start();
+                inputStream.startReadThread();
+            }
+
             DefaultLoadControl loadControl = new DefaultLoadControl.Builder().setBufferDurationsMs(32*1024, 64*1024, 0, 0).build();
             mPlayer = new SimpleExoPlayer.Builder(context).setLoadControl(loadControl).build();
             mPlayer.setVideoSurfaceView(surfaceView);
@@ -69,11 +76,26 @@ public class VideoReaderExoplayer {
                             Log.e("PLAYER_SOURCE", "TYPE_SOURCE: " + error.getSourceException().getMessage());
                             Toast.makeText(context, "Video not ready", Toast.LENGTH_SHORT).show();
                             (new Handler(Looper.getMainLooper())).postDelayed(() -> {
-                                mUsbMaskConnection.start();
-                                start(); //retry in 1 sec
-                            }, 1000);
+                                mUsbMaskConnection.stop();
+                                mPlayer.stop();
+                                start(); //retry in 5 sec
+                            }, 5000);
                             break;
                     }
+                }
+            });
+            mPlayer.addListener(new ExoPlayer.EventListener() {
+                @Override
+                public void onIsLoadingChanged(boolean isLoading) {
+                    if(!isLoading){
+                        Toast.makeText(context, "Connection Lost, trying to Reconnect...", Toast.LENGTH_SHORT).show();
+                        (new Handler(Looper.getMainLooper())).postDelayed(() -> {
+                            mUsbMaskConnection.stop();
+                            mPlayer.stop();
+                            start();
+                        }, 5000);
+                    }
+
                 }
             });
         }

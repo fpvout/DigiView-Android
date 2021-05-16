@@ -97,7 +97,6 @@ public class AndroidUSBInputStream extends InputStream {
 			return -1;
 		byte[] readData = new byte[readBytes];
 		System.arraycopy(buffer, offset, readData, 0, readBytes);
-		//Log.d("USBInputStream","Received a read request of " + length + " bytes, returning " + readData.length + ": " + readData.toString());
 		return readBytes;
 	}
 
@@ -146,7 +145,6 @@ public class AndroidUSBInputStream extends InputStream {
 						if (receivedBytes > 0) {
 							byte[] data = new byte[receivedBytes];
 							System.arraycopy(buffer, OFFSET, data, 0, receivedBytes);
-							//Log.d("USBInputStream","Message received: " + data.toString());
 							readBuffer.write(buffer, OFFSET, receivedBytes);
 						}
 					}

@@ -19,6 +19,7 @@ import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity implements UsbDeviceListener {
     private static final String ACTION_USB_PERMISSION = "com.fpvout.digiview.USB_PERMISSION";
+    private static final String TAG = "DIGIVIEW";
     private static final int VENDOR_ID = 11427;
     private static final int PRODUCT_ID = 31;
     PendingIntent permissionIntent;
@@ -33,6 +34,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "APP - On Create");
         setContentView(R.layout.activity_main);
 
         // Hide top bar and status bar
@@ -65,25 +67,28 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         mUsbMaskConnection = new UsbMaskConnection();
         mVideoReader = new VideoReaderExoplayer(fpvView, this);
 
-        Toast.makeText(getApplicationContext(), "waiting for usb connection...", Toast.LENGTH_SHORT).show();
-
-        if (searchDevice() && !usbConnected) {
-            connect();
+        if (!usbConnected) {
+            if (searchDevice()) {
+                connect();
+            } else {
+                Toast.makeText(getApplicationContext(), "Waiting for USB device...", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
     @Override
     public void usbDeviceApproved(UsbDevice device) {
-        Log.d("USB", "usbDevice approved");
+        Log.i(TAG, "USB - usbDevice approved");
         usbDevice = device;
-        Toast.makeText(getApplicationContext(), "usb attached", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), "USB device approved", Toast.LENGTH_SHORT).show();
         connect();
     }
 
     @Override
     public void usbDeviceDetached() {
-        Log.d("USB", "usbDevice detached");
-        Toast.makeText(getApplicationContext(), "usb detached", Toast.LENGTH_SHORT).show();
+        Log.i(TAG, "USB - usbDevice detached");
+        Toast.makeText(getApplicationContext(), "USB device detached", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), "Waiting for USB device...", Toast.LENGTH_SHORT).show();
         this.onStop();
     }
 
@@ -97,6 +102,8 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         for(UsbDevice device : deviceList.values()) {
             if (device.getVendorId() == VENDOR_ID && device.getProductId() == PRODUCT_ID) {
                 if (usbManager.hasPermission(device)) {
+                    Log.i(TAG, "USB - usbDevice attached");
+                    Toast.makeText(getApplicationContext(), "USB device found", Toast.LENGTH_SHORT).show();
                     usbDevice = device;
                     return true;
                 }
@@ -118,16 +125,31 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     @Override
     public void onResume() {
         super.onResume();
+        Log.d(TAG, "APP - On Resume");
 
-        if (searchDevice() && !usbConnected) {
-            Log.d("RESUME_USB_CONNECTED", "not connected");
-            connect();
+        if (!usbConnected) {
+            if (searchDevice()) {
+                Log.d(TAG, "APP - On Resume usbDevice device found");
+                connect();
+            } else {
+                Toast.makeText(getApplicationContext(), "Waiting for USB device...", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        Log.d(TAG, "APP - On Stop");
+
+        mUsbMaskConnection.stop();
+        mVideoReader.stop();
+        usbConnected = false;
+    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d(TAG, "APP - On Pause");
 
         mUsbMaskConnection.stop();
         mVideoReader.stop();
@@ -137,6 +159,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Log.d(TAG, "APP - On Destroy");
 
         mUsbMaskConnection.stop();
         mVideoReader.stop();

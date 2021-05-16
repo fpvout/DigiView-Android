@@ -23,7 +23,6 @@ public class UsbDeviceBroadcastReceiver extends BroadcastReceiver {
 
             if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
                 if(device != null){
-                    Log.d("UsbDeviceBroadcastReceiver", "Usb device approved");
                     listener.usbDeviceApproved(device);
                 }
             }

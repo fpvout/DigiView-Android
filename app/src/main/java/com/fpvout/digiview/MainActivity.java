@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
 
         float targetAlpha = 0;
         if (watermarkView.getAlpha() == 0) {
-            targetAlpha = 1;
+            targetAlpha = 0.3F;
         }
 
         watermarkView.animate()

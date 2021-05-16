@@ -49,7 +49,9 @@ public class UsbMaskConnection {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
 
+    public void disconnectUSB() {
         if (usbConnection != null) {
             usbConnection.releaseInterface(usbInterface);
             usbConnection.close();

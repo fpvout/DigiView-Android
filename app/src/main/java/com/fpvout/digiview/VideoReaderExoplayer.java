@@ -26,7 +26,7 @@ import usb.AndroidUSBOutputStream;
 
 public class VideoReaderExoplayer {
 
-        private SimpleExoPlayer mPlayer;
+        public SimpleExoPlayer mPlayer;
         private SurfaceView surfaceView;
         private Context context;
         private AndroidUSBInputStream inputStream;

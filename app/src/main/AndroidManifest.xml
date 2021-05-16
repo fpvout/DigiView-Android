@@ -4,6 +4,8 @@
     package="com.fpvout.digiview">
 
     <uses-feature android:name="android.hardware.usb.host" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
@@ -11,6 +13,9 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/ic_launcher_alpha_round"
+        android:largeHeap="true"
+        android:requestLegacyExternalStorage="true"
         android:supportsRtl="true"
         android:theme="@style/Theme.Digiview"
         >
@@ -21,6 +26,15 @@
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"></activity>
+
+        <service android:name="com.fpvout.digiview.dvr.DownloadService"
+            android:exported="false">
+            <!-- This is needed for Scheduler -->
+            <intent-filter>
+                <action android:name="com.google.android.exoplayer.downloadService.action.RESTART"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </service>
 
         <activity
             android:launchMode="singleTask"

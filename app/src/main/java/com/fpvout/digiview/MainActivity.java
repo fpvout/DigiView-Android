@@ -10,6 +10,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -21,9 +22,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
+import android.widget.ImageButton;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
+import com.fpvout.digiview.dvr.DVR;
+import com.fpvout.digiview.dvr.MediaDispatcher;
+import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
+import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.ProgressiveMediaSource;
+import com.google.android.exoplayer2.upstream.DataSource;
 
 import java.util.HashMap;
 
@@ -50,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     VideoReaderExoplayer mVideoReader;
     boolean usbConnected = false;
     SurfaceView fpvView;
+    DVR recorder;
     private GestureDetector gestureDetector;
     private ScaleGestureDetector scaleGestureDetector;
     private SharedPreferences sharedPreferences;
@@ -66,12 +77,10 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
 
         // Hide top bar and status bar
         View decorView = getWindow().getDecorView();
-        decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_FULLSCREEN);
+        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN;
+        decorView.setSystemUiVisibility(uiOptions);
+        decorView.setClickable(false);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.hide();
@@ -149,6 +158,65 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
                 }
             }
         });
+
+        watermarkView.setVisibility(View.GONE);
+
+        mUsbMaskConnection = new UsbMaskConnection();
+        mVideoReader = new VideoReaderExoplayer(fpvView, overlayView, this);
+
+        // Init DVR recorder
+        recorder = DVR.getInstance(this, null);
+        findViewById(R.id.recordbt).setOnClickListener(view -> {
+            if (recorder.isRecording()) {
+                recorder.stop();
+            } else {
+                recorder.start();
+            }
+        });
+
+        if (!usbConnected) {
+            if (searchDevice()) {
+                connect();
+            } else {
+                overlayView.showOpaque(R.string.waiting_for_usb_device, OverlayStatus.Disconnected);
+            }
+        }
+
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            hideSystemUI();
+        }
+    }
+
+    private void hideSystemUI() {
+        // Enables regular immersive mode.
+        // For "lean back" mode, remove SYSTEM_UI_FLAG_IMMERSIVE.
+        // Or for "sticky immersive," replace it with SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+        View decorView = getWindow().getDecorView();
+        decorView.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_IMMERSIVE
+                        // Set the content to appear under the system bars so that the
+                        // content doesn't resize when the system bars hide and show.
+                        | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        // Hide the nav bar and status bar
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN);
+    }
+
+    // Shows the system bars by removing all the flags
+// except for the ones that make the content appear under the system bars.
+    private void showSystemUI() {
+        View decorView = getWindow().getDecorView();
+        decorView.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
     }
 
     @Override
@@ -277,7 +345,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         mUsbMaskConnection.setUsbDevice(usbManager.openDevice(usbDevice), usbDevice);
         mVideoReader.setUsbMaskConnection(mUsbMaskConnection);
         overlayView.hide();
-        mVideoReader.start();
+        mVideoReader.start(recorder);
         updateWatermark();
         autoHideSettingsButton();
         showOverlay(R.string.waiting_for_video, OverlayStatus.Connected);

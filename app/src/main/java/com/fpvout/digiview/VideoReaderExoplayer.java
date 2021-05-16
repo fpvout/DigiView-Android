@@ -9,6 +9,8 @@ import android.os.Message;
 import android.util.Log;
 import android.view.SurfaceView;
 
+import com.fpvout.digiview.dvr.DVR;
+import com.fpvout.digiview.dvr.MediaDispatcher;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.preference.PreferenceManager;
 
@@ -61,7 +63,7 @@ public class VideoReaderExoplayer {
         inputStream = mUsbMaskConnection.mInputStream;
     }
 
-    public void start() {
+    public void start(DVR recorder) {
         zoomedIn = sharedPreferences.getBoolean(VideoZoomedIn, true);
         performancePreset = PerformancePreset.getPreset(sharedPreferences.getString(VideoPreset, "default"));
 
@@ -88,6 +90,7 @@ public class VideoReaderExoplayer {
             ExtractorsFactory extractorsFactory = () ->new Extractor[] {new H264Extractor(performancePreset.h264ReaderMaxSyncFrameSize, performancePreset.h264ReaderSampleTime)};
             MediaSource mediaSource = new ProgressiveMediaSource.Factory(dataSourceFactory, extractorsFactory).createMediaSource(MediaItem.fromUri(Uri.EMPTY));
             mPlayer.setMediaSource(mediaSource);
+
 
             mPlayer.prepare();
             mPlayer.play();

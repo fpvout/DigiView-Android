@@ -2,6 +2,9 @@ package com.fpvout.digiview;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +13,7 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
@@ -22,6 +26,9 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     private static final String TAG = "DIGIVIEW";
     private static final int VENDOR_ID = 11427;
     private static final int PRODUCT_ID = 31;
+    private int shortAnimationDuration;
+    private boolean watermarkAnimationInProgress = false;
+    private View watermarkView;
     PendingIntent permissionIntent;
     UsbDeviceBroadcastReceiver usbDeviceBroadcastReceiver;
     UsbManager usbManager;
@@ -62,6 +69,8 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         IntentFilter filterDetached = new IntentFilter(UsbManager.ACTION_USB_DEVICE_DETACHED);
         registerReceiver(usbDeviceBroadcastReceiver, filterDetached);
 
+        shortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
+        watermarkView = findViewById(R.id.watermarkView);
         fpvView = findViewById(R.id.fpvView);
 
         mUsbMaskConnection = new UsbMaskConnection();
@@ -74,6 +83,37 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
                 Toast.makeText(getApplicationContext(), "Waiting for USB device...", Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_UP) {
+            toggleWatermark();
+        }
+
+        return super.onTouchEvent(event);
+    }
+
+    private void toggleWatermark() {
+        if (watermarkAnimationInProgress) {
+            return;
+        }
+        watermarkAnimationInProgress = true;
+
+        float targetAlpha = 0;
+        if (watermarkView.getAlpha() == 0) {
+            targetAlpha = 0.3F;
+        }
+
+        watermarkView.animate()
+                .alpha(targetAlpha)
+                .setDuration(shortAnimationDuration)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        watermarkAnimationInProgress = false;
+                    }
+                });
     }
 
     @Override

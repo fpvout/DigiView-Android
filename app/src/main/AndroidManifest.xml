@@ -17,7 +17,7 @@
         <activity
             android:launchMode="singleTask"
             android:name="com.fpvout.digiview.MainActivity"
-            android:screenOrientation="landscape"
+            android:screenOrientation="sensorLandscape"
             android:configChanges="orientation|keyboardHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

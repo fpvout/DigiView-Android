@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">DigiView</string>
     <string name="connectButtonText">Connect</string>
+    <string name="digiview_feed">DigiView\nfeed</string>
 </resources>

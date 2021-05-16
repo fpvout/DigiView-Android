@@ -6,11 +6,7 @@ on:
   pull_request:
     branches: [ master ]
   workflow_dispatch:
-    inputs:
-      name:
-        description: 'Branch'
-        required: true
-        default: 'master'
+
 
 
 jobs:

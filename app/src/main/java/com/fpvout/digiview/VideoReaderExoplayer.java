@@ -48,10 +48,6 @@ public class VideoReaderExoplayer {
             if(inputStream!=null){
                 inputStream.startReadThread();
             }
-            else{
-                mUsbMaskConnection.start();
-                inputStream.startReadThread();
-            }
 
             DefaultLoadControl loadControl = new DefaultLoadControl.Builder().setBufferDurationsMs(32*1024, 64*1024, 0, 0).build();
             mPlayer = new SimpleExoPlayer.Builder(context).setLoadControl(loadControl).build();
@@ -76,8 +72,7 @@ public class VideoReaderExoplayer {
                             Log.e("PLAYER_SOURCE", "TYPE_SOURCE: " + error.getSourceException().getMessage());
                             Toast.makeText(context, "Video not ready", Toast.LENGTH_SHORT).show();
                             (new Handler(Looper.getMainLooper())).postDelayed(() -> {
-                                mUsbMaskConnection.stop();
-                                mPlayer.stop();
+                                mUsbMaskConnection.start();
                                 start(); //retry in 5 sec
                             }, 5000);
                             break;
@@ -90,7 +85,6 @@ public class VideoReaderExoplayer {
                     if(!isLoading){
                         Toast.makeText(context, "Connection Lost, trying to Reconnect...", Toast.LENGTH_SHORT).show();
                         (new Handler(Looper.getMainLooper())).postDelayed(() -> {
-                            mUsbMaskConnection.stop();
                             mPlayer.stop();
                             start();
                         }, 5000);

@@ -27,14 +27,9 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
 import com.fpvout.digiview.dvr.DVR;
-import com.fpvout.digiview.dvr.MediaDispatcher;
-import com.google.android.exoplayer2.MediaItem;
-import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
-import com.google.android.exoplayer2.source.ExtractorMediaSource;
-import com.google.android.exoplayer2.source.MediaSource;
-import com.google.android.exoplayer2.source.ProgressiveMediaSource;
-import com.google.android.exoplayer2.upstream.DataSource;
+import com.uncorkedstudios.android.view.recordablesurfaceview.RecordableSurfaceView;
 
+import java.io.IOException;
 import java.util.HashMap;
 
 import io.sentry.SentryLevel;
@@ -165,12 +160,16 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         mVideoReader = new VideoReaderExoplayer(fpvView, overlayView, this);
 
         // Init DVR recorder
-        recorder = DVR.getInstance(this, null);
+        recorder = DVR.getInstance(this, fpvView);
         findViewById(R.id.recordbt).setOnClickListener(view -> {
             if (recorder.isRecording()) {
                 recorder.stop();
             } else {
-                recorder.start();
+                try {
+                    recorder.start();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -345,7 +344,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         mUsbMaskConnection.setUsbDevice(usbManager.openDevice(usbDevice), usbDevice);
         mVideoReader.setUsbMaskConnection(mUsbMaskConnection);
         overlayView.hide();
-        mVideoReader.start(recorder);
+        mVideoReader.start();
         updateWatermark();
         autoHideSettingsButton();
         showOverlay(R.string.waiting_for_video, OverlayStatus.Connected);
@@ -381,6 +380,12 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         autoHideSettingsButton();
         updateWatermark();
         updateVideoZoom();
+
+        try {
+            recorder.init();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private boolean onVideoReaderEvent(VideoReaderExoplayer.VideoReaderEventMessageCode m) {

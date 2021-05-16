@@ -5,6 +5,8 @@
 
     <uses-feature android:name="android.hardware.usb.host" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
@@ -26,15 +28,6 @@
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"></activity>
-
-        <service android:name="com.fpvout.digiview.dvr.DownloadService"
-            android:exported="false">
-            <!-- This is needed for Scheduler -->
-            <intent-filter>
-                <action android:name="com.google.android.exoplayer.downloadService.action.RESTART"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-            </intent-filter>
-        </service>
 
         <activity
             android:launchMode="singleTask"

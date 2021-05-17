@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.LayoutTransition;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -13,9 +14,12 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Toast;
 
@@ -37,6 +41,8 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     VideoReaderExoplayer mVideoReader;
     boolean usbConnected = false;
     SurfaceView fpvView;
+    private GestureDetector gestureDetector;
+    private ScaleGestureDetector scaleGestureDetector;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +79,34 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         watermarkView = findViewById(R.id.watermarkView);
         fpvView = findViewById(R.id.fpvView);
 
+        // Enable resizing animations
+        ((ViewGroup)findViewById(R.id.mainLayout)).getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
+
+        gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                toggleWatermark();
+                return super.onSingleTapConfirmed(e);
+            }
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                mVideoReader.toggleZoom();
+                return super.onDoubleTap(e);
+            }
+        });
+
+        scaleGestureDetector = new ScaleGestureDetector(this, new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+            @Override
+            public void onScaleEnd(ScaleGestureDetector detector) {
+                if (detector.getScaleFactor() < 1) {
+                    mVideoReader.zoomOut();
+                } else {
+                    mVideoReader.zoomIn();
+                }
+            }
+        });
+
         mUsbMaskConnection = new UsbMaskConnection();
         mVideoReader = new VideoReaderExoplayer(fpvView, this);
 
@@ -87,9 +121,8 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (event.getAction() == MotionEvent.ACTION_UP) {
-            toggleWatermark();
-        }
+        gestureDetector.onTouchEvent(event);
+        scaleGestureDetector.onTouchEvent(event);
 
         return super.onTouchEvent(event);
     }

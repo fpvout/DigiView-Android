@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     boolean usbConnected = false;
     SurfaceView fpvView;
     private GestureDetector gestureDetector;
+    private ScaleGestureDetector scaleGestureDetector;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,6 +96,17 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
             }
         });
 
+        scaleGestureDetector = new ScaleGestureDetector(this, new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+            @Override
+            public void onScaleEnd(ScaleGestureDetector detector) {
+                if (detector.getScaleFactor() < 1) {
+                    mVideoReader.zoomOut();
+                } else {
+                    mVideoReader.zoomIn();
+                }
+            }
+        });
+
         mUsbMaskConnection = new UsbMaskConnection();
         mVideoReader = new VideoReaderExoplayer(fpvView, this);
 
@@ -109,6 +122,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         gestureDetector.onTouchEvent(event);
+        scaleGestureDetector.onTouchEvent(event);
 
         return super.onTouchEvent(event);
     }

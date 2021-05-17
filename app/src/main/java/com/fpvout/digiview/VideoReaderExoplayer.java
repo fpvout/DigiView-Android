@@ -43,6 +43,7 @@ public class VideoReaderExoplayer {
         VideoReaderExoplayer(SurfaceView videoSurface, Context c) {
             surfaceView = videoSurface;
             context = c;
+            sharedPreferences = context.getSharedPreferences("DigiView", Context.MODE_PRIVATE);
         }
 
         public void setUsbMaskConnection(UsbMaskConnection connection) {
@@ -51,7 +52,6 @@ public class VideoReaderExoplayer {
         }
 
         public void start() {
-            sharedPreferences = context.getSharedPreferences("DigiView", Context.MODE_PRIVATE);
             zoomedIn = sharedPreferences.getBoolean(VideoZoomedIn, true);
 
             inputStream.startReadThread();
@@ -113,7 +113,7 @@ public class VideoReaderExoplayer {
 
             SharedPreferences.Editor preferencesEditor = sharedPreferences.edit();
             preferencesEditor.putBoolean(VideoZoomedIn, zoomedIn);
-            preferencesEditor.commit();
+            preferencesEditor.apply();
 
             ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) surfaceView.getLayoutParams();
 
@@ -128,6 +128,18 @@ public class VideoReaderExoplayer {
             }
 
             surfaceView.setLayoutParams(params);
+        }
+
+        public void zoomIn() {
+            if (!zoomedIn) {
+                toggleZoom();
+            }
+        }
+
+        public void zoomOut() {
+            if (zoomedIn) {
+                toggleZoom();
+            }
         }
 
         public void restart() {

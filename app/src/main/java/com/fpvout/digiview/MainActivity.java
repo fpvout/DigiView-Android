@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
             if (searchDevice()) {
                 connect();
             } else {
-                overlayView.showOpaque("Waiting for USB device...", OverlayStatus.Disconnected);
+                overlayView.showOpaque(R.string.waiting_for_usb_device, OverlayStatus.Disconnected);
             }
         }
     }
@@ -124,14 +124,14 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     public void usbDeviceApproved(UsbDevice device) {
         Log.i(TAG, "USB - usbDevice approved");
         usbDevice = device;
-        overlayView.showOpaque("USB device approved", OverlayStatus.Connected);
+        overlayView.showOpaque(R.string.usb_device_approved, OverlayStatus.Connected);
         connect();
     }
 
     @Override
     public void usbDeviceDetached() {
         Log.i(TAG, "USB - usbDevice detached");
-        overlayView.showOpaque("USB device detached\n\nWaiting for USB device...", OverlayStatus.Disconnected);
+        overlayView.showOpaque(R.string.usb_device_detached_waiting, OverlayStatus.Disconnected);
         this.onStop();
     }
 
@@ -146,7 +146,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
             if (device.getVendorId() == VENDOR_ID && device.getProductId() == PRODUCT_ID) {
                 if (usbManager.hasPermission(device)) {
                     Log.i(TAG, "USB - usbDevice attached");
-                    overlayView.showOpaque("USB device found.", OverlayStatus.Connected);
+                    overlayView.showOpaque(R.string.usb_device_found, OverlayStatus.Connected);
                     usbDevice = device;
                     return true;
                 }
@@ -177,7 +177,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
                 Log.d(TAG, "APP - On Resume usbDevice device found");
                 connect();
             } else {
-                overlayView.showOpaque("Waiting for USB device...", OverlayStatus.Disconnected);
+                overlayView.showOpaque(R.string.waiting_for_usb_device, OverlayStatus.Disconnected);
             }
         }
     }

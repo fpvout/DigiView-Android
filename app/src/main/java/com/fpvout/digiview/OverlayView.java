@@ -26,8 +26,16 @@ public class OverlayView extends ConstraintLayout {
         setVisibility(View.GONE);
     }
 
+    public void showOverlay(int textResourceId, OverlayStatus status){
+        showOverlay(getContext().getString(textResourceId), status);
+    }
+
     public void showOverlay(String text, OverlayStatus status){
-        showInfo(text, status, 0.3f);
+        showInfo(text, status, 0.6f);
+    }
+
+    public void showOpaque(int textResourceId, OverlayStatus status){
+        showOpaque(getContext().getString(textResourceId), status);
     }
 
     public void showOpaque(String text, OverlayStatus status){

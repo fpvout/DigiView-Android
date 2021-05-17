@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     VideoReaderExoplayer mVideoReader;
     boolean usbConnected = false;
     SurfaceView fpvView;
-    GestureDetector gestureDetector;
+    private GestureDetector gestureDetector;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

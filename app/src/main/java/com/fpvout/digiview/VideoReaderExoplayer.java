@@ -1,6 +1,7 @@
 package com.fpvout.digiview;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
 
 import android.os.Handler;
@@ -35,7 +36,9 @@ public class VideoReaderExoplayer {
         private Context context;
         private AndroidUSBInputStream inputStream;
         private UsbMaskConnection mUsbMaskConnection;
-        private boolean zoomedIn = true;
+        private boolean zoomedIn;
+        private SharedPreferences sharedPreferences;
+        private static final String VideoZoomedIn = "VideoZoomedIn";
 
         VideoReaderExoplayer(SurfaceView videoSurface, Context c) {
             surfaceView = videoSurface;
@@ -48,6 +51,9 @@ public class VideoReaderExoplayer {
         }
 
         public void start() {
+            sharedPreferences = context.getSharedPreferences("DigiView", Context.MODE_PRIVATE);
+            zoomedIn = sharedPreferences.getBoolean(VideoZoomedIn, true);
+
             inputStream.startReadThread();
             DefaultLoadControl loadControl = new DefaultLoadControl.Builder().setBufferDurationsMs(32 * 1024, 64 * 1024, 0, 0).build();
             mPlayer = new SimpleExoPlayer.Builder(context).setLoadControl(loadControl).build();
@@ -104,6 +110,10 @@ public class VideoReaderExoplayer {
 
         public void toggleZoom() {
             zoomedIn = !zoomedIn;
+
+            SharedPreferences.Editor preferencesEditor = sharedPreferences.edit();
+            preferencesEditor.putBoolean(VideoZoomedIn, zoomedIn);
+            preferencesEditor.commit();
 
             ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) surfaceView.getLayoutParams();
 

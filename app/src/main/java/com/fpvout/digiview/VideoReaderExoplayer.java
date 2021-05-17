@@ -3,15 +3,14 @@ package com.fpvout.digiview;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
-
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.SurfaceView;
-import android.widget.Toast;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
@@ -19,8 +18,6 @@ import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.C;
-
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.upstream.DataSource;
@@ -33,6 +30,7 @@ public class VideoReaderExoplayer {
         private static final String TAG = "DIGIVIEW";
         private SimpleExoPlayer mPlayer;
         private SurfaceView surfaceView;
+        private final OverlayView overlayView;
         private Context context;
         private AndroidUSBInputStream inputStream;
         private UsbMaskConnection mUsbMaskConnection;
@@ -40,8 +38,9 @@ public class VideoReaderExoplayer {
         private SharedPreferences sharedPreferences;
         private static final String VideoZoomedIn = "VideoZoomedIn";
 
-        VideoReaderExoplayer(SurfaceView videoSurface, Context c) {
+        VideoReaderExoplayer(SurfaceView videoSurface, OverlayView overlayView, Context c) {
             surfaceView = videoSurface;
+            this.overlayView = overlayView;
             context = c;
             sharedPreferences = context.getSharedPreferences("DigiView", Context.MODE_PRIVATE);
         }
@@ -76,7 +75,7 @@ public class VideoReaderExoplayer {
                     switch (error.type) {
                         case ExoPlaybackException.TYPE_SOURCE:
                             Log.e(TAG, "PLAYER_SOURCE - TYPE_SOURCE: " + error.getSourceException().getMessage());
-                            Toast.makeText(context, "Waiting for video...", Toast.LENGTH_SHORT).show();
+                            overlayView.showOverlay(R.string.waiting_for_video, OverlayStatus.Connected);
                             (new Handler(Looper.getMainLooper())).postDelayed(() -> {
                                 restart();
                             }, 1000);
@@ -88,10 +87,13 @@ public class VideoReaderExoplayer {
                 public void onPlaybackStateChanged(int state) {
                     if (state == Player.STATE_ENDED) {
                         Log.d(TAG, "PLAYER_STATE - ENDED");
-                        Toast.makeText(context, "Waiting for video...", Toast.LENGTH_SHORT).show();
+                        overlayView.showOverlay(R.string.waiting_for_video, OverlayStatus.Connected);
                         (new Handler(Looper.getMainLooper())).postDelayed(() -> {
                             restart();
                         }, 1000);
+
+                    }else if(state == Player.STATE_READY){
+                        overlayView.hide();
                     }
                 }
             });

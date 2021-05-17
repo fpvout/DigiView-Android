@@ -1,8 +1,5 @@
 package com.fpvout.digiview;
 
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.LayoutTransition;
@@ -21,7 +18,9 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.Toast;
+
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.HashMap;
 
@@ -33,6 +32,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     private int shortAnimationDuration;
     private boolean watermarkAnimationInProgress = false;
     private View watermarkView;
+    private OverlayView overlayView;
     PendingIntent permissionIntent;
     UsbDeviceBroadcastReceiver usbDeviceBroadcastReceiver;
     UsbManager usbManager;
@@ -77,6 +77,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
 
         shortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
         watermarkView = findViewById(R.id.watermarkView);
+        overlayView = findViewById(R.id.overlayView);
         fpvView = findViewById(R.id.fpvView);
 
         // Enable resizing animations
@@ -85,7 +86,9 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onSingleTapConfirmed(MotionEvent e) {
-                toggleWatermark();
+                if (watermarkView.getVisibility() == View.VISIBLE) {
+                    toggleWatermark();
+                }
                 return super.onSingleTapConfirmed(e);
             }
 
@@ -107,14 +110,16 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
             }
         });
 
+        watermarkView.setVisibility(View.GONE);
+
         mUsbMaskConnection = new UsbMaskConnection();
-        mVideoReader = new VideoReaderExoplayer(fpvView, this);
+        mVideoReader = new VideoReaderExoplayer(fpvView, overlayView, this);
 
         if (!usbConnected) {
             if (searchDevice()) {
                 connect();
             } else {
-                Toast.makeText(getApplicationContext(), "Waiting for USB device...", Toast.LENGTH_SHORT).show();
+                overlayView.showOpaque(R.string.waiting_for_usb_device, OverlayStatus.Disconnected);
             }
         }
     }
@@ -153,15 +158,14 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     public void usbDeviceApproved(UsbDevice device) {
         Log.i(TAG, "USB - usbDevice approved");
         usbDevice = device;
-        Toast.makeText(getApplicationContext(), "USB device approved", Toast.LENGTH_SHORT).show();
+        overlayView.showOpaque(R.string.usb_device_approved, OverlayStatus.Connected);
         connect();
     }
 
     @Override
     public void usbDeviceDetached() {
         Log.i(TAG, "USB - usbDevice detached");
-        Toast.makeText(getApplicationContext(), "USB device detached", Toast.LENGTH_SHORT).show();
-        Toast.makeText(getApplicationContext(), "Waiting for USB device...", Toast.LENGTH_SHORT).show();
+        overlayView.showOpaque(R.string.usb_device_detached_waiting, OverlayStatus.Disconnected);
         this.onStop();
     }
 
@@ -176,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
             if (device.getVendorId() == VENDOR_ID && device.getProductId() == PRODUCT_ID) {
                 if (usbManager.hasPermission(device)) {
                     Log.i(TAG, "USB - usbDevice attached");
-                    Toast.makeText(getApplicationContext(), "USB device found", Toast.LENGTH_SHORT).show();
+                    overlayView.showOpaque(R.string.usb_device_found, OverlayStatus.Connected);
                     usbDevice = device;
                     return true;
                 }
@@ -192,6 +196,8 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         usbConnected = true;
         mUsbMaskConnection.setUsbDevice(usbManager.openDevice(usbDevice), usbDevice);
         mVideoReader.setUsbMaskConnection(mUsbMaskConnection);
+        watermarkView.setVisibility(View.VISIBLE);
+        overlayView.hide();
         mVideoReader.start();
     }
 
@@ -205,7 +211,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
                 Log.d(TAG, "APP - On Resume usbDevice device found");
                 connect();
             } else {
-                Toast.makeText(getApplicationContext(), "Waiting for USB device...", Toast.LENGTH_SHORT).show();
+                overlayView.showOpaque(R.string.waiting_for_usb_device, OverlayStatus.Disconnected);
             }
         }
     }

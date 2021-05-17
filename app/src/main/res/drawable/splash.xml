@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android"
+    android:opacity="opaque"
+    android:gravity="fill">
+
+    <item android:drawable="@color/black"/>
+
+    <item>
+        <bitmap android:src="@drawable/ic_splash" />
+    </item>
+
+</layer-list>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="digiview_feed">DigiView\nfeed</string>
+    <string name="waiting_for_usb_device">Warte auf USB Gerät…</string>
+    <string name="usb_device_approved">USB Gerät genehmigt</string>
+    <string name="usb_device_detached_waiting">USB Gerät getrennt\n\nWarte auf USB Gerät…</string>
+    <string name="usb_device_found">USB Gerät gefunden.</string>
+    <string name="waiting_for_video">Warte auf Video…</string>
+</resources>

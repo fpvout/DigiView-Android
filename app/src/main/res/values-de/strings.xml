@@ -1,5 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">DigiView</string>
     <string name="digiview_feed">DigiView\nfeed</string>
     <string name="waiting_for_usb_device">Warte auf USB Gerät…</string>
     <string name="usb_device_approved">USB Gerät genehmigt</string>

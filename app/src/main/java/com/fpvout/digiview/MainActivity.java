@@ -1,10 +1,8 @@
 package com.fpvout.digiview;
 
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.LayoutTransition;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -13,11 +11,16 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.Toast;
+
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.HashMap;
 
@@ -29,6 +32,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     private int shortAnimationDuration;
     private boolean watermarkAnimationInProgress = false;
     private View watermarkView;
+    private OverlayView overlayView;
     PendingIntent permissionIntent;
     UsbDeviceBroadcastReceiver usbDeviceBroadcastReceiver;
     UsbManager usbManager;
@@ -37,6 +41,8 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     VideoReaderExoplayer mVideoReader;
     boolean usbConnected = false;
     SurfaceView fpvView;
+    private GestureDetector gestureDetector;
+    private ScaleGestureDetector scaleGestureDetector;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,25 +77,57 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
 
         shortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
         watermarkView = findViewById(R.id.watermarkView);
+        overlayView = findViewById(R.id.overlayView);
         fpvView = findViewById(R.id.fpvView);
 
+        // Enable resizing animations
+        ((ViewGroup)findViewById(R.id.mainLayout)).getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
+
+        gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                if (watermarkView.getVisibility() == View.VISIBLE) {
+                    toggleWatermark();
+                }
+                return super.onSingleTapConfirmed(e);
+            }
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                mVideoReader.toggleZoom();
+                return super.onDoubleTap(e);
+            }
+        });
+
+        scaleGestureDetector = new ScaleGestureDetector(this, new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+            @Override
+            public void onScaleEnd(ScaleGestureDetector detector) {
+                if (detector.getScaleFactor() < 1) {
+                    mVideoReader.zoomOut();
+                } else {
+                    mVideoReader.zoomIn();
+                }
+            }
+        });
+
+        watermarkView.setVisibility(View.GONE);
+
         mUsbMaskConnection = new UsbMaskConnection();
-        mVideoReader = new VideoReaderExoplayer(fpvView, this);
+        mVideoReader = new VideoReaderExoplayer(fpvView, overlayView, this);
 
         if (!usbConnected) {
             if (searchDevice()) {
                 connect();
             } else {
-                Toast.makeText(getApplicationContext(), "Waiting for USB device...", Toast.LENGTH_SHORT).show();
+                overlayView.showOpaque(R.string.waiting_for_usb_device, OverlayStatus.Disconnected);
             }
         }
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (event.getAction() == MotionEvent.ACTION_UP) {
-            toggleWatermark();
-        }
+        gestureDetector.onTouchEvent(event);
+        scaleGestureDetector.onTouchEvent(event);
 
         return super.onTouchEvent(event);
     }
@@ -120,15 +158,14 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     public void usbDeviceApproved(UsbDevice device) {
         Log.i(TAG, "USB - usbDevice approved");
         usbDevice = device;
-        Toast.makeText(getApplicationContext(), "USB device approved", Toast.LENGTH_SHORT).show();
+        overlayView.showOpaque(R.string.usb_device_approved, OverlayStatus.Connected);
         connect();
     }
 
     @Override
     public void usbDeviceDetached() {
         Log.i(TAG, "USB - usbDevice detached");
-        Toast.makeText(getApplicationContext(), "USB device detached", Toast.LENGTH_SHORT).show();
-        Toast.makeText(getApplicationContext(), "Waiting for USB device...", Toast.LENGTH_SHORT).show();
+        overlayView.showOpaque(R.string.usb_device_detached_waiting, OverlayStatus.Disconnected);
         this.onStop();
     }
 
@@ -143,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
             if (device.getVendorId() == VENDOR_ID && device.getProductId() == PRODUCT_ID) {
                 if (usbManager.hasPermission(device)) {
                     Log.i(TAG, "USB - usbDevice attached");
-                    Toast.makeText(getApplicationContext(), "USB device found", Toast.LENGTH_SHORT).show();
+                    overlayView.showOpaque(R.string.usb_device_found, OverlayStatus.Connected);
                     usbDevice = device;
                     return true;
                 }
@@ -159,6 +196,8 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         usbConnected = true;
         mUsbMaskConnection.setUsbDevice(usbManager.openDevice(usbDevice), usbDevice);
         mVideoReader.setUsbMaskConnection(mUsbMaskConnection);
+        watermarkView.setVisibility(View.VISIBLE);
+        overlayView.hide();
         mVideoReader.start();
     }
 
@@ -172,7 +211,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
                 Log.d(TAG, "APP - On Resume usbDevice device found");
                 connect();
             } else {
-                Toast.makeText(getApplicationContext(), "Waiting for USB device...", Toast.LENGTH_SHORT).show();
+                overlayView.showOpaque(R.string.waiting_for_usb_device, OverlayStatus.Disconnected);
             }
         }
     }

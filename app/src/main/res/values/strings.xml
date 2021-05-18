@@ -1,6 +1,5 @@
 <resources>
-    <string name="app_name">DigiView</string>
-    <string name="connectButtonText">Connect</string>
+    <string name="app_name" translatable="false">DigiView</string>
     <string name="digiview_feed">DigiView\nfeed</string>
     <string name="waiting_for_usb_device">Waiting for USB device…</string>
     <string name="usb_device_approved">USB device approved</string>

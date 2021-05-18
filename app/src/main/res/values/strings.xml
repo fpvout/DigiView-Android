@@ -4,5 +4,5 @@
     <string name="tutorial_welcome_text">Welcome to DigiView! This app allows you to display the video feed of your DJI FPV Goggles V1 &amp; V2 on your phone.</string>
     <string name="tutorial_power_up_goggles">1.) Power up your goggles</string>
     <string name="tutorial_power_up_drone">2.) Power up your drone</string>
-    <string name="tutorial_plug_in_usb">3.) Connect goggles and phone using an USB calbe</string>
+    <string name="tutorial_plug_in_usb">3.) Connect goggles and phone using an USB cable</string>
 </resources>

@@ -10,7 +10,7 @@
         android:id="@+id/imageView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:src="@drawable/ic_dji_goggles"
+        android:src="@drawable/ic_plug_in_usb"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintDimensionRatio="1"
         app:layout_constraintEnd_toEndOf="parent"

@@ -37,8 +37,10 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // TODO Change this to not always start the tutorial. This is only for testing purposes
+        //      Maybe we should check if this is the first app start using SharedPreferences
+        //      Additionally, the tutorial could be reachable via the settings...
         startActivity(new Intent(MainActivity.this, TutorialActivity.class));
-        finish();
 
         // Hide top bar and status bar
         View decorView = getWindow().getDecorView();

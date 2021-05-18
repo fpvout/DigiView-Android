@@ -17,7 +17,10 @@ public class TutorialActivity extends AppCompatActivity {
 
     // Tutorial Fragments - Add here additional fragments to appear in the tutorial
     private final Fragment[] tutorialFragments = {
-            new WelcomeFragment()
+            new WelcomeFragment(),
+            new GogglesFragment(),
+            new DroneFragment(),
+            new PlugUsbFragment()
     };
     private int currentFragmentIndex = 0;
 
@@ -76,5 +79,18 @@ public class TutorialActivity extends AppCompatActivity {
         }
         ft.replace(R.id.tutorial_activity_frame_layout, tutorialFragments[currentFragmentIndex]);
         ft.commit();
+    }
+
+    /**
+     * If the user calls onBackPressed() the gallery switches backwards first.
+     * super.onBackPressed() is called when the first fragment is shown
+     */
+    @Override
+    public void onBackPressed() {
+        if (currentFragmentIndex > 0) {
+            previousFragment();
+        } else {
+            super.onBackPressed();
+        }
     }
 }

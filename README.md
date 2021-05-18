@@ -6,6 +6,8 @@ Working with Android 7+ and devices supporting USB Host mode.
 
 [Is my device Compatible?](SupportedDevices.md) (non exhaustive)
 
+[DigiView Wiki](https://github.com/fpvout/fpvout.com/wiki)
+
 ## Download
 You can download the **Alpha** Release [here](https://github.com/fpvout/fpv_viewer_android/releases/download/v0.1.0/DigiView_0.1.0_ALPHA.apk).
 

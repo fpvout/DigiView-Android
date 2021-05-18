@@ -53,8 +53,7 @@ public class VideoReaderExoplayer {
         public void start() {
             zoomedIn = sharedPreferences.getBoolean(VideoZoomedIn, true);
 
-            inputStream.startReadThread();
-            DefaultLoadControl loadControl = new DefaultLoadControl.Builder().setBufferDurationsMs(17, 17, 17, 17).build();
+            DefaultLoadControl loadControl = new DefaultLoadControl.Builder().setBufferDurationsMs(500, 2000, 10, 10).build(); //todo : try to play with other values
             mPlayer = new SimpleExoPlayer.Builder(context).setLoadControl(loadControl).build();
             mPlayer.setVideoSurfaceView(surfaceView);
             mPlayer.setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);

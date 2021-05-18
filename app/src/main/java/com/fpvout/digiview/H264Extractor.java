@@ -25,11 +25,11 @@ public final class H264Extractor implements Extractor {
     /** Factory for {@link H264Extractor} instances. */
     public static final ExtractorsFactory FACTORY = () -> new Extractor[] {new H264Extractor()};
 
-    private static final int MAX_SYNC_FRAME_SIZE = 30 * 1024;
+    private static final int MAX_SYNC_FRAME_SIZE = 131072;
     private static final int ID3_TAG = Util.getIntegerCodeForString("ID3");
 
     private long firstSampleTimestampUs;
-    private long sampleTime = 200; // todo: try to lower this. it directly infer on speed and latency
+    private long sampleTime = 10000; // todo: try to lower this. it directly infer on speed and latency. this should be equal to 16666 to reach 60fps but works better with lower value
     private final H264Reader reader;
     private final ParsableByteArray sampleData;
 

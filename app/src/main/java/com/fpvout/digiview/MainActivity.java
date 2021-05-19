@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
@@ -144,5 +145,29 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         mUsbMaskConnection.stop();
         mVideoReader.stop();
         usbConnected = false;
+    }
+
+    /**
+     * Method to launch the TutorialActivity. The method automatically detects if this
+     * is the first launch using SharedPreferences. The always param can be used
+     * to start the tutorial from some menu icons or the settings.
+     *
+     * @param always Launches the TutorialActivity even it is not the first start if true.
+     */
+    private void launchTutorialActivity(boolean always) {
+        // Constants, maybe move to global variables
+        final String SHARED_PREFERENCES = "digi_view_preferences";
+        final String FIRST_LAUNCH = "first_launch";
+
+        // SharedPreference instant, maybe use global one
+        SharedPreferences preferences = getSharedPreferences(SHARED_PREFERENCES, MODE_PRIVATE);
+
+        boolean firstLaunch = preferences.getBoolean(FIRST_LAUNCH, true);
+
+        if (firstLaunch || always) {
+            startActivity(new Intent(MainActivity.this, TutorialActivity.class));
+            // Save that tutorial was shown before
+            preferences.edit().putBoolean(FIRST_LAUNCH, false).apply();
+        }
     }
 }

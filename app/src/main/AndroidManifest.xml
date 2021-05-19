@@ -13,7 +13,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Digiview"
         >
-
+        <activity
+            android:name=".DataCollectionAgreementPopupActivity"
+            android:label="@string/title_activity_data_collection"
+            android:theme="@style/Theme.AppCompat.Dialog"></activity>
         <activity
             android:launchMode="singleTask"
             android:name="com.fpvout.digiview.MainActivity"

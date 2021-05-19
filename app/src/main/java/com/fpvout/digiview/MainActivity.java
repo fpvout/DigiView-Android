@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
@@ -50,6 +51,9 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         Log.d(TAG, "APP - On Create");
         setContentView(R.layout.activity_main);
 
+        // check Data Collection agreement
+        checkDataCollectionAgreement();
+
         // Hide top bar and status bar
         View decorView = getWindow().getDecorView();
         decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
@@ -81,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         fpvView = findViewById(R.id.fpvView);
 
         // Enable resizing animations
-        ((ViewGroup)findViewById(R.id.mainLayout)).getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
+        ((ViewGroup) findViewById(R.id.mainLayout)).getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
 
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
@@ -176,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
             return false;
         }
 
-        for(UsbDevice device : deviceList.values()) {
+        for (UsbDevice device : deviceList.values()) {
             if (device.getVendorId() == VENDOR_ID && device.getProductId() == PRODUCT_ID) {
                 if (usbManager.hasPermission(device)) {
                     Log.i(TAG, "USB - usbDevice attached");
@@ -192,7 +196,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         return false;
     }
 
-    private void connect(){
+    private void connect() {
         usbConnected = true;
         mUsbMaskConnection.setUsbDevice(usbManager.openDevice(usbDevice), usbDevice);
         mVideoReader.setUsbMaskConnection(mUsbMaskConnection);
@@ -225,6 +229,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         mVideoReader.stop();
         usbConnected = false;
     }
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -244,4 +249,33 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         mVideoReader.stop();
         usbConnected = false;
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        SharedPreferences preferences = getApplicationContext().getSharedPreferences("com.fpvout.digiview", Context.MODE_PRIVATE);
+        boolean dataCollectionAccepted= preferences.getBoolean("dataCollectionAccepted", false);
+
+        if (requestCode == 1) { // Data Collection agreement Activity
+            if(resultCode == RESULT_OK && dataCollectionAccepted){
+                Log.d(TAG, "init Sentry here");
+            }
+
+        }
+    } //onActivityResult
+
+    private void checkDataCollectionAgreement() {
+        SharedPreferences preferences = getApplicationContext().getSharedPreferences("com.fpvout.digiview", Context.MODE_PRIVATE);
+        boolean dataCollectionAccepted= preferences.getBoolean("dataCollectionAccepted", false);
+        boolean dataCollectionReplied = preferences.getBoolean("dataCollectionReplied", false);
+        if (!dataCollectionReplied) {
+            Intent intent = new Intent(this, DataCollectionAgreementPopupActivity.class);
+            startActivityForResult(intent, 1);
+        } else if(dataCollectionAccepted){
+            Log.d(TAG, "init Sentry here");
+        }
+
+    }
+
 }

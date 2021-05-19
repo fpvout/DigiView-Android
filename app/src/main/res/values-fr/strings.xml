@@ -6,4 +6,9 @@
     <string name="usb_device_detached_waiting">Périphérique USB détaché\n\nAttente de périphérique USB…</string>
     <string name="usb_device_found">Périphérique USB trouvé.</string>
     <string name="waiting_for_video">En attente de la vidéo…</string>
+    <string name="title_activity_data_collection">Collection des données</string>
+    <string name="data_collection_header" >Êtes vous d\'accord pour partager les données de crashs avec l\'équipe de DigiView ?</string>
+    <string name="data_collection_text">Cette application crashera sûrement moins que votre drone.\n Mais si jamais l\'application plante, On aimerait bien le savoir !\n\nL\'équipe utilise Sentry pour tracker les bugs et rendre cette application meilleur.</string>
+    <string name="data_collection_agree_button">Accepter</string>
+    <string name="data_collection_deny_button">Refuser</string>
 </resources>

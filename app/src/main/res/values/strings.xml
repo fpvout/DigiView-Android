@@ -5,4 +5,6 @@
     <string name="tutorial_power_up_goggles">1.) Power up your goggles</string>
     <string name="tutorial_power_up_drone">2.) Power up your drone</string>
     <string name="tutorial_plug_in_usb">3.) Connect goggles and phone using an USB cable</string>
+    <string name="tutorial_auto_temp_control">You might need to disable "automatic temp control" on your Air Unit/Vista. (in goggle menu: Settings > Device)</string>
+    <string name="tutorial_usb_otg_enable">You may need to activate USB OTG in your Android settings.</string>
 </resources>

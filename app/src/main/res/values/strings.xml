@@ -46,4 +46,6 @@
     <string name="recording_started">recording started</string>
     <string name="recording_stopped">recording stopped</string>
     <string name="NO_DVR_VIDEO">No stream recording could not be started</string>
+    <string name="saved_dvr">dvr has been saved</string>
+    <string name="dvr_merge_audio_video">merging audio and video of the dvr</string>
 </resources>

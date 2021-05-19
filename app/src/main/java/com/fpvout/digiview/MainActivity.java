@@ -10,7 +10,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -22,13 +21,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
-import android.widget.ImageButton;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
 import com.fpvout.digiview.dvr.DVR;
-import com.uncorkedstudios.android.view.recordablesurfaceview.RecordableSurfaceView;
-
 import java.io.IOException;
 import java.util.HashMap;
 
@@ -160,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         mVideoReader = new VideoReaderExoplayer(fpvView, overlayView, this);
 
         // Init DVR recorder
-        recorder = DVR.getInstance(this, fpvView);
+        recorder = DVR.getInstance(this, mVideoReader, true);
         findViewById(R.id.recordbt).setOnClickListener(view -> {
             if (recorder.isRecording()) {
                 recorder.stop();
@@ -181,6 +177,12 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
             }
         }
 
+
+        try {
+            recorder.init();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

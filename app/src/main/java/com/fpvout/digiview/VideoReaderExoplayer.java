@@ -55,6 +55,11 @@ public class VideoReaderExoplayer {
         videoReaderEventListener = v;
     }
 
+    public InputStreamDataSource getInputDataStream(){
+        DataSpec dataSpec = new DataSpec(Uri.EMPTY,0,C.LENGTH_UNSET);
+        return  new InputStreamDataSource(context, dataSpec, inputStream);
+    }
+
     public void setUsbMaskConnection(UsbMaskConnection connection) {
         mUsbMaskConnection = connection;
         inputStream = mUsbMaskConnection.mInputStream;

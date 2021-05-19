@@ -8,16 +8,17 @@
 
     <application
         android:allowBackup="false"
-        android:icon="@mipmap/ic_launcher_alpha"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_alpha_round"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Digiview">
         <activity android:name=".tutorial.TutorialActivity"></activity>
         <activity
-            android:name=".MainActivity"
-            android:configChanges="orientation|keyboardHidden"
-            android:screenOrientation="landscape">
+            android:launchMode="singleTask"
+            android:name="com.fpvout.digiview.MainActivity"
+            android:screenOrientation="sensorLandscape"
+            android:configChanges="orientation|keyboardHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

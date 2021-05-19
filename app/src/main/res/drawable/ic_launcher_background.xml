@@ -9,9 +9,9 @@
         android:pathData="M0,0h108v108h-108z">
         <aapt:attr name="android:fillColor">
             <gradient
-                android:centerX="110"
-                android:centerY="-10"
-                android:gradientRadius="150"
+                android:centerX="100"
+                android:centerY="0"
+                android:gradientRadius="120"
                 android:type="radial"
                 android:startColor="@color/digiview_purple"
                 android:endColor="@color/digiview_blue">

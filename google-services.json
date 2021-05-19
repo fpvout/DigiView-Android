@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1098951021382",
+    "project_id": "fpvout",
+    "storage_bucket": "fpvout.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1098951021382:android:0e42e902c98c2d6deb4b47",
+        "android_client_info": {
+          "package_name": "com.fpvout.digiview"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1098951021382-lge70n5fif1csdumcuk86omabtgvsems.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDRfdW_nEkshiKZnlUiTY7Ww5R3Ne0Fgog"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1098951021382-lge70n5fif1csdumcuk86omabtgvsems.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

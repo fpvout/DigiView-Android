@@ -25,11 +25,10 @@ public final class H264Extractor implements Extractor {
     /** Factory for {@link H264Extractor} instances. */
     public static final ExtractorsFactory FACTORY = () -> new Extractor[] {new H264Extractor()};
 
-    private static final int MAX_SYNC_FRAME_SIZE = 30 * 1024;
-    private static final int ID3_TAG = Util.getIntegerCodeForString("ID3");
+    private static int MAX_SYNC_FRAME_SIZE = 30 * 1024;
 
     private long firstSampleTimestampUs;
-    private long sampleTime = 200; // todo: try to lower this. it directly infer on speed and latency
+    private static long sampleTime = 200; // todo: try to lower this. it directly infer on speed and latency
     private final H264Reader reader;
     private final ParsableByteArray sampleData;
 
@@ -39,7 +38,17 @@ public final class H264Extractor implements Extractor {
         this(0);
     }
 
+    public H264Extractor(int mMaxSyncFrameSize, int mSampleTime) {
+        this(0, mMaxSyncFrameSize, mSampleTime);
+    }
+
     public H264Extractor(long firstSampleTimestampUs) {
+        this(firstSampleTimestampUs, MAX_SYNC_FRAME_SIZE, (int) sampleTime);
+    }
+
+    public H264Extractor(long firstSampleTimestampUs, int mMaxSyncFrameSize, int mSampleTime) {
+        MAX_SYNC_FRAME_SIZE = mMaxSyncFrameSize;
+        sampleTime = mSampleTime;
         this.firstSampleTimestampUs = firstSampleTimestampUs;
         reader = new H264Reader(new SeiReader(new ArrayList<Format>()),false,true);
         sampleData = new ParsableByteArray(MAX_SYNC_FRAME_SIZE);

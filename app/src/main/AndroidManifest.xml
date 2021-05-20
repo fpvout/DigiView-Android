@@ -13,6 +13,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Digiview"
+        android:requestLegacyExternalStorage="true"
         >
 
         <activity

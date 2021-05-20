@@ -21,10 +21,10 @@ public class StreamDumper  {
 
     public StreamDumper(){
         dumpDir = new File(
-                Environment.getExternalStoragePublicDirectory(
-                        Environment.DIRECTORY_PICTURES),
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
                 "DigiView");
-        dumpDir.mkdir();
+
+        dumpDir.mkdirs();
 
         init();
     }

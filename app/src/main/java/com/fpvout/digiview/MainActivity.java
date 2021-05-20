@@ -155,12 +155,6 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         mUsbMaskConnection = new UsbMaskConnection();
         mVideoReader = new VideoReaderExoplayer(fpvView, overlayView, this, recorder);
 
-        try {
-            recorder.init(mVideoReader);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
         if (!usbConnected) {
             if (searchDevice()) {
                 connect();
@@ -337,6 +331,12 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
                 recorder.start();
             }
         });
+
+        try {
+            recorder.init(mVideoReader);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         mUsbMaskConnection.setUsbDevice(usbManager.openDevice(usbDevice), usbDevice, recorder);
         mVideoReader.setUsbMaskConnection(mUsbMaskConnection);
         overlayView.hide();

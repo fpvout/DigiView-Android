@@ -4,7 +4,7 @@ DigiView is an Android app that allows you to get a live preview from your DJI F
 
 Working with Android 7+ and devices supporting USB Host mode.
 
-[Is my device Compatible?](SupportedDevices.md) (non exhaustive)
+[Is my device Compatible?](SupportedDevices.md) (non-exhaustive)
 
 [DigiView Wiki](https://github.com/fpvout/fpvout.com/wiki)
 
@@ -14,7 +14,7 @@ You can download the **Alpha** Release [here](https://github.com/fpvout/fpv_view
 **Note:** App is still in development so you might run into some bugs or even a crash.
 
 ## Instructions
-- Power on your googles.
+- Power on your goggles.
 - Power on your drone.
 - Plug the USB cable from your goggles into your phone (if using an OTG adapter, that goes into your phone).
 - Automatic launch is enabled so app should launch. If not, just launch app manually.
@@ -26,7 +26,7 @@ If there is any other issues, please check our [Discord server](https://discord.
 ## Known Issues
 - **You might need to set Auto temp control off on your Vista/Air unit (under Settings > Device in goggle menu) to get it to work**.
 - Some people reported it's working best in 50mbps mode
-- Concerning hardware, USB-C to USB-C cables sometimes don't work depending the phone you're using. in that case, an USB OTG adapter is the best option.
+- Concerning hardware, USB-C to USB-C cables sometimes don't work depending on the phone you're using. in that case, an USB OTG adapter is the best option.
 - You *may* need to activate USB OTG in your Android settings to get the fpv goggles detected.
 - See [open issues](https://github.com/fpvout/DigiView-Android/issues) for more or to report a new issue.
 
@@ -34,7 +34,7 @@ If there is any other issues, please check our [Discord server](https://discord.
 - We will put more info here in the near future.
 
 ## Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change. Most PRs should be based from and target `dev` branch.
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change. Most PRs should be based on and target `dev` branch.
 
 ## They deserve some credits!
 - [jlucidar](https://github.com/jlucidar) - Lead developer - [Donate](https://paypal.me/jlucidar) - [Youtube](https://www.youtube.com/channel/UCBbyqtxntnlF6Cn_8ezkTLQ)

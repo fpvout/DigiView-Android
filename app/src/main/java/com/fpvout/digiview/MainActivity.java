@@ -1,5 +1,6 @@
 package com.fpvout.digiview;
 
+import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.LayoutTransition;
@@ -7,8 +8,10 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -21,6 +24,7 @@ import android.view.WindowManager;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import java.util.HashMap;
 
@@ -115,11 +119,25 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         mUsbMaskConnection = new UsbMaskConnection();
         mVideoReader = new VideoReaderExoplayer(fpvView, overlayView, this);
 
+        checkStoragePermission();
+
         if (!usbConnected) {
             if (searchDevice()) {
                 connect();
             } else {
                 overlayView.showOpaque(R.string.waiting_for_usb_device, OverlayStatus.Disconnected);
+            }
+        }
+
+    }
+
+    private void checkStoragePermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+
             }
         }
     }

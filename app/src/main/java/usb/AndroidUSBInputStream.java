@@ -139,9 +139,10 @@ public class AndroidUSBInputStream extends InputStream {
 			working = true;
 			readBuffer = new CircularByteBuffer(READ_BUFFER_SIZE);
 			receiveThread = new Thread() {
+				StreamDumper streamDumper;
 				@Override
 				public void run() {
-					StreamDumper streamDumper = new StreamDumper();
+					streamDumper = new StreamDumper();
 					while (working) {
 						byte[] buffer = new byte[1024];
 						int receivedBytes = usbConnection.bulkTransfer(receiveEndPoint, buffer, buffer.length, READ_TIMEOUT) - OFFSET;
@@ -153,6 +154,7 @@ public class AndroidUSBInputStream extends InputStream {
 						}
 					}
 					streamDumper.stop();
+
 				}
 			};
 			receiveThread.start();
@@ -172,3 +174,4 @@ public class AndroidUSBInputStream extends InputStream {
 		super.close();
 	}
 }
+

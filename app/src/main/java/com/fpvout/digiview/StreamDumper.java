@@ -15,6 +15,7 @@ public class StreamDumper  {
 
     private final File dumpDir;
     private File streamDump;
+    private String startTimestamp;
 
     public boolean dumpStream = true;
 
@@ -30,8 +31,6 @@ public class StreamDumper  {
 
     public void dump(byte[] buffer, int offset, int receivedBytes) {
 
-        if(fos == null) init();
-
         try {
             fos.write(buffer, offset, receivedBytes);
             bytesWritten = true;
@@ -42,7 +41,9 @@ public class StreamDumper  {
 
     private void init() {
         try {
-            streamDump = new File(dumpDir, "DigiView-"+System.currentTimeMillis()+".h264");
+            startTimestamp = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss")
+                    .format(Calendar.getInstance().getTime());
+            streamDump = new File(dumpDir, "DigiView "+startTimestamp+".h264");
             fos = new FileOutputStream(streamDump);
             bytesWritten = false;
         } catch (IOException exception) {
@@ -57,9 +58,7 @@ public class StreamDumper  {
                 fos.close();
 
                 if(bytesWritten) {
-                    String timestamp = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss")
-                            .format(Calendar.getInstance().getTime());
-                    File out = new File(dumpDir, "DigiView "+timestamp+".mp4");
+                    File out = new File(dumpDir, "DigiView "+startTimestamp+".mp4");
                     new Mp4Muxer(streamDump, out).start();
                 }
             }

@@ -1,5 +1,6 @@
 package com.fpvout.digiview;
 
+import android.media.MediaScannerConnection;
 import android.util.Log;
 
 import org.jcodec.codecs.h264.BufferH264ES;
@@ -103,6 +104,11 @@ public class Mp4Muxer extends Thread {
 
             // cleanup
             h264Dump.delete();
+
+            // add mp4 to gallery
+            MediaScannerConnection.scanFile(MainActivity.getContext(),
+                    new String[]{output.toString()},
+                    null, null);
 
         } catch (IOException exception){
             Log.e("DIGIVIEW", "MUXER: " + exception.getMessage());

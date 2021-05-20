@@ -4,6 +4,7 @@ import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.LayoutTransition;
+import android.app.Application;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -30,6 +31,7 @@ import androidx.core.app.ActivityCompat;
 import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity implements UsbDeviceListener {
+    private static AppCompatActivity instance;
     private static final String ACTION_USB_PERMISSION = "com.fpvout.digiview.USB_PERMISSION";
     private static final String TAG = "DIGIVIEW";
     private static final int VENDOR_ID = 11427;
@@ -52,6 +54,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        instance = this;
         Log.d(TAG, "APP - On Create");
         setContentView(R.layout.activity_main);
 
@@ -286,5 +289,9 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         mUsbMaskConnection.stop();
         mVideoReader.stop();
         usbConnected = false;
+    }
+
+    public static Context getContext() {
+        return instance.getApplicationContext();
     }
 }

@@ -153,21 +153,13 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         watermarkView.setVisibility(View.GONE);
 
         mUsbMaskConnection = new UsbMaskConnection();
-        mVideoReader = new VideoReaderExoplayer(fpvView, overlayView, this);
+        mVideoReader = new VideoReaderExoplayer(fpvView, overlayView, this, recorder);
 
-        // Init DVR recorder
-        recorder = DVR.getInstance(this, mVideoReader, true);
-        findViewById(R.id.recordbt).setOnClickListener(view -> {
-            if (recorder.isRecording()) {
-                recorder.stop();
-            } else {
-                try {
-                    recorder.start();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+        try {
+            recorder.init(mVideoReader);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         if (!usbConnected) {
             if (searchDevice()) {
@@ -175,13 +167,6 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
             } else {
                 overlayView.showOpaque(R.string.waiting_for_usb_device, OverlayStatus.Disconnected);
             }
-        }
-
-
-        try {
-            recorder.init();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
@@ -343,7 +328,16 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
 
     private void connect() {
         usbConnected = true;
-        mUsbMaskConnection.setUsbDevice(usbManager.openDevice(usbDevice), usbDevice);
+        // Init DVR recorder
+        recorder = DVR.getInstance(this, true);
+        findViewById(R.id.recordbt).setOnClickListener(view -> {
+            if (recorder.isRecording()) {
+                recorder.stop();
+            } else {
+                recorder.start();
+            }
+        });
+        mUsbMaskConnection.setUsbDevice(usbManager.openDevice(usbDevice), usbDevice, recorder);
         mVideoReader.setUsbMaskConnection(mUsbMaskConnection);
         overlayView.hide();
         mVideoReader.start();

@@ -22,6 +22,8 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.util.Log;
 
+import com.fpvout.digiview.dvr.DVR;
+
 /**
  * This class acts as a wrapper to read data from the USB Interface in Android
  * behaving like an {@code InputputStream} class.
@@ -42,6 +44,8 @@ public class AndroidUSBInputStream extends InputStream {
 	private boolean working = false;
 
 
+	private DVR dvr;
+
 	/**
 	 * Class constructor. Instantiates a new {@code AndroidUSBInputStream}
 	 * object with the given parameters.
@@ -52,9 +56,10 @@ public class AndroidUSBInputStream extends InputStream {
 	 * @see UsbDeviceConnection
 	 * @see UsbEndpoint
 	 */
-	public AndroidUSBInputStream( UsbEndpoint readEndpoint, UsbEndpoint sendEndpoint, UsbDeviceConnection connection) {
+	public AndroidUSBInputStream( UsbEndpoint readEndpoint, UsbEndpoint sendEndpoint, UsbDeviceConnection connection, DVR dvr) {
 		this.usbConnection = connection;
 		this.receiveEndPoint = readEndpoint;
+		this.dvr = dvr;
 		this.sendEndPoint = sendEndpoint;
 	}
 

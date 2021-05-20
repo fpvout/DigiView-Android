@@ -4,6 +4,8 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbInterface;
 
+import com.fpvout.digiview.dvr.DVR;
+
 import java.io.IOException;
 
 import usb.AndroidUSBInputStream;
@@ -22,7 +24,7 @@ public class UsbMaskConnection {
     public UsbMaskConnection() {
     }
 
-    public void setUsbDevice(UsbDeviceConnection c, UsbDevice d) {
+    public void setUsbDevice(UsbDeviceConnection c, UsbDevice d, DVR dvr) {
         usbConnection = c;
         device = d;
         usbInterface = device.getInterface(3);
@@ -30,7 +32,7 @@ public class UsbMaskConnection {
         usbConnection.claimInterface(usbInterface,true);
 
         mOutputStream = new AndroidUSBOutputStream(usbInterface.getEndpoint(0), usbConnection);
-        mInputStream = new AndroidUSBInputStream(usbInterface.getEndpoint(1), usbInterface.getEndpoint(0), usbConnection);
+        mInputStream = new AndroidUSBInputStream(usbInterface.getEndpoint(1), usbInterface.getEndpoint(0), usbConnection, dvr);
         ready = true;
     }
 

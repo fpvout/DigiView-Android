@@ -3,6 +3,7 @@ package com.fpvout.digiview;
 import android.content.Context;
 import android.net.Uri;
 
+import com.fpvout.digiview.dvr.DVR;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSpec;

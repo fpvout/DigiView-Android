@@ -11,6 +11,7 @@ import android.view.SurfaceView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.preference.PreferenceManager;
 
+import com.fpvout.digiview.dvr.DVR;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
@@ -43,19 +44,27 @@ public class VideoReaderExoplayer {
     private PerformancePreset performancePreset = PerformancePreset.getPreset(PerformancePreset.PresetType.DEFAULT);
     static final String VideoZoomedIn = "VideoZoomedIn";
     private final SharedPreferences sharedPreferences;
+    private DVR dvr;
+    private boolean streaming = false;
 
     VideoReaderExoplayer(SurfaceView videoSurface, Context c) {
         surfaceView = videoSurface;
-        context = c;
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(c);
-    }
+            context = c;
+            sharedPreferences = PreferenceManager.getDefaultSharedPreferences(c);
+            this.dvr = dvr;
+        }
 
     VideoReaderExoplayer(SurfaceView videoSurface, Context c, Handler v) {
         this(videoSurface, c);
         videoReaderEventListener = v;
     }
 
-    public InputStreamDataSource getInputDataStream(){
+
+    public boolean isStreaming(){
+        return streaming;
+    }
+
+    private InputStreamDataSource getInputDataStream(){
         DataSpec dataSpec = new DataSpec(Uri.EMPTY,0,C.LENGTH_UNSET);
         return  new InputStreamDataSource(context, dataSpec, inputStream);
     }
@@ -102,6 +111,7 @@ public class VideoReaderExoplayer {
                 public void onPlayerError(ExoPlaybackException error) {
                     switch (error.type) {
                         case ExoPlaybackException.TYPE_SOURCE:
+                            streaming = false;
                             Log.e(TAG, "PLAYER_SOURCE - TYPE_SOURCE: " + error.getSourceException().getMessage());
                             (new Handler(Looper.getMainLooper())).postDelayed(() -> restart(), 1000);
                             break;
@@ -123,11 +133,13 @@ public class VideoReaderExoplayer {
                         case Player.STATE_IDLE:
                         case Player.STATE_READY:
                         case Player.STATE_BUFFERING:
+                            streaming = false;
                             break;
                         case Player.STATE_ENDED:
                             Log.d(TAG, "PLAYER_STATE - ENDED");
                             sendEvent(VideoReaderEventMessageCode.WAITING_FOR_VIDEO); // let MainActivity know so it can hide watermark/show settings button
                             (new Handler(Looper.getMainLooper())).postDelayed(() -> restart(), 1000);
+                            streaming = false;
                             break;
                     }
                 }

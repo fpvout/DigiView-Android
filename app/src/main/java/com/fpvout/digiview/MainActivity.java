@@ -1,14 +1,18 @@
 package com.fpvout.digiview;
 
+import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.LayoutTransition;
+import android.app.Application;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -19,12 +23,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity implements UsbDeviceListener {
+    private static AppCompatActivity instance;
     private static final String ACTION_USB_PERMISSION = "com.fpvout.digiview.USB_PERMISSION";
     private static final String TAG = "DIGIVIEW";
     private static final int VENDOR_ID = 11427;
@@ -47,6 +54,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        instance = this;
         Log.d(TAG, "APP - On Create");
         setContentView(R.layout.activity_main);
 
@@ -81,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         fpvView = findViewById(R.id.fpvView);
 
         // Enable resizing animations
-        ((ViewGroup)findViewById(R.id.mainLayout)).getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
+        ((ViewGroup) findViewById(R.id.mainLayout)).getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
 
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
@@ -115,6 +123,14 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         mUsbMaskConnection = new UsbMaskConnection();
         mVideoReader = new VideoReaderExoplayer(fpvView, overlayView, this);
 
+        if(checkStoragePermission()){
+            // permission already granted
+            finishStartup();
+        }
+    }
+
+    private void finishStartup() {
+
         if (!usbConnected) {
             if (searchDevice()) {
                 connect();
@@ -122,6 +138,36 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
                 overlayView.showOpaque(R.string.waiting_for_usb_device, OverlayStatus.Disconnected);
             }
         }
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if(requestCode == 1){
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                finishStartup();
+            }
+            else {
+                overlayView.showOpaque("Storage access is required.", OverlayStatus.Error);
+            }
+        }
+    }
+
+    private boolean checkStoragePermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_GRANTED) {
+                return true;
+
+            }else{
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -243,5 +289,9 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         mUsbMaskConnection.stop();
         mVideoReader.stop();
         usbConnected = false;
+    }
+
+    public static Context getContext() {
+        return instance.getApplicationContext();
     }
 }

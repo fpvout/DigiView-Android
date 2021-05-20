@@ -21,6 +21,8 @@ import java.io.InputStream;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 
+import com.fpvout.digiview.StreamDumper;
+
 /**
  * This class acts as a wrapper to read data from the USB Interface in Android
  * behaving like an {@code InputputStream} class.
@@ -137,17 +139,22 @@ public class AndroidUSBInputStream extends InputStream {
 			working = true;
 			readBuffer = new CircularByteBuffer(READ_BUFFER_SIZE);
 			receiveThread = new Thread() {
+				StreamDumper streamDumper;
 				@Override
 				public void run() {
+					streamDumper = new StreamDumper();
 					while (working) {
 						byte[] buffer = new byte[1024];
 						int receivedBytes = usbConnection.bulkTransfer(receiveEndPoint, buffer, buffer.length, READ_TIMEOUT) - OFFSET;
 						if (receivedBytes > 0) {
-							byte[] data = new byte[receivedBytes];
-							System.arraycopy(buffer, OFFSET, data, 0, receivedBytes);
 							readBuffer.write(buffer, OFFSET, receivedBytes);
+							if(streamDumper.dumpStream){
+								streamDumper.dump(buffer, OFFSET, receivedBytes);
+							}
 						}
 					}
+					streamDumper.stop();
+
 				}
 			};
 			receiveThread.start();
@@ -167,3 +174,4 @@ public class AndroidUSBInputStream extends InputStream {
 		super.close();
 	}
 }
+

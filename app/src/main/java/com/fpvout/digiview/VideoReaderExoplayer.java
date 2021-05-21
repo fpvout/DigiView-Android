@@ -18,6 +18,8 @@ import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.extractor.Extractor;
+import com.google.android.exoplayer2.extractor.ExtractorsFactory;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.upstream.DataSource;
@@ -36,6 +38,7 @@ public class VideoReaderExoplayer {
         private UsbMaskConnection mUsbMaskConnection;
         private boolean zoomedIn;
         private SharedPreferences sharedPreferences;
+        private PerformancePreset performancePreset = PerformancePreset.getPreset(PerformancePreset.PresetType.DEFAULT);
         private static final String VideoZoomedIn = "VideoZoomedIn";
 
         VideoReaderExoplayer(SurfaceView videoSurface, OverlayView overlayView, Context c) {
@@ -43,6 +46,11 @@ public class VideoReaderExoplayer {
             this.overlayView = overlayView;
             context = c;
             sharedPreferences = context.getSharedPreferences("DigiView", Context.MODE_PRIVATE);
+        }
+
+        VideoReaderExoplayer(SurfaceView videoSurface, OverlayView overlayView, Context c, PerformancePreset p) {
+            this(videoSurface,overlayView,c);
+            performancePreset = p;
         }
 
         public void setUsbMaskConnection(UsbMaskConnection connection) {
@@ -53,8 +61,7 @@ public class VideoReaderExoplayer {
         public void start() {
             zoomedIn = sharedPreferences.getBoolean(VideoZoomedIn, true);
 
-            inputStream.startReadThread();
-            DefaultLoadControl loadControl = new DefaultLoadControl.Builder().setBufferDurationsMs(32 * 1024, 64 * 1024, 0, 0).build();
+            DefaultLoadControl loadControl = new DefaultLoadControl.Builder().setBufferDurationsMs(performancePreset.exoPlayerMinBufferMs, performancePreset.exoPlayerMaxBufferMs, performancePreset.exoPlayerBufferForPlaybackMs, performancePreset.exoPlayerBufferForPlaybackAfterRebufferMs).build();
             mPlayer = new SimpleExoPlayer.Builder(context).setLoadControl(loadControl).build();
             mPlayer.setVideoSurfaceView(surfaceView);
             mPlayer.setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
@@ -62,9 +69,20 @@ public class VideoReaderExoplayer {
 
             DataSpec dataSpec = new DataSpec(Uri.EMPTY, 0, C.LENGTH_UNSET);
 
-            DataSource.Factory dataSourceFactory = () -> (DataSource) new InputStreamDataSource(context, dataSpec, inputStream);
+            Log.d(TAG, "preset: " + performancePreset);
 
-            MediaSource mediaSource = new ProgressiveMediaSource.Factory(dataSourceFactory, H264Extractor.FACTORY).createMediaSource(MediaItem.fromUri(Uri.EMPTY));
+            DataSource.Factory dataSourceFactory = () -> {
+                switch (performancePreset.dataSourceType){
+                    case INPUT_STREAM:
+                        return (DataSource) new InputStreamDataSource(context, dataSpec, inputStream);
+                    case BUFFERED_INPUT_STREAM:
+                    default:
+                        return (DataSource) new InputStreamBufferedDataSource(context, dataSpec, inputStream);
+                }
+            };
+
+            ExtractorsFactory extractorsFactory = () ->new Extractor[] {new H264Extractor(performancePreset.h264ReaderMaxSyncFrameSize, performancePreset.h264ReaderSampleTime)};
+            MediaSource mediaSource = new ProgressiveMediaSource.Factory(dataSourceFactory, extractorsFactory).createMediaSource(MediaItem.fromUri(Uri.EMPTY));
             mPlayer.setMediaSource(mediaSource);
 
             mPlayer.prepare();
@@ -156,5 +174,10 @@ public class VideoReaderExoplayer {
         public void stop() {
             if (mPlayer != null)
                 mPlayer.release();
+        }
+
+        public void setPerformancePreset(PerformancePreset p){
+            performancePreset = p;
+            restart();
         }
 }

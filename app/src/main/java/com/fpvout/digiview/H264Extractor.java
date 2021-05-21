@@ -12,7 +12,6 @@ import com.google.android.exoplayer2.extractor.ts.H264Reader;
 import com.google.android.exoplayer2.extractor.ts.TsPayloadReader;
 import com.google.android.exoplayer2.util.ParsableByteArray;
 import com.google.android.exoplayer2.extractor.ts.SeiReader;
-import com.google.android.exoplayer2.util.Util;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -95,8 +94,6 @@ public final class H264Extractor implements Extractor {
         }
         firstSampleTimestampUs+=sampleTime;
         reader.packetStarted(firstSampleTimestampUs, FLAG_DATA_ALIGNMENT_INDICATOR);
-        // TODO: Make it possible for the reader to consume the dataSource directly, so that it becomes
-        // unnecessary to copy the data through packetBuffer.
         reader.consume(sampleData);
         return RESULT_CONTINUE;
     }

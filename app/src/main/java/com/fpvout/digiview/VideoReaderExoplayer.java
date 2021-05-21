@@ -38,7 +38,7 @@ public class VideoReaderExoplayer {
         private UsbMaskConnection mUsbMaskConnection;
         private boolean zoomedIn;
         private SharedPreferences sharedPreferences;
-        private PerformancePreset performancePreset = PerformancePreset.getPreset(PerformancePreset.presetType.DEFAULT);
+        private PerformancePreset performancePreset = PerformancePreset.getPreset(PerformancePreset.PresetType.DEFAULT);
         private static final String VideoZoomedIn = "VideoZoomedIn";
 
         VideoReaderExoplayer(SurfaceView videoSurface, OverlayView overlayView, Context c) {
@@ -69,8 +69,19 @@ public class VideoReaderExoplayer {
 
             DataSpec dataSpec = new DataSpec(Uri.EMPTY, 0, C.LENGTH_UNSET);
 
-            DataSource.Factory dataSourceFactory = () -> (DataSource) new InputStreamDataSource(context, dataSpec, inputStream);
-            ExtractorsFactory extractorsFactory = () ->new Extractor[] {new H264Extractor(performancePreset.h264ReaderMaxSyncFrameSize,performancePreset.h264ReaderSampleTime)};
+            Log.d(TAG, "preset: " + performancePreset);
+
+            DataSource.Factory dataSourceFactory = () -> {
+                switch (performancePreset.dataSourceType){
+                    case INPUT_STREAM:
+                        return (DataSource) new InputStreamDataSource(context, dataSpec, inputStream);
+                    case BUFFERED_INPUT_STREAM:
+                    default:
+                        return (DataSource) new InputStreamBufferedDataSource(context, dataSpec, inputStream);
+                }
+            };
+
+            ExtractorsFactory extractorsFactory = () ->new Extractor[] {new H264Extractor(performancePreset.h264ReaderMaxSyncFrameSize, performancePreset.h264ReaderSampleTime)};
             MediaSource mediaSource = new ProgressiveMediaSource.Factory(dataSourceFactory, extractorsFactory).createMediaSource(MediaItem.fromUri(Uri.EMPTY));
             mPlayer.setMediaSource(mediaSource);
 

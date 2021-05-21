@@ -66,12 +66,12 @@ public class AndroidUSBInputStream extends InputStream {
 
 	@Override
 	public int read(byte[] buffer, int offset, int length) throws IOException {
-		//byte[] buffer = new byte[131072];
-		int receivedBytes = usbConnection.bulkTransfer(receiveEndPoint, buffer, buffer.length, READ_TIMEOUT) - OFFSET;
+		int receivedBytes = usbConnection.bulkTransfer(receiveEndPoint, buffer, buffer.length, READ_TIMEOUT);
 		if (receivedBytes <= 0) {
 			// send magic packet again; Would be great to handle this in UsbMaskConnection directly...
 			Log.d(TAG, "received buffer empty, sending magic packet again...");
-			usbConnection.bulkTransfer(sendEndPoint, "RMVT".getBytes(), "RMVT".getBytes().length, 200);
+			usbConnection.bulkTransfer(sendEndPoint, "RMVT".getBytes(), "RMVT".getBytes().length, 2000);
+			receivedBytes = usbConnection.bulkTransfer(receiveEndPoint, buffer, buffer.length, READ_TIMEOUT);
 		}
 		return receivedBytes;
 	}

@@ -54,7 +54,7 @@
             app:summary="fpvout.com">
             <intent
                 android:action="android.intent.action.VIEW"
-                android:data="https://www.fpvout.com" />
+                android:data="https://fpvout.com" />
         </Preference>
 
         <Preference
@@ -62,7 +62,7 @@
             app:summary="@string/discord_summary">
             <intent
                 android:action="android.intent.action.VIEW"
-                android:data="https://discord.gg/kqwKX9GyNq" />
+                android:data="https://discord.gg/4kUGdtAZJ5" />
         </Preference>
 
         <Preference

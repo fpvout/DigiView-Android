@@ -19,6 +19,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -37,7 +38,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     private static final int VENDOR_ID = 11427;
     private static final int PRODUCT_ID = 31;
     private int shortAnimationDuration;
-    private boolean buttonAnimationInProgress = false;
+    private float buttonAlpha = 1;
     private View settingsButton;
     private View watermarkView;
     private OverlayView overlayView;
@@ -173,34 +174,33 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     }
 
     private void toggleSettingsButton() {
-        if (buttonAnimationInProgress)  return;
+        // cancel any pending delayed animations first
+        settingsButton.getHandler().removeCallbacksAndMessages(null);
 
-        buttonAnimationInProgress = true;
-
-        float targetAlpha = 0;
-        if (settingsButton.getAlpha() == 0) {
-            targetAlpha = 1;
+        if (buttonAlpha == 1) {
+            buttonAlpha = 0;
+        } else {
+            buttonAlpha = 1;
         }
 
         settingsButton.animate()
-                .alpha(targetAlpha)
+                .alpha(buttonAlpha)
                 .setDuration(shortAnimationDuration)
                 .setListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
-                        buttonAnimationInProgress = false;
-
                         autoHideSettingsButton();
                     }
                 });
     }
 
     private void autoHideSettingsButton() {
-        if (settingsButton.getAlpha() == 0) return;
+        if (buttonAlpha == 0) return;
 
         settingsButton.postDelayed(new Runnable() {
             @Override
             public void run() {
+                buttonAlpha = 0;
                 settingsButton.animate()
                         .alpha(0)
                         .setDuration(shortAnimationDuration);

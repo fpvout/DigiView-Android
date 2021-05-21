@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.SurfaceView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.preference.PreferenceManager;
 
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
@@ -39,13 +40,13 @@ public class VideoReaderExoplayer {
         private boolean zoomedIn;
         private SharedPreferences sharedPreferences;
         private PerformancePreset performancePreset = PerformancePreset.getPreset(PerformancePreset.PresetType.DEFAULT);
-        private static final String VideoZoomedIn = "VideoZoomedIn";
+        static final String VideoZoomedIn = "VideoZoomedIn";
 
         VideoReaderExoplayer(SurfaceView videoSurface, OverlayView overlayView, Context c) {
             surfaceView = videoSurface;
             this.overlayView = overlayView;
             context = c;
-            sharedPreferences = context.getSharedPreferences("DigiView", Context.MODE_PRIVATE);
+            sharedPreferences = PreferenceManager.getDefaultSharedPreferences(c);
         }
 
         VideoReaderExoplayer(SurfaceView videoSurface, OverlayView overlayView, Context c, PerformancePreset p) {

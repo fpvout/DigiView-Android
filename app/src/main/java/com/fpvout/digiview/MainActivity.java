@@ -258,18 +258,16 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         super.onActivityResult(requestCode, resultCode, data);
 
         SharedPreferences preferences = getApplicationContext().getSharedPreferences("com.fpvout.digiview", Context.MODE_PRIVATE);
-        boolean dataCollectionAccepted= preferences.getBoolean("dataCollectionAccepted", false);
+        boolean dataCollectionAccepted = preferences.getBoolean("dataCollectionAccepted", false);
 
         if (requestCode == 1) { // Data Collection agreement Activity
-            if(resultCode == RESULT_OK && dataCollectionAccepted){
-                SentryAndroid.init(this, options -> {
-                    options.setBeforeSend((event, hint) -> {
-                        if (SentryLevel.DEBUG.equals(event.getLevel()))
-                            return null;
-                        else
-                            return event;
-                    });
-                });
+            if (resultCode == RESULT_OK && dataCollectionAccepted) {
+                SentryAndroid.init(this, options -> options.setBeforeSend((event, hint) -> {
+                    if (SentryLevel.DEBUG.equals(event.getLevel()))
+                        return null;
+                    else
+                        return event;
+                }));
             }
 
         }
@@ -277,22 +275,18 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
 
     private void checkDataCollectionAgreement() {
         SharedPreferences preferences = getApplicationContext().getSharedPreferences("com.fpvout.digiview", Context.MODE_PRIVATE);
-        boolean dataCollectionAccepted= preferences.getBoolean("dataCollectionAccepted", false);
+        boolean dataCollectionAccepted = preferences.getBoolean("dataCollectionAccepted", false);
         boolean dataCollectionReplied = preferences.getBoolean("dataCollectionReplied", false);
         if (!dataCollectionReplied) {
             Intent intent = new Intent(this, DataCollectionAgreementPopupActivity.class);
             startActivityForResult(intent, 1);
-        } else if(dataCollectionAccepted){
-            SentryAndroid.init(this, options -> {
-                // Add a callback that will be used before the event is sent to Sentry.
-                // With this callback, you can modify the event or, when returning null, also discard the event.
-                options.setBeforeSend((event, hint) -> {
-                    if (SentryLevel.DEBUG.equals(event.getLevel()))
-                        return null;
-                    else
-                        return event;
-                });
-            });
+        } else if (dataCollectionAccepted) {
+            SentryAndroid.init(this, options -> options.setBeforeSend((event, hint) -> {
+                if (SentryLevel.DEBUG.equals(event.getLevel()))
+                    return null;
+                else
+                    return event;
+            }));
         }
 
     }

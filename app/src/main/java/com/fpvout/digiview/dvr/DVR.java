@@ -32,6 +32,7 @@ import java.io.OutputStream;
 import java.util.Date;
 
 import androidx.core.app.ActivityCompat;
+import usb.AndroidUSBOutputStream;
 
 public class DVR {
     private static final int WRITE_EXTERNAL_STORAGE = 0;
@@ -48,6 +49,7 @@ public class DVR {
     private VideoReaderExoplayer _mPlayer;
     private File dvrTmpFile;
     private String fileName;
+    private AndroidUSBOutputStream dvrOutputStream;
 
     DVR(Activity activity,  boolean recordAmbientAudio){
         _activity = activity;
@@ -77,12 +79,9 @@ public class DVR {
         if (isRecording()) {
             try {
                 if (dvrTmpFile != null) {
-                    FileOutputStream dvrOutputStream = new FileOutputStream(dvrTmpFile);
                     dvrOutputStream.write(buffer, offset, readLength);
-                    dvrOutputStream.flush();
-                    dvrOutputStream.close();
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -109,7 +108,6 @@ public class DVR {
                 }
 
                 dvrTmpFile = new File(_videoFile);
-
                 if (_recordAmbientAudio) {
                     Log.d(DVR_LOG_TAG, "starting abient recording ...");
                     _recorder.setOutputFile(_ambietAudio);

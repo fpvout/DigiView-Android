@@ -77,6 +77,18 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
             actionBar.hide();
         }
 
+        findViewById(R.id.recordbt).setOnClickListener(view -> {
+            if (recorder != null) {
+                if (recorder.isRecording()) {
+                    recorder.stop();
+                } else {
+                    recorder.start();
+                }
+            } else {
+
+            }
+        });
+
         // Prevent screen from sleeping
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
@@ -324,14 +336,6 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         usbConnected = true;
         // Init DVR recorder
         recorder = DVR.getInstance(this, true);
-        findViewById(R.id.recordbt).setOnClickListener(view -> {
-            if (recorder.isRecording()) {
-                recorder.stop();
-            } else {
-                recorder.start();
-            }
-        });
-
         try {
             recorder.init(mVideoReader);
         } catch (IOException e) {

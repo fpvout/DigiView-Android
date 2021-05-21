@@ -5,11 +5,11 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
+import android.preference.PreferenceManager;
 import android.os.Message;
 import android.util.Log;
 import android.view.SurfaceView;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.preference.PreferenceManager;
 
 import com.fpvout.digiview.dvr.DVR;
 import com.google.android.exoplayer2.C;

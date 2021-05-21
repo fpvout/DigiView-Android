@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.os.Handler;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -23,13 +24,13 @@ import android.view.WindowManager;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.preference.PreferenceManager;
+import io.sentry.SentryLevel;
+import io.sentry.android.core.SentryAndroid;
+
 import com.fpvout.digiview.dvr.DVR;
 import java.io.IOException;
 import java.util.HashMap;
 
-import io.sentry.SentryLevel;
-import io.sentry.android.core.SentryAndroid;
 
 import static com.fpvout.digiview.VideoReaderExoplayer.VideoZoomedIn;
 
@@ -41,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     private int shortAnimationDuration;
     private float buttonAlpha = 1;
     private View settingsButton;
+    private View recordButton;
     private View watermarkView;
     private OverlayView overlayView;
     PendingIntent permissionIntent;
@@ -114,6 +116,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
                 v.getContext().startActivity(intent);
             }
         });
+        recordButton = findViewById(R.id.recordbt);
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -140,7 +143,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onSingleTapConfirmed(MotionEvent e) {
-                toggleSettingsButton();
+                toggleButton();
                 return super.onSingleTapConfirmed(e);
             }
 
@@ -165,7 +168,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         watermarkView.setVisibility(View.GONE);
 
         mUsbMaskConnection = new UsbMaskConnection();
-        mVideoReader = new VideoReaderExoplayer(fpvView, overlayView, this, recorder);
+        mVideoReader = new VideoReaderExoplayer(fpvView, overlayView, this);
 
         if (!usbConnected) {
             if (searchDevice()) {
@@ -256,11 +259,11 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         }
     }
 
-    private void toggleSettingsButton() {
+    private void toggleButton() {
         if (buttonAlpha == 1 && overlayView.getVisibility() == View.VISIBLE) return;
-
         // cancel any pending delayed animations first
         cancelButtonAnimation();
+        recordButton.getHandler().removeCallbacksAndMessages(null);
 
         if (buttonAlpha == 1) {
             buttonAlpha = 0;
@@ -277,6 +280,10 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
                         autoHideSettingsButton();
                     }
                 });
+
+        recordButton.animate()
+                .alpha(buttonAlpha)
+                .setDuration(shortAnimationDuration);
     }
 
     private void autoHideSettingsButton() {
@@ -288,6 +295,16 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
             public void run() {
                 buttonAlpha = 0;
                 settingsButton.animate()
+                        .alpha(0)
+                        .setDuration(shortAnimationDuration);
+            }
+        }, 3000);
+
+        recordButton.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                buttonAlpha = 0;
+                recordButton.animate()
                         .alpha(0)
                         .setDuration(shortAnimationDuration);
             }
@@ -377,15 +394,10 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         }
 
         settingsButton.setAlpha(1);
+        recordButton.setAlpha(1);
         autoHideSettingsButton();
         updateWatermark();
         updateVideoZoom();
-
-        try {
-            recorder.init();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     private boolean onVideoReaderEvent(VideoReaderExoplayer.VideoReaderEventMessageCode m) {

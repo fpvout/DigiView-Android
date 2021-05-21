@@ -40,8 +40,6 @@
     <string name="copyright">Copyright</string>
     <string name="open_source_license">Open-Source License</string>
     <string name="open_source_license_summary">MIT License</string>
-
-    <string name="app_name">DigiView</string>
     <string name="connectButtonText">Connect</string>
     <string name="recording_started">recording started</string>
     <string name="recording_stopped">recording stopped</string>

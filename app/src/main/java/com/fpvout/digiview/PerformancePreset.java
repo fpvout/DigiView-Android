@@ -35,10 +35,10 @@ public class PerformancePreset {
         BUFFERED_INPUT_STREAM
     }
 
-    static PerformancePreset getPreset(PresetType p){
-        switch(p){
+    static PerformancePreset getPreset(PresetType p) {
+        switch (p) {
             case CONSERVATIVE:
-                return new PerformancePreset(131072,14000,500,2000,34,34, DataSourceType.INPUT_STREAM);
+                return new PerformancePreset(131072, 14000, 500, 2000, 34, 34, DataSourceType.INPUT_STREAM);
             case AGGRESSIVE:
                 return new PerformancePreset(131072, 7000, 50, 2000, 17, 17, DataSourceType.INPUT_STREAM);
             case LEGACY:
@@ -46,6 +46,20 @@ public class PerformancePreset {
             case DEFAULT:
             default:
                 return new PerformancePreset(131072, 10000, 500, 2000, 17, 17, DataSourceType.INPUT_STREAM);
+        }
+    }
+
+    static PerformancePreset getPreset(String p) {
+        switch (p) {
+            case "conservative":
+                return getPreset(PresetType.CONSERVATIVE);
+            case "aggressive":
+                return getPreset(PresetType.AGGRESSIVE);
+            case "legacy":
+                return getPreset(PresetType.LEGACY);
+            case "default":
+            default:
+                return getPreset(PresetType.DEFAULT);
         }
     }
 

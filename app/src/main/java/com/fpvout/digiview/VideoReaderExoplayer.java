@@ -32,15 +32,16 @@ import usb.AndroidUSBInputStream;
 public class VideoReaderExoplayer {
         private static final String TAG = "DIGIVIEW";
         private SimpleExoPlayer mPlayer;
-        private SurfaceView surfaceView;
-        private final OverlayView overlayView;
-        private Context context;
-        private AndroidUSBInputStream inputStream;
+    static final String VideoPreset = "VideoPreset";
+    private final OverlayView overlayView;
+    private final SurfaceView surfaceView;
+    private AndroidUSBInputStream inputStream;
         private UsbMaskConnection mUsbMaskConnection;
-        private boolean zoomedIn;
-        private SharedPreferences sharedPreferences;
-        private PerformancePreset performancePreset = PerformancePreset.getPreset(PerformancePreset.PresetType.DEFAULT);
-        static final String VideoZoomedIn = "VideoZoomedIn";
+    private boolean zoomedIn;
+    private final Context context;
+    private PerformancePreset performancePreset = PerformancePreset.getPreset(PerformancePreset.PresetType.DEFAULT);
+    static final String VideoZoomedIn = "VideoZoomedIn";
+    private final SharedPreferences sharedPreferences;
 
         VideoReaderExoplayer(SurfaceView videoSurface, OverlayView overlayView, Context c) {
             surfaceView = videoSurface;
@@ -61,6 +62,7 @@ public class VideoReaderExoplayer {
 
         public void start() {
             zoomedIn = sharedPreferences.getBoolean(VideoZoomedIn, true);
+            performancePreset = PerformancePreset.getPreset(sharedPreferences.getString(VideoPreset, "default"));
 
             DefaultLoadControl loadControl = new DefaultLoadControl.Builder().setBufferDurationsMs(performancePreset.exoPlayerMinBufferMs, performancePreset.exoPlayerMaxBufferMs, performancePreset.exoPlayerBufferForPlaybackMs, performancePreset.exoPlayerBufferForPlaybackAfterRebufferMs).build();
             mPlayer = new SimpleExoPlayer.Builder(context).setLoadControl(loadControl).build();
@@ -175,10 +177,5 @@ public class VideoReaderExoplayer {
         public void stop() {
             if (mPlayer != null)
                 mPlayer.release();
-        }
-
-        public void setPerformancePreset(PerformancePreset p){
-            performancePreset = p;
-            restart();
         }
 }

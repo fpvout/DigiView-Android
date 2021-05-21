@@ -39,7 +39,6 @@ public class DataCollectionAgreementPopupActivity extends AppCompatActivity {
         finish();
     }
 
-    // NOTE: Here you would call your api to save the status
     private void confirmDataCollection() {
         preferences.edit()
                 .putBoolean("dataCollectionAccepted", true)

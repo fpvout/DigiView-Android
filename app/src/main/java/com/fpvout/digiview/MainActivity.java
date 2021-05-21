@@ -25,6 +25,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.HashMap;
 
+import io.sentry.SentryLevel;
+import io.sentry.android.core.SentryAndroid;
+
 public class MainActivity extends AppCompatActivity implements UsbDeviceListener {
     private static final String ACTION_USB_PERMISSION = "com.fpvout.digiview.USB_PERMISSION";
     private static final String TAG = "DIGIVIEW";
@@ -273,7 +276,16 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
             Intent intent = new Intent(this, DataCollectionAgreementPopupActivity.class);
             startActivityForResult(intent, 1);
         } else if(dataCollectionAccepted){
-            Log.d(TAG, "init Sentry here");
+            SentryAndroid.init(this, options -> {
+                // Add a callback that will be used before the event is sent to Sentry.
+                // With this callback, you can modify the event or, when returning null, also discard the event.
+                options.setBeforeSend((event, hint) -> {
+                    if (SentryLevel.DEBUG.equals(event.getLevel()))
+                        return null;
+                    else
+                        return event;
+                });
+            });
         }
 
     }

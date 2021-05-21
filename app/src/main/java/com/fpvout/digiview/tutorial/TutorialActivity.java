@@ -20,7 +20,8 @@ public class TutorialActivity extends AppCompatActivity {
             new WelcomeFragment(),
             new GogglesFragment(),
             new DroneFragment(),
-            new PlugUsbFragment()
+            new PlugUsbFragment(),
+            new GesturesFragment()
     };
     private int currentFragmentIndex = 0;
 

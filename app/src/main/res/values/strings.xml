@@ -1,10 +1,4 @@
 <resources>
-    <string name="tutorial_welcome_text">Welcome to DigiView! This app allows you to display the video feed of your DJI FPV Goggles V1 &amp; V2 on your phone.</string>
-    <string name="tutorial_power_up_goggles">1.) Power up your goggles</string>
-    <string name="tutorial_power_up_drone">2.) Power up your drone</string>
-    <string name="tutorial_plug_in_usb">3.) Connect goggles and phone using an USB cable</string>
-    <string name="tutorial_auto_temp_control">You might need to disable "automatic temp control" on your Air Unit/Vista. (in goggle menu: Settings > Device)</string>
-    <string name="tutorial_usb_otg_enable">You may need to activate USB OTG in your Android settings.</string>
     <string name="app_name" translatable="false">DigiView</string>
     <string name="digiview_feed">DigiView\nfeed</string>
     <string name="waiting_for_usb_device">Waiting for USB device…</string>
@@ -12,4 +6,12 @@
     <string name="usb_device_detached_waiting">USB device detached\n\nWaiting for USB device…</string>
     <string name="usb_device_found">USB device found.</string>
     <string name="waiting_for_video">Waiting for video…</string>
+    <string name="tutorial_welcome_text">Welcome to DigiView! This app allows you to display the video feed of your DJI FPV Goggles V1 &amp; V2 on your phone.</string>
+    <string name="tutorial_power_up_goggles">1.) Power up your goggles</string>
+    <string name="tutorial_power_up_drone">2.) Power up your drone</string>
+    <string name="tutorial_plug_in_usb">3.) Connect goggles and phone using an USB cable</string>
+    <string name="tutorial_auto_temp_control">You might need to disable "automatic temp control" on your Air Unit/Vista. (in goggle menu: Settings > Device)</string>
+    <string name="tutorial_usb_otg_enable">You may need to activate USB OTG in your Android settings.</string>
+    <string name="tutorial_touch_gestures">4.) Using touch gestures</string>
+    <string name="tutorial_touch_gestures_explained">- Tap on screen to toggle menu overlay.\n - Pinch in/out to toggle between original- and cropped-view.</string>
 </resources>

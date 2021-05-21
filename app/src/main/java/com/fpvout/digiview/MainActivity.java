@@ -262,7 +262,14 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
 
         if (requestCode == 1) { // Data Collection agreement Activity
             if(resultCode == RESULT_OK && dataCollectionAccepted){
-                Log.d(TAG, "init Sentry here");
+                SentryAndroid.init(this, options -> {
+                    options.setBeforeSend((event, hint) -> {
+                        if (SentryLevel.DEBUG.equals(event.getLevel()))
+                            return null;
+                        else
+                            return event;
+                    });
+                });
             }
 
         }

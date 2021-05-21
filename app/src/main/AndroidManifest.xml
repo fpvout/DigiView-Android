@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.fpvout.digiview">
 
     <uses-feature android:name="android.hardware.usb.host" />
@@ -13,7 +14,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Digiview"
         >
-
+        <activity
+            android:name=".DataCollectionAgreementPopupActivity"
+            android:label="@string/title_activity_data_collection"
+            android:theme="@style/Theme.AppCompat.Dialog"></activity>
         <activity
             android:launchMode="singleTask"
             android:name="com.fpvout.digiview.MainActivity"
@@ -36,6 +40,12 @@
             <meta-data android:name="android.hardware.usb.action.USB_DEVICE_DETACHED"
                 android:resource="@xml/device_filter" />
         </activity>
+        <meta-data android:name="io.sentry.dsn" android:value="https://df6168678f2e4107abe5abb40cf3e648@o660067.ingest.sentry.io/5764247" />
+        <meta-data android:name="io.sentry.auto-init" android:value="false" />
+        <provider
+            android:name="io.sentry.android.core.SentryInitProvider"
+            android:authorities="com.fpvout.digiview.SentryInitProvider"
+            tools:node="remove" />
     </application>
 
 </manifest>

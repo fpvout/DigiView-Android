@@ -6,4 +6,9 @@
     <string name="usb_device_detached_waiting">USB Gerät getrennt\n\nWarte auf USB Gerät…</string>
     <string name="usb_device_found">USB Gerät gefunden.</string>
     <string name="waiting_for_video">Warte auf Video…</string>
+    <string name="title_activity_data_collection">Data Collection Agreement</string>
+    <string name="data_collection_header" >Report crash data to the DigiView team?</string>
+    <string name="data_collection_text">This app will probably crash less than your drone.\n Even though, if a crash occur we would like to know !\n\nWe use Sentry to track bugs and to make this app better.</string>
+    <string name="data_collection_agree_button">Agree</string>
+    <string name="data_collection_deny_button">Deny</string>
 </resources>

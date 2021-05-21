@@ -13,5 +13,5 @@
     <string name="tutorial_auto_temp_control">You might need to disable "automatic temp control" on your Air Unit/Vista. (in goggle menu: Settings > Device)</string>
     <string name="tutorial_usb_otg_enable">You may need to activate USB OTG in your Android settings.</string>
     <string name="tutorial_touch_gestures">4.) Using touch gestures</string>
-    <string name="tutorial_touch_gestures_explained">- Tap on screen to toggle menu overlay.\n - Pinch in/out to toggle between original- and cropped-view.</string>
+    <string name="tutorial_touch_gestures_explained">- Tap on screen to toggle menu overlay.\n- Pinch in/out to toggle between original- and cropped-view.</string>
 </resources>

@@ -96,7 +96,7 @@ public class VideoReaderExoplayer {
                     switch (error.type) {
                         case ExoPlaybackException.TYPE_SOURCE:
                             Log.e(TAG, "PLAYER_SOURCE - TYPE_SOURCE: " + error.getSourceException().getMessage());
-                            overlayView.showOverlay(R.string.waiting_for_video, OverlayStatus.Connected);
+                            overlayView.show(R.string.waiting_for_video, OverlayStatus.Connected);
                             (new Handler(Looper.getMainLooper())).postDelayed(() -> {
                                 restart();
                             }, 1000);
@@ -108,7 +108,7 @@ public class VideoReaderExoplayer {
                 public void onPlaybackStateChanged(int state) {
                     if (state == Player.STATE_ENDED) {
                         Log.d(TAG, "PLAYER_STATE - ENDED");
-                        overlayView.showOverlay(R.string.waiting_for_video, OverlayStatus.Connected);
+                        overlayView.show(R.string.waiting_for_video, OverlayStatus.Connected);
                         (new Handler(Looper.getMainLooper())).postDelayed(() -> {
                             restart();
                         }, 1000);

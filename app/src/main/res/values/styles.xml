@@ -22,6 +22,6 @@
         <item name="android:shadowColor">@color/shadow</item>
         <item name="android:shadowDx">0</item>
         <item name="android:shadowDy">0</item>
-        <item name="android:shadowRadius">20</item>
+        <item name="android:shadowRadius">12</item>
     </style>
 </resources>

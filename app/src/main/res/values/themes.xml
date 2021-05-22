@@ -2,7 +2,8 @@
     <!-- Base application theme. -->
     <style name="Theme.Digiview" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/digiview_blue</item>
+        <!-- colorPrimary should be digiview_blue, this is a dirty "fix" for settings top bar. -->
+        <item name="colorPrimary">@color/digiview_purple_variant</item>
         <item name="colorPrimaryVariant">@color/digiview_blue_variant</item>
         <item name="colorOnPrimary">@color/white</item>
         <!-- Secondary brand color. -->

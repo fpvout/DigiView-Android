@@ -1,14 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="digiview_feed">DigiView\nfeed</string>
+    <string name="digiview_feed">DigiView\nseñal</string>
     <string name="waiting_for_usb_device">Esperando dispositivo USB…</string>
     <string name="usb_device_approved">Dispositivo USB aprobado</string>
     <string name="usb_device_detached_waiting">Dispositivo USB desconectado\n\nEsperando dispositivo USB…</string>
     <string name="usb_device_found">Dispositivo USB encontrado.</string>
     <string name="waiting_for_video">Esperando video…</string>
-    <string name="title_activity_data_collection">Data Collection Agreement</string>
-    <string name="data_collection_header" >Report crash data to the DigiView team?</string>
-    <string name="data_collection_text">This app will probably crash less than your drone.\n Even though, if a crash occur we would like to know !\n\nWe use Sentry to track bugs and to make this app better.</string>
-    <string name="data_collection_agree_button">Agree</string>
-    <string name="data_collection_deny_button">Deny</string>
+    <string name="title_activity_data_collection">Acuerdo de recopilacion de datos</string>
+    <string name="data_collection_header">¿Enviar datos de fallos al equipo de DigiView?</string>
+    <string name="data_collection_text">Esta aplicacion probablemente fallara menos que tu dron. \n ¡Aunque, si ocurre un bloqueo, nos gustaria saberlo! \n \nUtilizamos Sentry para rastrear errores y mejorar esta aplicacion.</string>
+    <string name="data_collection_agree_button">Aceptar</string>
+    <string name="data_collection_deny_button">Rechazar</string>
+    <string name="title_activity_settings">Ajustes</string>
+
+    <!-- Settings -->
+    <string name="performance">Rendimiento</string>
+    <string name="privacy">Privacidad</string>
+    <string name="video_preset">Video Preestablecido</string>
+    <string name="video_preset_default">Defecto</string>
+    <string name="video_preset_conservative">Conservador</string>
+    <string name="video_preset_aggressive">Agresivo</string>
+    <string name="video_preset_legacy">Legacy</string>
+    <string name="enable_analytics">Habilitar analitica</string>
+    <string name="enable_analytics_summary">Esta aplicacion probablemente fallara menos que tu dron, pero si lo hace, ¡nos gustaria saberlo para poder solucionarlo!</string>
+    <string name="privacy_policy">Politica de privacidad</string>
+    <string name="privacy_policy_summary">Vea que datos recopilamos y como los usamos</string>
+    <string name="video_player">Reproductor de video</string>
+    <string name="full_screen">Pantall completa</string>
+    <string name="full_screen_summary">También se puede alternar tocando dos veces o pellizcando el reproductor de video.</string>
+    <string name="show_watermark">Muestra marca de agua de DigiView</string>
+    <string name="links">Enlaces</string>
+    <string name="our_website">Nuestro sitio web</string>
+    <string name="discord_summary">Chatea con nosotros y otros usuarios de DigiView</string>
+    <string name="digiview_web_app">DigiView Web App</string>
+    <string name="digiview_web_app_summary">Funciona en Chrome y navegadores basados ​​en Chrome, ¡incluso en Android!</string>
+    <string name="github_summary">Todo nuestro codigo es open source</string>
+    <string name="about">Sobre la app</string>
+    <string name="app_Version">Version de la App</string>
+    <string name="copyright">Copyright</string>
+    <string name="open_source_license">Licencia Open-Source</string>
+    <string name="open_source_license_summary">Licencia MIT</string>
 </resources>

@@ -33,7 +33,7 @@
     <string name="our_website">我们的网站</string>
     <string name="discord_summary">与我们和其他 DigiView 用户聊天</string>
     <string name="digiview_web_app">DigiView Web应用</string>
-    <string name="digiview_web_app_summary">可以在Chrome和基于Chrome的浏览器中使用，甚至可以在Android上使用！</string>
+    <string name="digiview_web_app_summary">可以在Chrome以及基于Chromium核心的浏览器中使用，甚至可以在Android上运行！</string>
     <string name="github_summary">我们所有的代码都是开源的</string>
     <string name="about">关于</string>
     <string name="app_Version">应用程序版本</string>

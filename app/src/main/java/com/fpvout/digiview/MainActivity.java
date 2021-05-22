@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
             if (searchDevice()) {
                 connect();
             } else {
-                overlayView.showOpaque(R.string.waiting_for_usb_device, OverlayStatus.Disconnected);
+                overlayView.showOpaque(R.string.waiting_for_usb_device, OverlayStatus.Connected);
             }
         }
     }
@@ -275,7 +275,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
                 Log.d(TAG, "APP - On Resume usbDevice device found");
                 connect();
             } else {
-                overlayView.showOpaque(R.string.waiting_for_usb_device, OverlayStatus.Disconnected);
+                overlayView.showOpaque(R.string.waiting_for_usb_device, OverlayStatus.Connected);
             }
         }
 

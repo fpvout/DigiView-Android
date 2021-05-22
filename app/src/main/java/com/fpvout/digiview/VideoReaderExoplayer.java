@@ -96,7 +96,8 @@ public class VideoReaderExoplayer {
                     switch (error.type) {
                         case ExoPlaybackException.TYPE_SOURCE:
                             Log.e(TAG, "PLAYER_SOURCE - TYPE_SOURCE: " + error.getSourceException().getMessage());
-                            overlayView.show(R.string.waiting_for_video, OverlayStatus.Connected);
+                            overlayView.show(R.string.waiting_for_video, OverlayStatus.Error);
+                            // TODO: let MainActivity know so it can hide watermark/show settings button
                             (new Handler(Looper.getMainLooper())).postDelayed(() -> {
                                 restart();
                             }, 1000);
@@ -109,12 +110,14 @@ public class VideoReaderExoplayer {
                     if (state == Player.STATE_ENDED) {
                         Log.d(TAG, "PLAYER_STATE - ENDED");
                         overlayView.show(R.string.waiting_for_video, OverlayStatus.Connected);
+                        // TODO: let MainActivity know so it can hide watermark/show settings button
                         (new Handler(Looper.getMainLooper())).postDelayed(() -> {
                             restart();
                         }, 1000);
 
                     }else if(state == Player.STATE_READY){
                         overlayView.hide();
+                        // TODO: let MainActivity know so it can show watermark/auto-hide settings button
                     }
                 }
             });

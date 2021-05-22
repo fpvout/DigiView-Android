@@ -1,19 +1,17 @@
 package com.fpvout.digiview;
 
+import androidx.annotation.NonNull;
+
 public class PerformancePreset {
-    int h264ReaderMaxSyncFrameSize = 131072;
-    int h264ReaderSampleTime = 10000;
-    int exoPlayerMinBufferMs = 500;
-    int exoPlayerMaxBufferMs = 2000;
-    int exoPlayerBufferForPlaybackMs = 17;
-    int exoPlayerBufferForPlaybackAfterRebufferMs = 17;
-    DataSourceType dataSourceType = DataSourceType.INPUT_STREAM;
+    int h264ReaderMaxSyncFrameSize;
+    int h264ReaderSampleTime;
+    int exoPlayerMinBufferMs;
+    int exoPlayerMaxBufferMs;
+    int exoPlayerBufferForPlaybackMs;
+    int exoPlayerBufferForPlaybackAfterRebufferMs;
+    DataSourceType dataSourceType;
 
-    private PerformancePreset(){
-
-    }
-
-    private PerformancePreset(int mH264ReaderMaxSyncFrameSize, int mH264ReaderSampleTime, int mExoPlayerMinBufferMs, int mExoPlayerMaxBufferMs, int mExoPlayerBufferForPlaybackMs, int mExoPlayerBufferForPlaybackAfterRebufferMs, DataSourceType mDataSourceType){
+    private PerformancePreset(int mH264ReaderMaxSyncFrameSize, int mH264ReaderSampleTime, int mExoPlayerMinBufferMs, int mExoPlayerMaxBufferMs, int mExoPlayerBufferForPlaybackMs, int mExoPlayerBufferForPlaybackAfterRebufferMs, DataSourceType mDataSourceType) {
         h264ReaderMaxSyncFrameSize = mH264ReaderMaxSyncFrameSize;
         h264ReaderSampleTime = mH264ReaderSampleTime;
         exoPlayerMinBufferMs = mExoPlayerMinBufferMs;
@@ -63,7 +61,9 @@ public class PerformancePreset {
         }
     }
 
+
     @Override
+    @NonNull
     public String toString() {
         return "PerformancePreset{" +
                 "h264ReaderMaxSyncFrameSize=" + h264ReaderMaxSyncFrameSize +

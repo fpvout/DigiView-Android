@@ -1,6 +1,5 @@
 package com.fpvout.digiview;
 
-import android.content.Context;
 import android.net.Uri;
 
 import com.google.android.exoplayer2.C;
@@ -19,8 +18,7 @@ public class InputStreamBufferedDataSource implements DataSource {
     private static final String ERROR_THREAD_NOT_INITIALIZED = "Read thread not initialized, call first 'startReadThread()'";
     private static final long READ_TIMEOUT = 200;
 
-    private Context context;
-    private DataSpec dataSpec;
+    private final DataSpec dataSpec;
     private InputStream inputStream;
     private long bytesRemaining;
     private boolean opened;
@@ -30,8 +28,7 @@ public class InputStreamBufferedDataSource implements DataSource {
     private boolean working;
 
 
-    public InputStreamBufferedDataSource(Context context, DataSpec dataSpec, InputStream inputStream) {
-        this.context = context;
+    public InputStreamBufferedDataSource(DataSpec dataSpec, InputStream inputStream) {
         this.dataSpec = dataSpec;
         this.inputStream = inputStream;
         startReadThread();

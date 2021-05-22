@@ -14,7 +14,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Digiview">
-        <activity android:name=".tutorial.TutorialActivity"></activity>
+        <activity android:name=".tutorial.TutorialActivity">
+            <intent-filter>
+                <action android:name="digiview.start.tutorial.activity"/>
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".DataCollectionAgreementPopupActivity"
             android:label="@string/title_activity_data_collection"

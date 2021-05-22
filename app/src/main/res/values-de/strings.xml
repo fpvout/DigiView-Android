@@ -6,6 +6,8 @@
     <string name="usb_device_detached_waiting">USB Gerät getrennt\n\nWarte auf USB Gerät…</string>
     <string name="usb_device_found">USB Gerät gefunden.</string>
     <string name="waiting_for_video">Warte auf Video…</string>
+    <string name="tutorial_title">Tutorial</string>
+    <string name="tutorial_preference_title">Schau dir das Tutorial erneut an.</string>
     <string name="tutorial_welcome_text">Willkommen zu DigiView! Diese App ermöglicht es dir den Videofeed deiner DJI FPV Brille V1 &amp; V2 auf deinem Smartphone abzuspielen.</string>
     <string name="tutorial_power_up_goggles">1.) Starte deine FPV Brille</string>
     <string name="tutorial_power_up_drone">2.) Starte deine Drohne</string>

@@ -51,7 +51,7 @@ public class TutorialActivity extends AppCompatActivity {
             currentFragmentIndex++;
             showFragment(false);
         } else {
-            // TODO Handle tutorial finished
+            // Just quit the activity
             finish();
         }
     }

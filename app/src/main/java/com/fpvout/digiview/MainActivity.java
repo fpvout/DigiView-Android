@@ -121,6 +121,9 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
                 overlayView.showOpaque(R.string.waiting_for_usb_device, OverlayStatus.Disconnected);
             }
         }
+
+        // This only launches the tutorial at first start
+        launchTutorialActivity();
     }
 
     private void setupGestureDetectors() {
@@ -319,25 +322,23 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
 
     /**
      * Method to launch the TutorialActivity. The method automatically detects if this
-     * is the first launch using SharedPreferences. The always param can be used
-     * to start the tutorial from some menu icons or the settings.
-     *
-     * @param always Launches the TutorialActivity even it is not the first start if true.
+     * is the first launch using SharedPreferences. So, this method should be called at
+     * every start but only launches the TutorialActivity at first start.
      */
-    private void launchTutorialActivity(boolean always) {
+    private void launchTutorialActivity() {
         // Constants, maybe move to global variables
         final String SHARED_PREFERENCES = "digi_view_preferences";
-        final String FIRST_LAUNCH = "first_launch";
+        final String TUTORIAL_SHOWN = "tutorial_shown";
 
         // SharedPreference instant, maybe use global one
         SharedPreferences preferences = getSharedPreferences(SHARED_PREFERENCES, MODE_PRIVATE);
 
-        boolean firstLaunch = preferences.getBoolean(FIRST_LAUNCH, true);
+        boolean tutorialShown = preferences.getBoolean(TUTORIAL_SHOWN, false);
 
-        if (firstLaunch || always) {
+        if (!tutorialShown) {
             startActivity(new Intent(MainActivity.this, TutorialActivity.class));
             // Save that tutorial was shown before
-            preferences.edit().putBoolean(FIRST_LAUNCH, false).apply();
+            preferences.edit().putBoolean(TUTORIAL_SHOWN, true).apply();
         }
     }
   

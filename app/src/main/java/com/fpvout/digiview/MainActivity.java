@@ -1,5 +1,6 @@
 package com.fpvout.digiview;
 
+import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.LayoutTransition;
@@ -8,8 +9,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.os.Handler;
@@ -21,9 +24,12 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import io.sentry.SentryLevel;
 import io.sentry.android.core.SentryAndroid;
 
@@ -79,7 +85,8 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
             actionBar.hide();
         }
 
-        findViewById(R.id.recordbt).setOnClickListener(view -> {
+        recordButton = findViewById(R.id.recordbt);
+        recordButton.setOnClickListener(view -> {
             if (recorder != null) {
                 if (recorder.isRecording()) {
                     recorder.stop();
@@ -87,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
                     recorder.start();
                 }
             } else {
-
+                Toast.makeText(this, this.getText(R.string.no_dvr_video), Toast.LENGTH_LONG).show();
             }
         });
 
@@ -116,7 +123,6 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
                 v.getContext().startActivity(intent);
             }
         });
-        recordButton = findViewById(R.id.recordbt);
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -384,6 +390,20 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
             actionBar.hide();
         }
 
+
+        settingsButton.setAlpha(1);
+        recordButton.setAlpha(1);
+        autoHideSettingsButton();
+        updateWatermark();
+        updateVideoZoom();
+
+        if(checkStoragePermission()){
+            // permission already granted
+            finishStartup();
+        }
+    }
+
+    private void finishStartup(){
         if (!usbConnected) {
             if (searchDevice()) {
                 Log.d(TAG, "APP - On Resume usbDevice device found");
@@ -392,12 +412,39 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
                 showOverlay(R.string.waiting_for_usb_device, OverlayStatus.Connected);
             }
         }
+    }
 
-        settingsButton.setAlpha(1);
-        recordButton.setAlpha(1);
-        autoHideSettingsButton();
-        updateWatermark();
-        updateVideoZoom();
+    private boolean checkStoragePermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_GRANTED &&
+                    checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_GRANTED &&
+                    checkSelfPermission(Manifest.permission.RECORD_AUDIO)
+                            == PackageManager.PERMISSION_GRANTED) {
+                return true;
+
+            }else{
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO, Manifest.permission.CAMERA }, 1);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if(requestCode == 1){
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                finishStartup();
+            }
+            else {
+                overlayView.showOpaque("Storage access is required.", OverlayStatus.Error);
+            }
+        }
     }
 
     private boolean onVideoReaderEvent(VideoReaderExoplayer.VideoReaderEventMessageCode m) {
@@ -491,5 +538,4 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         }
 
     }
-
 }

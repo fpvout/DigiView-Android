@@ -77,7 +77,10 @@ public class AndroidUSBInputStream extends InputStream {
 			Log.d(TAG, "received buffer empty, sending magic packet again...");
 			usbConnection.bulkTransfer(sendEndPoint, "RMVT".getBytes(), "RMVT".getBytes().length, 2000);
 			receivedBytes = usbConnection.bulkTransfer(receiveEndPoint, buffer, buffer.length, READ_TIMEOUT);
+		} else {
+			this.dvr.recordVideoDVR(buffer,offset , buffer.length);
 		}
+
 		return receivedBytes;
 	}
 

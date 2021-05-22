@@ -11,18 +11,23 @@ import org.jcodec.common.io.SeekableByteChannel;
 import org.jcodec.common.model.Packet;
 import org.jcodec.containers.mp4.muxer.MP4Muxer;
 import org.mp4parser.Container;
-import org.mp4parser.muxer.DataSource;
 import org.mp4parser.muxer.FileDataSourceImpl;
 import org.mp4parser.muxer.Movie;
 import org.mp4parser.muxer.builder.DefaultMp4Builder;
+import org.mp4parser.muxer.container.mp4.MovieCreator;
 import org.mp4parser.muxer.tracks.AACTrackImpl;
-import org.mp4parser.muxer.tracks.h264.H264TrackImpl;
+import org.mp4parser.muxer.tracks.ClippedTrack;
 
+import android.content.Context;
+import android.media.MediaScannerConnection;
 import android.util.Log;
+
+import com.fpvout.digiview.MainActivity;
+
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.channels.FileChannel;
 
 public class Mp4Muxer extends Thread {
 
@@ -30,23 +35,26 @@ public class Mp4Muxer extends Thread {
     private static final long DURATION = 1;
 
     private final File h264Dump;
-    private final File muxerfile;
-    private final String ambientAudioPath;
-    private final String finalDVROutputPath;
+    private final File ambientAudioFile;
+    private final File videoFile;
+    private final File output;
+    private final Context context;
+
 
     SeekableByteChannel file;
     MP4Muxer muxer;
     BufferH264ES es;
 
-    public Mp4Muxer(File h264Dump, String ambientAudioPath, String finalDVROutputPath) {
+    public Mp4Muxer(Context context, File h264Dump, File ambientAudio, File output) {
+        this.context = context;
         this.h264Dump = h264Dump;
-        this.muxerfile = new File(finalDVROutputPath + ".tmp");
-        this.ambientAudioPath = ambientAudioPath;
-        this.finalDVROutputPath = finalDVROutputPath;
+        this.ambientAudioFile = ambientAudio;
+        this.videoFile = new File(output.getAbsolutePath() + ".tmp");
+        this.output = output;
     }
 
     private void init() throws IOException {
-        file = NIOUtils.writableChannel(muxerfile);
+        file = NIOUtils.writableChannel(videoFile);
         muxer = MP4Muxer.createMP4MuxerToChannel(file);
 
         es = new BufferH264ES(NIOUtils.mapFile(h264Dump));
@@ -109,32 +117,29 @@ public class Mp4Muxer extends Thread {
                 frame = nextValidFrame(frame, track);
             }
             muxer.finish();
-
             file.close();
+
+            Movie movie = MovieCreator.build(videoFile.getAbsolutePath());
+            AACTrackImpl aacTrack = new AACTrackImpl(new FileDataSourceImpl(ambientAudioFile));
+            ClippedTrack aacCroppedTrack = new ClippedTrack(aacTrack, 1, aacTrack.getSamples().size());
+            movie.addTrack(aacCroppedTrack);
+
+            Container mp4file = new DefaultMp4Builder().build(movie);
+
+            FileOutputStream fileOutputStream = new FileOutputStream(output);
+            FileChannel fc = fileOutputStream.getChannel();
+            mp4file.writeContainer(fc);
+            fileOutputStream.close();
+
+            // add mp4 to gallery
+            MediaScannerConnection.scanFile(context,
+                    new String[]{output.toString()},
+                    null, null);
+
             // cleanup
             h264Dump.delete();
-
-            try {
-                DataSource videoFile = new FileDataSourceImpl(muxerfile);
-                AACTrackImpl aacTrack = new AACTrackImpl(new FileDataSourceImpl(ambientAudioPath));
-
-                H264TrackImpl h264Track = new H264TrackImpl(videoFile);
-                Movie movie = new Movie();
-                movie.addTrack(h264Track);
-                movie.addTrack(aacTrack);
-
-                Container out = new DefaultMp4Builder().build(movie);
-                FileOutputStream fos = new FileOutputStream(new File(finalDVROutputPath));
-                out.writeContainer(fos.getChannel());
-                fos.close();
-
-                muxerfile.delete();
-                new File(ambientAudioPath).delete();
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            videoFile.delete();
+            ambientAudioFile.delete();
         } catch (IOException exception){
             Log.e("DIGIVIEW", "MUXER: " + exception.getMessage());
         }

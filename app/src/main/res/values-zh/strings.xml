@@ -6,9 +6,9 @@
     <string name="usb_device_detached_waiting">USB设备已断开\n\n等待USB设备…</string>
     <string name="usb_device_found">已发现USB设备.</string>
     <string name="waiting_for_video">等待视频…</string>
-    <string name="title_activity_data_collection">Data Collection Agreement</string>
-    <string name="data_collection_header" >Report crash data to the DigiView team?</string>
-    <string name="data_collection_text">This app will probably crash less than your drone.\n Even though, if a crash occur we would like to know !\n\nWe use Sentry to track bugs and to make this app better.</string>
-    <string name="data_collection_deny_button">Deny</string>
-    <string name="data_collection_agree_button">Agree</string>
+    <string name="title_activity_data_collection">数据收集协议</string>
+    <string name="data_collection_header" >向DigiView团队报告崩溃数据？</string>
+    <string name="data_collection_text">该程序崩溃的次数可能比您炸机次数还少。\n 但即使发生崩溃，我们也想知道！\n\n我们使用Sentry跟踪错误并持续改进此应用程序。</string>
+    <string name="data_collection_deny_button">拒绝</string>
+    <string name="data_collection_agree_button">同意</string>
 </resources>

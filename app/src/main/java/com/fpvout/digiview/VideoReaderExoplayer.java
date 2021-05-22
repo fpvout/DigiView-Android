@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.SurfaceView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.preference.PreferenceManager;
 
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
@@ -18,6 +19,8 @@ import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.extractor.Extractor;
+import com.google.android.exoplayer2.extractor.ExtractorsFactory;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.upstream.DataSource;
@@ -29,20 +32,27 @@ import usb.AndroidUSBInputStream;
 public class VideoReaderExoplayer {
         private static final String TAG = "DIGIVIEW";
         private SimpleExoPlayer mPlayer;
-        private SurfaceView surfaceView;
-        private final OverlayView overlayView;
-        private Context context;
-        private AndroidUSBInputStream inputStream;
+    static final String VideoPreset = "VideoPreset";
+    private final OverlayView overlayView;
+    private final SurfaceView surfaceView;
+    private AndroidUSBInputStream inputStream;
         private UsbMaskConnection mUsbMaskConnection;
-        private boolean zoomedIn;
-        private SharedPreferences sharedPreferences;
-        private static final String VideoZoomedIn = "VideoZoomedIn";
+    private boolean zoomedIn;
+    private final Context context;
+    private PerformancePreset performancePreset = PerformancePreset.getPreset(PerformancePreset.PresetType.DEFAULT);
+    static final String VideoZoomedIn = "VideoZoomedIn";
+    private final SharedPreferences sharedPreferences;
 
         VideoReaderExoplayer(SurfaceView videoSurface, OverlayView overlayView, Context c) {
             surfaceView = videoSurface;
             this.overlayView = overlayView;
             context = c;
-            sharedPreferences = context.getSharedPreferences("DigiView", Context.MODE_PRIVATE);
+            sharedPreferences = PreferenceManager.getDefaultSharedPreferences(c);
+        }
+
+        VideoReaderExoplayer(SurfaceView videoSurface, OverlayView overlayView, Context c, PerformancePreset p) {
+            this(videoSurface,overlayView,c);
+            performancePreset = p;
         }
 
         public void setUsbMaskConnection(UsbMaskConnection connection) {
@@ -52,9 +62,9 @@ public class VideoReaderExoplayer {
 
         public void start() {
             zoomedIn = sharedPreferences.getBoolean(VideoZoomedIn, true);
+            performancePreset = PerformancePreset.getPreset(sharedPreferences.getString(VideoPreset, "default"));
 
-            inputStream.startReadThread();
-            DefaultLoadControl loadControl = new DefaultLoadControl.Builder().setBufferDurationsMs(32 * 1024, 64 * 1024, 0, 0).build();
+            DefaultLoadControl loadControl = new DefaultLoadControl.Builder().setBufferDurationsMs(performancePreset.exoPlayerMinBufferMs, performancePreset.exoPlayerMaxBufferMs, performancePreset.exoPlayerBufferForPlaybackMs, performancePreset.exoPlayerBufferForPlaybackAfterRebufferMs).build();
             mPlayer = new SimpleExoPlayer.Builder(context).setLoadControl(loadControl).build();
             mPlayer.setVideoSurfaceView(surfaceView);
             mPlayer.setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
@@ -62,9 +72,20 @@ public class VideoReaderExoplayer {
 
             DataSpec dataSpec = new DataSpec(Uri.EMPTY, 0, C.LENGTH_UNSET);
 
-            DataSource.Factory dataSourceFactory = () -> (DataSource) new InputStreamDataSource(context, dataSpec, inputStream);
+            Log.d(TAG, "preset: " + performancePreset);
 
-            MediaSource mediaSource = new ProgressiveMediaSource.Factory(dataSourceFactory, H264Extractor.FACTORY).createMediaSource(MediaItem.fromUri(Uri.EMPTY));
+            DataSource.Factory dataSourceFactory = () -> {
+                switch (performancePreset.dataSourceType){
+                    case INPUT_STREAM:
+                        return (DataSource) new InputStreamDataSource(context, dataSpec, inputStream);
+                    case BUFFERED_INPUT_STREAM:
+                    default:
+                        return (DataSource) new InputStreamBufferedDataSource(context, dataSpec, inputStream);
+                }
+            };
+
+            ExtractorsFactory extractorsFactory = () ->new Extractor[] {new H264Extractor(performancePreset.h264ReaderMaxSyncFrameSize, performancePreset.h264ReaderSampleTime)};
+            MediaSource mediaSource = new ProgressiveMediaSource.Factory(dataSourceFactory, extractorsFactory).createMediaSource(MediaItem.fromUri(Uri.EMPTY));
             mPlayer.setMediaSource(mediaSource);
 
             mPlayer.prepare();

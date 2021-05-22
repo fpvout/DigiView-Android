@@ -52,7 +52,7 @@ public class InputStreamDataSource implements DataSource {
 
     @Override
     public int read(byte[] buffer, int offset, int readLength) throws IOException {
-        return inputStream.read(buffer,offset,readLength);
+        return inputStream.read(buffer, offset, readLength);
     }
 
     @Override

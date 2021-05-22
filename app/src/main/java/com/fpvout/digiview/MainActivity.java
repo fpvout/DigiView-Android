@@ -22,10 +22,16 @@ import android.view.WindowManager;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.PreferenceManager;
 
 import com.fpvout.digiview.tutorial.TutorialActivity;
 
 import java.util.HashMap;
+
+import io.sentry.SentryLevel;
+import io.sentry.android.core.SentryAndroid;
+
+import static com.fpvout.digiview.VideoReaderExoplayer.VideoZoomedIn;
 
 public class MainActivity extends AppCompatActivity implements UsbDeviceListener {
     private static final String ACTION_USB_PERMISSION = "com.fpvout.digiview.USB_PERMISSION";
@@ -33,7 +39,8 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     private static final int VENDOR_ID = 11427;
     private static final int PRODUCT_ID = 31;
     private int shortAnimationDuration;
-    private boolean watermarkAnimationInProgress = false;
+    private float buttonAlpha = 1;
+    private View settingsButton;
     private View watermarkView;
     private OverlayView overlayView;
     PendingIntent permissionIntent;
@@ -46,12 +53,17 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     SurfaceView fpvView;
     private GestureDetector gestureDetector;
     private ScaleGestureDetector scaleGestureDetector;
+    private SharedPreferences sharedPreferences;
+    private static final String ShowWatermark = "ShowWatermark";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "APP - On Create");
         setContentView(R.layout.activity_main);
+
+        // check Data Collection agreement
+        checkDataCollectionAgreement();
 
         // Hide top bar and status bar
         View decorView = getWindow().getDecorView();
@@ -83,15 +95,39 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         overlayView = findViewById(R.id.overlayView);
         fpvView = findViewById(R.id.fpvView);
 
-        // Enable resizing animations
-        ((ViewGroup)findViewById(R.id.mainLayout)).getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
+        settingsButton = findViewById(R.id.settingsButton);
+        settingsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(v.getContext(), SettingsActivity.class);
+                v.getContext().startActivity(intent);
+            }
+        });
 
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        // Enable resizing animations
+        ((ViewGroup) findViewById(R.id.mainLayout)).getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
+
+        setupGestureDetectors();
+
+        mUsbMaskConnection = new UsbMaskConnection();
+        mVideoReader = new VideoReaderExoplayer(fpvView, overlayView, this);
+
+        if (!usbConnected) {
+            if (searchDevice()) {
+                connect();
+            } else {
+                overlayView.showOpaque(R.string.waiting_for_usb_device, OverlayStatus.Disconnected);
+            }
+        }
+    }
+
+    private void setupGestureDetectors() {
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onSingleTapConfirmed(MotionEvent e) {
-                if (watermarkView.getVisibility() == View.VISIBLE) {
-                    toggleWatermark();
-                }
+                toggleSettingsButton();
                 return super.onSingleTapConfirmed(e);
             }
 
@@ -112,19 +148,6 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
                 }
             }
         });
-
-        watermarkView.setVisibility(View.GONE);
-
-        mUsbMaskConnection = new UsbMaskConnection();
-        mVideoReader = new VideoReaderExoplayer(fpvView, overlayView, this);
-
-        if (!usbConnected) {
-            if (searchDevice()) {
-                connect();
-            } else {
-                overlayView.showOpaque(R.string.waiting_for_usb_device, OverlayStatus.Disconnected);
-            }
-        }
     }
 
     @Override
@@ -135,26 +158,55 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         return super.onTouchEvent(event);
     }
 
-    private void toggleWatermark() {
-        if (watermarkAnimationInProgress) {
-            return;
+    private void updateWatermark() {
+        if (sharedPreferences.getBoolean(ShowWatermark, true)) {
+            watermarkView.setAlpha(0.3F);
+        } else {
+            watermarkView.setAlpha(0F);
         }
-        watermarkAnimationInProgress = true;
+    }
 
-        float targetAlpha = 0;
-        if (watermarkView.getAlpha() == 0) {
-            targetAlpha = 0.3F;
+    private void updateVideoZoom() {
+        if (sharedPreferences.getBoolean(VideoZoomedIn, true)) {
+            mVideoReader.zoomIn();
+        } else {
+            mVideoReader.zoomOut();
+        }
+    }
+
+    private void toggleSettingsButton() {
+        // cancel any pending delayed animations first
+        settingsButton.getHandler().removeCallbacksAndMessages(null);
+
+        if (buttonAlpha == 1) {
+            buttonAlpha = 0;
+        } else {
+            buttonAlpha = 1;
         }
 
-        watermarkView.animate()
-                .alpha(targetAlpha)
+        settingsButton.animate()
+                .alpha(buttonAlpha)
                 .setDuration(shortAnimationDuration)
                 .setListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
-                        watermarkAnimationInProgress = false;
+                        autoHideSettingsButton();
                     }
                 });
+    }
+
+    private void autoHideSettingsButton() {
+        if (buttonAlpha == 0) return;
+
+        settingsButton.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                buttonAlpha = 0;
+                settingsButton.animate()
+                        .alpha(0)
+                        .setDuration(shortAnimationDuration);
+            }
+        }, 3000);
     }
 
     @Override
@@ -179,7 +231,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
             return false;
         }
 
-        for(UsbDevice device : deviceList.values()) {
+        for (UsbDevice device : deviceList.values()) {
             if (device.getVendorId() == VENDOR_ID && device.getProductId() == PRODUCT_ID) {
                 if (usbManager.hasPermission(device)) {
                     Log.i(TAG, "USB - usbDevice attached");
@@ -195,11 +247,10 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         return false;
     }
 
-    private void connect(){
+    private void connect() {
         usbConnected = true;
         mUsbMaskConnection.setUsbDevice(usbManager.openDevice(usbDevice), usbDevice);
         mVideoReader.setUsbMaskConnection(mUsbMaskConnection);
-        watermarkView.setVisibility(View.VISIBLE);
         overlayView.hide();
         mVideoReader.start();
     }
@@ -209,6 +260,18 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         super.onResume();
         Log.d(TAG, "APP - On Resume");
 
+        View decorView = getWindow().getDecorView();
+        decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.hide();
+        }
+
         if (!usbConnected) {
             if (searchDevice()) {
                 Log.d(TAG, "APP - On Resume usbDevice device found");
@@ -217,6 +280,11 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
                 overlayView.showOpaque(R.string.waiting_for_usb_device, OverlayStatus.Disconnected);
             }
         }
+
+        settingsButton.setAlpha(1);
+        autoHideSettingsButton();
+        updateWatermark();
+        updateVideoZoom();
     }
 
     @Override
@@ -228,6 +296,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         mVideoReader.stop();
         usbConnected = false;
     }
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -271,4 +340,43 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
             preferences.edit().putBoolean(FIRST_LAUNCH, false).apply();
         }
     }
+  
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        SharedPreferences preferences = getApplicationContext().getSharedPreferences("com.fpvout.digiview", Context.MODE_PRIVATE);
+        boolean dataCollectionAccepted = preferences.getBoolean("dataCollectionAccepted", false);
+
+        if (requestCode == 1) { // Data Collection agreement Activity
+            if (resultCode == RESULT_OK && dataCollectionAccepted) {
+                SentryAndroid.init(this, options -> options.setBeforeSend((event, hint) -> {
+                    if (SentryLevel.DEBUG.equals(event.getLevel()))
+                        return null;
+                    else
+                        return event;
+                }));
+            }
+
+        }
+    } //onActivityResult
+
+    private void checkDataCollectionAgreement() {
+        SharedPreferences preferences = getApplicationContext().getSharedPreferences("com.fpvout.digiview", Context.MODE_PRIVATE);
+        boolean dataCollectionAccepted = preferences.getBoolean("dataCollectionAccepted", false);
+        boolean dataCollectionReplied = preferences.getBoolean("dataCollectionReplied", false);
+        if (!dataCollectionReplied) {
+            Intent intent = new Intent(this, DataCollectionAgreementPopupActivity.class);
+            startActivityForResult(intent, 1);
+        } else if (dataCollectionAccepted) {
+            SentryAndroid.init(this, options -> options.setBeforeSend((event, hint) -> {
+                if (SentryLevel.DEBUG.equals(event.getLevel()))
+                    return null;
+                else
+                    return event;
+            }));
+        }
+
+    }
+
 }

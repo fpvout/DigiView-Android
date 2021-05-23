@@ -21,6 +21,7 @@
     <string name="video_preset_conservative">Conservative</string>
     <string name="video_preset_aggressive">Aggressive</string>
     <string name="video_preset_legacy">Legacy</string>
+    <string name="video_preset_legacy_buffered">Legacy Buffered</string>
     <string name="enable_analytics">Enable Analytics</string>
     <string name="enable_analytics_summary">This app will probably crash less than your drone, but if it does crash, we would like to know so we can fix it!</string>
     <string name="privacy_policy">Privacy Policy</string>

@@ -111,13 +111,15 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         setupGestureDetectors();
 
         mUsbMaskConnection = new UsbMaskConnection();
-        mVideoReader = new VideoReaderExoplayer(fpvView, overlayView, this);
+        Handler videoReaderEventListener = new Handler(this.getMainLooper(), msg -> onVideoReaderEvent((VideoReaderExoplayer.VideoReaderEventMessageCode) msg.obj));
+
+        mVideoReader = new VideoReaderExoplayer(fpvView, this, videoReaderEventListener);
 
         if (!usbConnected) {
             if (searchDevice()) {
                 connect();
             } else {
-                showOverlay(R.string.waiting_for_usb_device, OverlayStatus.Connected);
+                showOverlay(R.string.waiting_for_usb_device, OverlayStatus.Disconnected);
             }
         }
     }
@@ -278,10 +280,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         mVideoReader.start();
         updateWatermark();
         autoHideSettingsButton();
-    }
-
-    private void showOverlay() {
-
+        showOverlay(R.string.waiting_for_video, OverlayStatus.Connected);
     }
 
     @Override
@@ -316,10 +315,28 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         updateVideoZoom();
     }
 
+    private boolean onVideoReaderEvent(VideoReaderExoplayer.VideoReaderEventMessageCode m) {
+        if (VideoReaderExoplayer.VideoReaderEventMessageCode.WAITING_FOR_VIDEO.equals(m)) {
+            Log.d(TAG, "event: WAITING_FOR_VIDEO");
+            showOverlay(R.string.waiting_for_video, OverlayStatus.Connected);
+        } else if (VideoReaderExoplayer.VideoReaderEventMessageCode.VIDEO_PLAYING.equals(m)) {
+            Log.d(TAG, "event: VIDEO_PLAYING");
+            hideOverlay();
+        }
+        return false; // false to continue listening
+    }
+
     private void showOverlay(int textId, OverlayStatus connected) {
         overlayView.show(textId, connected);
         updateWatermark();
         showSettingsButton();
+    }
+
+    private void hideOverlay() {
+        overlayView.hide();
+        updateWatermark();
+        showSettingsButton();
+        autoHideSettingsButton();
     }
 
     @Override

@@ -10,7 +10,7 @@
     <string name="data_collection_deny_button">No Thanks</string>
     <string name="data_collection_agree_button">Sure!</string>
     <string name="data_collection_header" >Report crash data to the DigiView team?</string>
-    <string name="data_collection_text">This app will probably crash less than your drone.\nEven though, if a crash occurs we would like to know!\n\nWe use Sentry to track bugs and to make this app better.</string>
+    <string name="data_collection_text">This app will probably crash less than your drone, but if it does, we'd like to know!</string>
     <string name="title_activity_settings">Settings</string>
 
     <!-- Settings -->

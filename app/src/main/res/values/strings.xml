@@ -23,7 +23,6 @@
     <string name="video_preset_legacy">Legacy</string>
     <string name="video_preset_legacy_buffered">Legacy Buffered</string>
     <string name="enable_analytics">Enable Analytics</string>
-    <string name="enable_analytics_summary">This app will probably crash less than your drone, but if it does crash, we would like to know so we can fix it!</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="privacy_policy_summary">See what data we collect and how we use it</string>
     <string name="video_player">Video Player</string>

@@ -24,7 +24,7 @@ android {
         applicationId "com.fpvout.digiview"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 1
+        versionCode 3
         versionName '1.0.0'
         resConfigs "en", "de", "fr", "es", "zh", "pt"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

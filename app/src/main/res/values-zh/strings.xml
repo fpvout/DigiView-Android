@@ -22,7 +22,6 @@
     <string name="video_preset_aggressive">激进</string>
     <string name="video_preset_legacy">传统</string>
     <string name="enable_analytics">开启数据分析</string>
-    <string name="enable_analytics_summary">该程序崩溃的次数可能比您炸机次数还少。但即使发生崩溃，我们也想知道，这样才能修复它！</string>
     <string name="privacy_policy">隐私策略</string>
     <string name="privacy_policy_summary">查看我们收集数据的内容以及我们如何使用它们</string>
     <string name="video_player">视频播放器</string>

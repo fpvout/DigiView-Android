@@ -3,7 +3,6 @@ package com.fpvout.digiview;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.LayoutTransition;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -94,6 +93,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         mVideoReader = new VideoReaderExoplayer(fpvView, this, videoReaderEventListener);
 
         mUsbMaskConnection = new UsbMaskConnection();
+
         if (!usbConnected) {
             usbDevice = UsbMaskConnection.searchDevice(usbManager, getApplicationContext());
             if (usbDevice != null) {
@@ -276,6 +276,9 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         mVideoReader.setUsbMaskConnection(mUsbMaskConnection);
         overlayView.hide();
         mVideoReader.start();
+        updateWatermark();
+        autoHideSettingsButton();
+        showOverlay(R.string.waiting_for_video, OverlayStatus.Connected);
     }
 
     @Override
@@ -297,7 +300,11 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         }
 
         settingsButton.setAlpha(1);
+        autoHideSettingsButton();
+        updateWatermark();
+        updateVideoZoom();
     }
+
 
     @Override
     protected void onStop() {
@@ -333,7 +340,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        SharedPreferences preferences = getApplicationContext().getSharedPreferences("com.fpvout.digiview", Context.MODE_PRIVATE);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         boolean dataCollectionAccepted = preferences.getBoolean("dataCollectionAccepted", false);
 
         if (requestCode == 1) { // Data Collection agreement Activity
@@ -350,7 +357,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     } //onActivityResult
 
     private void checkDataCollectionAgreement() {
-        SharedPreferences preferences = getApplicationContext().getSharedPreferences("com.fpvout.digiview", Context.MODE_PRIVATE);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         boolean dataCollectionAccepted = preferences.getBoolean("dataCollectionAccepted", false);
         boolean dataCollectionReplied = preferences.getBoolean("dataCollectionReplied", false);
         if (!dataCollectionReplied) {

@@ -22,7 +22,6 @@
     <string name="video_preset_aggressive">Agresivo</string>
     <string name="video_preset_legacy">Legacy</string>
     <string name="enable_analytics">Habilitar analitica</string>
-    <string name="enable_analytics_summary">Esta aplicacion probablemente fallara menos que tu dron, pero si lo hace, ¡nos gustaria saberlo para poder solucionarlo!</string>
     <string name="privacy_policy">Politica de privacidad</string>
     <string name="privacy_policy_summary">Vea que datos recopilamos y como los usamos</string>
     <string name="video_player">Reproductor de video</string>

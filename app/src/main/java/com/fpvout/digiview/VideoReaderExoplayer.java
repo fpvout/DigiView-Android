@@ -35,10 +35,15 @@ public class VideoReaderExoplayer {
     private static final String TAG = "DIGIVIEW";
     private Handler videoReaderEventListener;
     private SimpleExoPlayer mPlayer;
-    private UsbMaskConnection mUsbMaskConnection;
     static final String VideoPreset = "VideoPreset";
     private final SurfaceView surfaceView;
     private AndroidUSBInputStream inputStream;
+        private UsbMaskConnection mUsbMaskConnection;
+    private boolean zoomedIn;
+    private final Context context;
+    private PerformancePreset performancePreset = PerformancePreset.getPreset(PerformancePreset.PresetType.DEFAULT);
+    static final String VideoZoomedIn = "VideoZoomedIn";
+    private final SharedPreferences sharedPreferences;
 
     VideoReaderExoplayer(SurfaceView videoSurface, Context c) {
         surfaceView = videoSurface;
@@ -46,15 +51,14 @@ public class VideoReaderExoplayer {
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(c);
     }
 
-    private boolean zoomedIn;
-    private final Context context;
-    private PerformancePreset performancePreset = PerformancePreset.getPreset(PerformancePreset.PresetType.DEFAULT);
-    static final String VideoZoomedIn = "VideoZoomedIn";
-    private final SharedPreferences sharedPreferences;
-
     VideoReaderExoplayer(SurfaceView videoSurface, Context c, Handler v) {
         this(videoSurface, c);
         videoReaderEventListener = v;
+    }
+
+    public void setUsbMaskConnection(UsbMaskConnection connection) {
+        mUsbMaskConnection = connection;
+        inputStream = mUsbMaskConnection.mInputStream;
     }
 
     public void start() {
@@ -140,12 +144,7 @@ public class VideoReaderExoplayer {
                     }
                 }
             });
-    }
-
-    public void setUsbMaskConnection(UsbMaskConnection connection) {
-        mUsbMaskConnection = connection;
-        inputStream = mUsbMaskConnection.mInputStream;
-    }
+        }
 
     private void sendEvent(VideoReaderEventMessageCode eventCode) {
         if (videoReaderEventListener != null) { // let MainActivity know so it can hide watermark/show settings button
@@ -189,14 +188,14 @@ public class VideoReaderExoplayer {
             }
         }
 
-    public void restart() {
-        mPlayer.release();
+        public void restart() {
+            mPlayer.release();
 
-        if (mUsbMaskConnection.isReady()) {
-            mUsbMaskConnection.start();
-            start();
+            if (mUsbMaskConnection.isReady()) {
+                mUsbMaskConnection.start();
+                start();
+            }
         }
-    }
 
     public void stop() {
         if (mPlayer != null)

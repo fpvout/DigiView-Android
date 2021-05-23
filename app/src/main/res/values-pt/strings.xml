@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">DigiView</string>
     <string name="digiview_feed">DigiView\nfeed</string>
     <string name="waiting_for_usb_device">Aguardando pelo dispositivo USB…</string>
     <string name="usb_device_approved">Dispositivo USB aprovado</string>
@@ -23,7 +22,6 @@
     <string name="video_preset_aggressive">Agressivo</string>
     <string name="video_preset_legacy">Legado</string>
     <string name="enable_analytics">Ativar Análise de Dados</string>
-    <string name="enable_analytics_summary">Esse app provavelmente vai cair menos do que o seu drone mas se acontecer gostaríamos de saber para podermos arrumar!</string>
     <string name="privacy_policy">Política de Privacidade</string>
     <string name="privacy_policy_summary">Veja os dados que coletamos e como os utilizamos</string>
     <string name="video_player">Reprodução Vídeo</string>

@@ -23,7 +23,6 @@
     <string name="video_preset_aggressive">Aggressiv</string>
     <string name="video_preset_legacy">Legacy</string>
     <string name="enable_analytics">Analytics akivieren</string>
-    <string name="enable_analytics_summary">Diese App wird wahrscheinlich seltener abstürzen als deine Drohne. Falls doch, würden wir gerne davon erfahren, um Fehler zu beheben!</string>
     <string name="privacy_policy">Datenschutzbestimmungen</string>
     <string name="privacy_policy_summary">Sehe, welche Daten wir sammeln und wie wir sie verwenden</string>
     <string name="video_player">Videoplayer</string>

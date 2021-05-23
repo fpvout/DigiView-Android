@@ -2,7 +2,6 @@ package usb;
 
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
-import android.util.Log;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -26,7 +25,8 @@ public class AndroidUSBOutputStream extends OutputStream {
 	 * object with the given parameters.
 	 *
 	 * @param writeEndpoint The USB end point to use to write data to.
-	 * @param connection    The USB connection to use to write data to.
+	 * @param connection The USB connection to use to write data to.
+	 *
 	 * @see UsbDeviceConnection
 	 * @see UsbEndpoint
 	 */
@@ -60,7 +60,6 @@ public class AndroidUSBOutputStream extends OutputStream {
 	@Override
 	public void write(byte[] buffer, int offset, int count) {
 		usbConnection.bulkTransfer(sendEndPoint, buffer, count, WRITE_TIMEOUT);
-		Log.d("USBOutputStream", "Message sent: " + buffer.toString());
 	}
 
 	@Override

@@ -17,7 +17,7 @@
     <PreferenceCategory app:title="@string/privacy">
 
         <SwitchPreferenceCompat
-            app:key="EnableAnalytics"
+            app:key="dataCollectionAccepted"
             app:title="@string/enable_analytics"
             app:defaultValue="true"
             app:summary="@string/data_collection_text" />

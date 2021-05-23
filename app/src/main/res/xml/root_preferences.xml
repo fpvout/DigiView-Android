@@ -17,10 +17,10 @@
     <PreferenceCategory app:title="@string/privacy">
 
         <SwitchPreferenceCompat
-            app:key="EnableAnalytics"
+            app:key="dataCollectionAccepted"
             app:title="@string/enable_analytics"
             app:defaultValue="true"
-            app:summary="@string/enable_analytics_summary" />
+            app:summary="@string/data_collection_text" />
 
         <Preference
             android:title="@string/privacy_policy"
@@ -54,7 +54,7 @@
             app:summary="fpvout.com">
             <intent
                 android:action="android.intent.action.VIEW"
-                android:data="https://www.fpvout.com" />
+                android:data="https://fpvout.com" />
         </Preference>
 
         <Preference
@@ -62,7 +62,7 @@
             app:summary="@string/discord_summary">
             <intent
                 android:action="android.intent.action.VIEW"
-                android:data="https://discord.gg/kqwKX9GyNq" />
+                android:data="https://discord.gg/4kUGdtAZJ5" />
         </Preference>
 
         <Preference

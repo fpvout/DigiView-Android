@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 import android.view.SurfaceView;
 
@@ -25,15 +26,16 @@ import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSpec;
+import com.google.android.exoplayer2.util.NonNullApi;
 import com.google.android.exoplayer2.video.VideoListener;
 
 import usb.AndroidUSBInputStream;
 
 public class VideoReaderExoplayer {
-        private static final String TAG = "DIGIVIEW";
-        private SimpleExoPlayer mPlayer;
+    private static final String TAG = "DIGIVIEW";
+    private Handler videoReaderEventListener;
+    private SimpleExoPlayer mPlayer;
     static final String VideoPreset = "VideoPreset";
-    private final OverlayView overlayView;
     private final SurfaceView surfaceView;
     private AndroidUSBInputStream inputStream;
         private UsbMaskConnection mUsbMaskConnection;
@@ -43,26 +45,25 @@ public class VideoReaderExoplayer {
     static final String VideoZoomedIn = "VideoZoomedIn";
     private final SharedPreferences sharedPreferences;
 
-        VideoReaderExoplayer(SurfaceView videoSurface, OverlayView overlayView, Context c) {
-            surfaceView = videoSurface;
-            this.overlayView = overlayView;
-            context = c;
-            sharedPreferences = PreferenceManager.getDefaultSharedPreferences(c);
-        }
+    VideoReaderExoplayer(SurfaceView videoSurface, Context c) {
+        surfaceView = videoSurface;
+        context = c;
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(c);
+    }
 
-        VideoReaderExoplayer(SurfaceView videoSurface, OverlayView overlayView, Context c, PerformancePreset p) {
-            this(videoSurface,overlayView,c);
-            performancePreset = p;
-        }
+    VideoReaderExoplayer(SurfaceView videoSurface, Context c, Handler v) {
+        this(videoSurface, c);
+        videoReaderEventListener = v;
+    }
 
-        public void setUsbMaskConnection(UsbMaskConnection connection) {
-            mUsbMaskConnection = connection;
-            inputStream = mUsbMaskConnection.mInputStream;
-        }
+    public void setUsbMaskConnection(UsbMaskConnection connection) {
+        mUsbMaskConnection = connection;
+        inputStream = mUsbMaskConnection.mInputStream;
+    }
 
-        public void start() {
-            zoomedIn = sharedPreferences.getBoolean(VideoZoomedIn, true);
-            performancePreset = PerformancePreset.getPreset(sharedPreferences.getString(VideoPreset, "default"));
+    public void start() {
+        zoomedIn = sharedPreferences.getBoolean(VideoZoomedIn, true);
+        performancePreset = PerformancePreset.getPreset(sharedPreferences.getString(VideoPreset, "default"));
 
             DefaultLoadControl loadControl = new DefaultLoadControl.Builder().setBufferDurationsMs(performancePreset.exoPlayerMinBufferMs, performancePreset.exoPlayerMaxBufferMs, performancePreset.exoPlayerBufferForPlaybackMs, performancePreset.exoPlayerBufferForPlaybackAfterRebufferMs).build();
             mPlayer = new SimpleExoPlayer.Builder(context).setLoadControl(loadControl).build();
@@ -92,34 +93,48 @@ public class VideoReaderExoplayer {
             mPlayer.play();
             mPlayer.addListener(new ExoPlayer.EventListener() {
                 @Override
+                @NonNullApi
                 public void onPlayerError(ExoPlaybackException error) {
                     switch (error.type) {
                         case ExoPlaybackException.TYPE_SOURCE:
                             Log.e(TAG, "PLAYER_SOURCE - TYPE_SOURCE: " + error.getSourceException().getMessage());
-                            overlayView.showOverlay(R.string.waiting_for_video, OverlayStatus.Connected);
-                            (new Handler(Looper.getMainLooper())).postDelayed(() -> {
-                                restart();
-                            }, 1000);
+                            (new Handler(Looper.getMainLooper())).postDelayed(() -> restart(), 1000);
+                            break;
+                        case ExoPlaybackException.TYPE_REMOTE:
+                            Log.e(TAG, "PLAYER_SOURCE - TYPE_REMOTE: " + error.getSourceException().getMessage());
+                            break;
+                        case ExoPlaybackException.TYPE_RENDERER:
+                            Log.e(TAG, "PLAYER_SOURCE - TYPE_RENDERER: " + error.getSourceException().getMessage());
+                            break;
+                        case ExoPlaybackException.TYPE_UNEXPECTED:
+                            Log.e(TAG, "PLAYER_SOURCE - TYPE_UNEXPECTED: " + error.getSourceException().getMessage());
                             break;
                     }
                 }
 
                 @Override
-                public void onPlaybackStateChanged(int state) {
-                    if (state == Player.STATE_ENDED) {
-                        Log.d(TAG, "PLAYER_STATE - ENDED");
-                        overlayView.showOverlay(R.string.waiting_for_video, OverlayStatus.Connected);
-                        (new Handler(Looper.getMainLooper())).postDelayed(() -> {
-                            restart();
-                        }, 1000);
-
-                    }else if(state == Player.STATE_READY){
-                        overlayView.hide();
+                public void onPlaybackStateChanged(@NonNullApi int state) {
+                    switch (state) {
+                        case Player.STATE_IDLE:
+                        case Player.STATE_READY:
+                        case Player.STATE_BUFFERING:
+                            break;
+                        case Player.STATE_ENDED:
+                            Log.d(TAG, "PLAYER_STATE - ENDED");
+                            sendEvent(VideoReaderEventMessageCode.WAITING_FOR_VIDEO); // let MainActivity know so it can hide watermark/show settings button
+                            (new Handler(Looper.getMainLooper())).postDelayed(() -> restart(), 1000);
+                            break;
                     }
                 }
             });
 
             mPlayer.addVideoListener(new VideoListener() {
+                @Override
+                public void onRenderedFirstFrame() {
+                    Log.d(TAG, "PLAYER_RENDER - FIRST FRAME");
+                    sendEvent(VideoReaderEventMessageCode.VIDEO_PLAYING); // let MainActivity know so it can hide watermark/show settings button
+                }
+
                 @Override
                 public void onVideoSizeChanged(int width, int height, int unappliedRotationDegrees, float pixelWidthHeightRatio) {
                     if (!zoomedIn) {
@@ -129,16 +144,24 @@ public class VideoReaderExoplayer {
                     }
                 }
             });
+    }
+
+    private void sendEvent(VideoReaderEventMessageCode eventCode) {
+        if (videoReaderEventListener != null) { // let MainActivity know so it can hide watermark/show settings button
+            Message videoReaderEventMessage = new Message();
+            videoReaderEventMessage.obj = eventCode;
+            videoReaderEventListener.sendMessage(videoReaderEventMessage);
         }
+    }
 
-        public void toggleZoom() {
-            zoomedIn = !zoomedIn;
+    public void toggleZoom() {
+        zoomedIn = !zoomedIn;
 
-            SharedPreferences.Editor preferencesEditor = sharedPreferences.edit();
-            preferencesEditor.putBoolean(VideoZoomedIn, zoomedIn);
-            preferencesEditor.apply();
+        SharedPreferences.Editor preferencesEditor = sharedPreferences.edit();
+        preferencesEditor.putBoolean(VideoZoomedIn, zoomedIn);
+        preferencesEditor.apply();
 
-            ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) surfaceView.getLayoutParams();
+        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) surfaceView.getLayoutParams();
 
             if (zoomedIn) {
                 params.dimensionRatio = "";
@@ -174,8 +197,10 @@ public class VideoReaderExoplayer {
             }
         }
 
-        public void stop() {
-            if (mPlayer != null)
-                mPlayer.release();
-        }
+    public void stop() {
+        if (mPlayer != null)
+            mPlayer.release();
+    }
+
+    public enum VideoReaderEventMessageCode {WAITING_FOR_VIDEO, VIDEO_PLAYING}
 }

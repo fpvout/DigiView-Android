@@ -22,7 +22,6 @@
     <string name="video_preset_aggressive">Agressivo</string>
     <string name="video_preset_legacy">Legado</string>
     <string name="enable_analytics">Ativar Análise de Dados</string>
-    <string name="enable_analytics_summary">Esse app provavelmente vai cair menos do que o seu drone mas se acontecer gostaríamos de saber para podermos arrumar!</string>
     <string name="privacy_policy">Política de Privacidade</string>
     <string name="privacy_policy_summary">Veja os dados que coletamos e como os utilizamos</string>
     <string name="video_player">Reprodução Vídeo</string>

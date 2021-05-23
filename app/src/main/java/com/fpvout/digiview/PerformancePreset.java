@@ -23,18 +23,6 @@ public class PerformancePreset {
         dataSourceType = mDataSourceType;
     }
 
-    public enum PresetType {
-        DEFAULT,
-        CONSERVATIVE,
-        AGGRESSIVE,
-        LEGACY
-    }
-
-    public enum DataSourceType {
-        INPUT_STREAM,
-        BUFFERED_INPUT_STREAM
-    }
-
     static PerformancePreset getPreset(PresetType p) {
         switch (p) {
             case CONSERVATIVE:
@@ -43,10 +31,17 @@ public class PerformancePreset {
                 return new PerformancePreset(131072, 7000, 50, 2000, 17, 17, DataSourceType.INPUT_STREAM);
             case LEGACY:
                 return new PerformancePreset(30720, 200, 32768, 65536, 0, 0, DataSourceType.BUFFERED_INPUT_STREAM);
+            case LEGACY_BUFFERED:
+                return new PerformancePreset(30720, 300, 32768, 65536, 34, 34, DataSourceType.BUFFERED_INPUT_STREAM);
             case DEFAULT:
             default:
                 return new PerformancePreset(131072, 10000, 500, 2000, 17, 17, DataSourceType.INPUT_STREAM);
         }
+    }
+
+    public enum DataSourceType {
+        INPUT_STREAM,
+        BUFFERED_INPUT_STREAM
     }
 
     static PerformancePreset getPreset(String p) {
@@ -57,10 +52,20 @@ public class PerformancePreset {
                 return getPreset(PresetType.AGGRESSIVE);
             case "legacy":
                 return getPreset(PresetType.LEGACY);
+            case "new_legacy":
+                return getPreset(PresetType.LEGACY_BUFFERED);
             case "default":
             default:
                 return getPreset(PresetType.DEFAULT);
         }
+    }
+
+    public enum PresetType {
+        DEFAULT,
+        CONSERVATIVE,
+        AGGRESSIVE,
+        LEGACY,
+        LEGACY_BUFFERED
     }
 
     @Override

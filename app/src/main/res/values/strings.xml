@@ -1,16 +1,16 @@
 <resources>
     <string name="app_name" translatable="false">DigiView</string>
     <string name="digiview_feed">DigiView\nfeed</string>
-    <string name="waiting_for_usb_device">Waiting for USB device…</string>
+    <string name="waiting_for_usb_device">Please Connect Goggles</string>
     <string name="usb_device_approved">USB device approved</string>
-    <string name="usb_device_detached_waiting">USB device detached\n\nWaiting for USB device…</string>
-    <string name="usb_device_found">USB device found.</string>
-    <string name="waiting_for_video">Waiting for video…</string>
+    <string name="usb_device_detached_waiting">Goggles Disconnected</string>
+    <string name="usb_device_found">Goggles Connected</string>
+    <string name="waiting_for_video">Waiting For Video…</string>
     <string name="title_activity_data_collection">Data Collection Agreement</string>
-    <string name="data_collection_deny_button">Deny</string>
-    <string name="data_collection_agree_button">Agree</string>
+    <string name="data_collection_deny_button">No Thanks</string>
+    <string name="data_collection_agree_button">Sure!</string>
     <string name="data_collection_header" >Report crash data to the DigiView team?</string>
-    <string name="data_collection_text">This app will probably crash less than your drone.\n Even though, if a crash occurs we would like to know!\n\nWe use Sentry to track bugs and to make this app better.</string>
+    <string name="data_collection_text">This app will probably crash less than your drone, but if it does, we\'d like to know!</string>
     <string name="title_activity_settings">Settings</string>
 
     <!-- Settings -->
@@ -21,8 +21,8 @@
     <string name="video_preset_conservative">Conservative</string>
     <string name="video_preset_aggressive">Aggressive</string>
     <string name="video_preset_legacy">Legacy</string>
+    <string name="video_preset_legacy_buffered">Legacy Buffered</string>
     <string name="enable_analytics">Enable Analytics</string>
-    <string name="enable_analytics_summary">This app will probably crash less than your drone, but if it does crash, we would like to know so we can fix it!</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="privacy_policy_summary">See what data we collect and how we use it</string>
     <string name="video_player">Video Player</string>

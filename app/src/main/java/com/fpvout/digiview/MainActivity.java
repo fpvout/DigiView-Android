@@ -110,6 +110,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         recordButton = findViewById(R.id.recordbt);
         recordButton.setOnClickListener(view -> {
             if (dvr != null) {
+                updateDVRThumb();
                 if (dvr.isRecording()) {
                     dvr.stop();
                 } else {
@@ -261,7 +262,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         } else {
             toolbarAlpha = 0.7f;
         }
-
+        updateDVRThumb();
         toolbar.animate()
                 .alpha(toolbarAlpha)
                 .translationX(translation)
@@ -270,6 +271,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         autoHideToolbar();
+                        updateDVRThumb();
                     }
                 });
     }
@@ -341,6 +343,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         mVideoReader.setUsbMaskConnection(mUsbMaskConnection);
         overlayView.hide();
         mVideoReader.start();
+        updateDVRThumb();
         updateWatermark();
         autoHideToolbar();
         showOverlay(R.string.waiting_for_video, OverlayStatus.Connected);

@@ -46,4 +46,5 @@
     <string name="no_dvr_video">No stream! recording could not be started</string>
     <string name="saved_dvr">dvr has been saved</string>
     <string name="dvr_merge_audio_video">merging audio and video of the dvr</string>
+    <string name="storage_rights_required">Storage access is required.</string>
 </resources>

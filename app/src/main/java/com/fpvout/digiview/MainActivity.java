@@ -80,10 +80,12 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
 
         // Hide top bar and status bar
         View decorView = getWindow().getDecorView();
-        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_FULLSCREEN;
-        decorView.setSystemUiVisibility(uiOptions);
-        decorView.setClickable(false);
+        decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.hide();
@@ -177,54 +179,6 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
                 }
             }
         });
-
-        watermarkView.setVisibility(View.GONE);
-
-        mUsbMaskConnection = new UsbMaskConnection();
-        mVideoReader = new VideoReaderExoplayer(fpvView, overlayView, this);
-
-        if (!usbConnected) {
-            if (searchDevice()) {
-                //connect();
-            } else {
-                overlayView.showOpaque(R.string.waiting_for_usb_device, OverlayStatus.Disconnected);
-            }
-        }
-    }
-
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        if (hasFocus) {
-            hideSystemUI();
-        }
-    }
-
-    private void hideSystemUI() {
-        // Enables regular immersive mode.
-        // For "lean back" mode, remove SYSTEM_UI_FLAG_IMMERSIVE.
-        // Or for "sticky immersive," replace it with SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-        View decorView = getWindow().getDecorView();
-        decorView.setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_IMMERSIVE
-                        // Set the content to appear under the system bars so that the
-                        // content doesn't resize when the system bars hide and show.
-                        | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                        // Hide the nav bar and status bar
-                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_FULLSCREEN);
-    }
-
-    // Shows the system bars by removing all the flags
-// except for the ones that make the content appear under the system bars.
-    private void showSystemUI() {
-        View decorView = getWindow().getDecorView();
-        decorView.setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
     }
 
     @Override
@@ -256,18 +210,11 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         }
     }
 
-    private void cancelButtonAnimation() {
-        Handler handler = settingsButton.getHandler();
-        if (handler != null) {
-            settingsButton.getHandler().removeCallbacksAndMessages(null);
-        }
-    }
-
     private void showSettingsButton() {
         cancelButtonAnimation();
 
         if (overlayView.getVisibility() == View.VISIBLE) {
-            buttonAlpha = 1;
+            toolbarAlpha = 0.9f;
             settingsButton.setAlpha(1);
         }
     }
@@ -304,7 +251,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
                 });
     }
 
-    private void autoHideSettingsButton() {
+    private void autoHideToolbar() {
         if (overlayView.getVisibility() == View.VISIBLE) return;
         if (toolbarAlpha == 0) return;
 
@@ -361,7 +308,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     private void connect() {
         usbConnected = true;
         // Init DVR recorder
-        recorder = DVR.getInstance(this, true, overlayView);
+        recorder = DVR .getInstance(this, true);
         try {
             recorder.init(mVideoReader);
         } catch (IOException e) {
@@ -372,7 +319,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         overlayView.hide();
         mVideoReader.start();
         updateWatermark();
-        autoHideSettingsButton();
+        autoHideToolbar();
         showOverlay(R.string.waiting_for_video, OverlayStatus.Connected);
     }
 
@@ -398,7 +345,11 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         updateVideoZoom();
 
         if(checkStoragePermission()) {
-            connect();
+            if (searchDevice()) {
+                connect();
+            } else {
+                showOverlay(R.string.waiting_for_usb_device, OverlayStatus.Connected);
+            }
         }
     }
 
@@ -440,7 +391,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
                 finishStartup();
             }
             else {
-                overlayView.showOpaque("Storage access is required.", OverlayStatus.Error);
+                overlayView.show( R.string.storage_rights_required, OverlayStatus.Error);
             }
         }
     }
@@ -466,7 +417,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         overlayView.hide();
         updateWatermark();
         showSettingsButton();
-        autoHideSettingsButton();
+        autoHideToolbar();
     }
 
     @Override

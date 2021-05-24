@@ -9,13 +9,14 @@ import android.preference.PreferenceManager;
 import android.os.Message;
 import android.util.Log;
 import android.view.SurfaceView;
+
+import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.fpvout.digiview.dvr.DVR;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
-import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.Player;
@@ -26,47 +27,43 @@ import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSpec;
-import com.google.android.exoplayer2.util.NonNullApi;
-import com.google.android.exoplayer2.video.VideoListener;
+import com.google.android.exoplayer2.video.VideoSize;
 
 import usb.AndroidUSBInputStream;
 
 public class VideoReaderExoplayer {
     private static final String TAG = "DIGIVIEW";
-    private Handler videoReaderEventListener;
     private SimpleExoPlayer mPlayer;
     static final String VideoPreset = "VideoPreset";
     private final SurfaceView surfaceView;
     private AndroidUSBInputStream inputStream;
-        private UsbMaskConnection mUsbMaskConnection;
+    private UsbMaskConnection mUsbMaskConnection;
     private boolean zoomedIn;
     private final Context context;
     private PerformancePreset performancePreset = PerformancePreset.getPreset(PerformancePreset.PresetType.DEFAULT);
     static final String VideoZoomedIn = "VideoZoomedIn";
     private final SharedPreferences sharedPreferences;
-    private DVR dvr;
     private boolean streaming = false;
+
+    private VideoPlayingListener videoPlayingListener = null;
+    private VideoWaitingListener videoWaitingListener = null;
+
+    public void setVideoPlayingEventListener(VideoPlayingListener listener) {
+        this.videoPlayingListener = listener;
+    }
+
+    public void setVideoWaitingEventListener(VideoWaitingListener listener) {
+        this.videoWaitingListener = listener;
+    }
 
     VideoReaderExoplayer(SurfaceView videoSurface, Context c) {
         surfaceView = videoSurface;
             context = c;
             sharedPreferences = PreferenceManager.getDefaultSharedPreferences(c);
-            this.dvr = dvr;
         }
-
-    VideoReaderExoplayer(SurfaceView videoSurface, Context c, Handler v) {
-        this(videoSurface, c);
-        videoReaderEventListener = v;
-    }
-
 
     public boolean isStreaming(){
         return streaming;
-    }
-
-    private InputStreamDataSource getInputDataStream(){
-        DataSpec dataSpec = new DataSpec(Uri.EMPTY,0,C.LENGTH_UNSET);
-        return  new InputStreamDataSource(context, dataSpec, inputStream);
     }
 
     public void setUsbMaskConnection(UsbMaskConnection connection) {
@@ -78,23 +75,23 @@ public class VideoReaderExoplayer {
         zoomedIn = sharedPreferences.getBoolean(VideoZoomedIn, true);
         performancePreset = PerformancePreset.getPreset(sharedPreferences.getString(VideoPreset, "default"));
 
-            DefaultLoadControl loadControl = new DefaultLoadControl.Builder().setBufferDurationsMs(performancePreset.exoPlayerMinBufferMs, performancePreset.exoPlayerMaxBufferMs, performancePreset.exoPlayerBufferForPlaybackMs, performancePreset.exoPlayerBufferForPlaybackAfterRebufferMs).build();
-            mPlayer = new SimpleExoPlayer.Builder(context).setLoadControl(loadControl).build();
-            mPlayer.setVideoSurfaceView(surfaceView);
-            mPlayer.setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
-            mPlayer.setWakeMode(C.WAKE_MODE_LOCAL);
+        DefaultLoadControl loadControl = new DefaultLoadControl.Builder().setBufferDurationsMs(performancePreset.exoPlayerMinBufferMs, performancePreset.exoPlayerMaxBufferMs, performancePreset.exoPlayerBufferForPlaybackMs, performancePreset.exoPlayerBufferForPlaybackAfterRebufferMs).build();
+        mPlayer = new SimpleExoPlayer.Builder(context).setLoadControl(loadControl).build();
+        mPlayer.setVideoSurfaceView(surfaceView);
+        mPlayer.setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
+        mPlayer.setWakeMode(C.WAKE_MODE_LOCAL);
 
-            DataSpec dataSpec = new DataSpec(Uri.EMPTY, 0, C.LENGTH_UNSET);
+        DataSpec dataSpec = new DataSpec(Uri.EMPTY, 0, C.LENGTH_UNSET);
 
-            Log.d(TAG, "preset: " + performancePreset);
+        Log.d(TAG, "preset: " + performancePreset);
 
-            DataSource.Factory dataSourceFactory = () -> {
-                switch (performancePreset.dataSourceType){
-                    case INPUT_STREAM:
-                        return (DataSource) new InputStreamDataSource(context, dataSpec, inputStream);
+        DataSource.Factory dataSourceFactory = () -> {
+            switch (performancePreset.dataSourceType) {
+                case INPUT_STREAM:
+                    return (DataSource) new InputStreamDataSource(dataSpec, inputStream);
                     case BUFFERED_INPUT_STREAM:
                     default:
-                        return (DataSource) new InputStreamBufferedDataSource(context, dataSpec, inputStream);
+                        return (DataSource) new InputStreamBufferedDataSource(dataSpec, inputStream);
                 }
             };
 
@@ -105,13 +102,12 @@ public class VideoReaderExoplayer {
 
             mPlayer.prepare();
             mPlayer.play();
-            mPlayer.addListener(new ExoPlayer.EventListener() {
-                @Override
-                @NonNullApi
-                public void onPlayerError(ExoPlaybackException error) {
-                    switch (error.type) {
-                        case ExoPlaybackException.TYPE_SOURCE:
-                            streaming = false;
+        mPlayer.addListener(new Player.Listener() {
+            @Override
+            public void onPlayerError(@NonNull ExoPlaybackException error) {
+                switch (error.type) {
+                    case ExoPlaybackException.TYPE_SOURCE:
+                        streaming = false;
                             Log.e(TAG, "PLAYER_SOURCE - TYPE_SOURCE: " + error.getSourceException().getMessage());
                             (new Handler(Looper.getMainLooper())).postDelayed(() -> restart(), 1000);
                             break;
@@ -127,17 +123,18 @@ public class VideoReaderExoplayer {
                     }
                 }
 
-                @Override
-                public void onPlaybackStateChanged(@NonNullApi int state) {
-                    switch (state) {
-                        case Player.STATE_IDLE:
-                        case Player.STATE_READY:
-                        case Player.STATE_BUFFERING:
-                            streaming = false;
+            @Override
+            public void onPlaybackStateChanged(int state) {
+                switch (state) {
+                    case Player.STATE_IDLE:
+                    case Player.STATE_READY:
+                    case Player.STATE_BUFFERING:
+                        streaming = false;
                             break;
                         case Player.STATE_ENDED:
                             Log.d(TAG, "PLAYER_STATE - ENDED");
-                            sendEvent(VideoReaderEventMessageCode.WAITING_FOR_VIDEO); // let MainActivity know so it can hide watermark/show settings button
+                            if (videoWaitingListener != null)
+                            videoWaitingListener.onVideoWaiting(); // let MainActivity know so it can hide watermark/show settings button
                             (new Handler(Looper.getMainLooper())).postDelayed(() -> restart(), 1000);
                             streaming = false;
                             break;
@@ -145,30 +142,32 @@ public class VideoReaderExoplayer {
                 }
             });
 
-            mPlayer.addVideoListener(new VideoListener() {
-                @Override
-                public void onRenderedFirstFrame() {
-                    Log.d(TAG, "PLAYER_RENDER - FIRST FRAME");
-                    sendEvent(VideoReaderEventMessageCode.VIDEO_PLAYING); // let MainActivity know so it can hide watermark/show settings button
-                }
+        mPlayer.addVideoListener(new Player.Listener() {
+            @Override
+            public void onRenderedFirstFrame() {
+                Log.d(TAG, "PLAYER_RENDER - FIRST FRAME");
+                if (videoPlayingListener != null)
+                    videoPlayingListener.onVideoPlaying(); // let MainActivity know so it can hide watermark/show settings button
+            }
 
-                @Override
-                public void onVideoSizeChanged(int width, int height, int unappliedRotationDegrees, float pixelWidthHeightRatio) {
-                    if (!zoomedIn) {
-                        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) surfaceView.getLayoutParams();
-                        params.dimensionRatio = width + ":" + height;
-                        surfaceView.setLayoutParams(params);
-                    }
+            @Override
+            public void onVideoSizeChanged(@NonNull VideoSize videosize) {
+                if (!zoomedIn) {
+                    ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) surfaceView.getLayoutParams();
+                    params.dimensionRatio = videosize.width + ":" + videosize.height;
+                    surfaceView.setLayoutParams(params);
                 }
+            }
             });
     }
 
-    private void sendEvent(VideoReaderEventMessageCode eventCode) {
-        if (videoReaderEventListener != null) { // let MainActivity know so it can hide watermark/show settings button
-            Message videoReaderEventMessage = new Message();
-            videoReaderEventMessage.obj = eventCode;
-            videoReaderEventListener.sendMessage(videoReaderEventMessage);
-        }
+    public interface VideoPlayingListener {
+        void onVideoPlaying();
+    }
+
+
+    public interface VideoWaitingListener {
+        void onVideoWaiting();
     }
 
     public void toggleZoom() {
@@ -180,12 +179,12 @@ public class VideoReaderExoplayer {
 
         ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) surfaceView.getLayoutParams();
 
-            if (zoomedIn) {
-                params.dimensionRatio = "";
-            } else {
-                if (mPlayer == null) return;
-                Format videoFormat = mPlayer.getVideoFormat();
-                if (videoFormat == null) return;
+        if (zoomedIn) {
+            params.dimensionRatio = "";
+        } else {
+            if (mPlayer == null) return;
+            Format videoFormat = mPlayer.getVideoFormat();
+            if (videoFormat == null) return;
 
                 params.dimensionRatio = videoFormat.width + ":" + videoFormat.height;
             }
@@ -218,6 +217,4 @@ public class VideoReaderExoplayer {
         if (mPlayer != null)
             mPlayer.release();
     }
-
-    public enum VideoReaderEventMessageCode {WAITING_FOR_VIDEO, VIDEO_PLAYING}
 }

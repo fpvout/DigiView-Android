@@ -38,6 +38,8 @@ public class OverlayView extends ConstraintLayout {
 
         int image = R.drawable.ic_goggles_white;
         switch(status){
+            case Connected:
+                break;
             case Disconnected:
                 image = R.drawable.ic_goggles_disconnected_white;
                 break;

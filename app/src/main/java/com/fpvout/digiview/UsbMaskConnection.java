@@ -27,8 +27,10 @@ public class UsbMaskConnection {
     AndroidUSBInputStream mInputStream;
     AndroidUSBOutputStream mOutputStream;
     private boolean ready = false;
+    private DVR dvr;
 
     public UsbMaskConnection() {
+
     }
 
     public static UsbDevice searchDevice(UsbManager usbManager, Context c) {
@@ -76,14 +78,15 @@ public class UsbMaskConnection {
         return ready;
     }
 
-    public void setUsbDevice(UsbManager usbManager, UsbDevice d) {
+    public void setUsbDevice(UsbManager usbManager, UsbDevice d, DVR _dvr) {
+        dvr = _dvr;
         usbConnection = usbManager.openDevice(d);
         usbInterface = d.getInterface(3);
 
         usbConnection.claimInterface(usbInterface, true);
 
         mOutputStream = new AndroidUSBOutputStream(usbInterface.getEndpoint(0), usbConnection);
-        mInputStream = new AndroidUSBInputStream(usbInterface.getEndpoint(1), usbInterface.getEndpoint(0), usbConnection);
+        mInputStream = new AndroidUSBInputStream(usbInterface.getEndpoint(1), usbInterface.getEndpoint(0), usbConnection, dvr);
         ready = true;
     }
 }

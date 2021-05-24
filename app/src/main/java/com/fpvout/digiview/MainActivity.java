@@ -36,8 +36,6 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
-import androidx.preference.PreferenceManager;
-
 import androidx.core.app.ActivityCompat;
 import io.sentry.SentryLevel;
 import io.sentry.android.core.SentryAndroid;
@@ -67,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     VideoReaderExoplayer mVideoReader;
     boolean usbConnected = false;
     SurfaceView fpvView;
-    DVR recorder;
+    DVR dvr;
     private GestureDetector gestureDetector;
     private ScaleGestureDetector scaleGestureDetector;
     private SharedPreferences sharedPreferences;
@@ -90,11 +88,11 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
 
         recordButton = findViewById(R.id.recordbt);
         recordButton.setOnClickListener(view -> {
-            if (recorder != null) {
-                if (recorder.isRecording()) {
-                    recorder.stop();
+            if (dvr != null) {
+                if (dvr.isRecording()) {
+                    dvr.stop();
                 } else {
-                    recorder.start();
+                    dvr.start();
                 }
             } else {
                 Toast.makeText(this, this.getText(R.string.no_dvr_video), Toast.LENGTH_LONG).show();
@@ -135,7 +133,6 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         mVideoReader.setVideoWaitingEventListener(() -> showOverlay(R.string.waiting_for_video, OverlayStatus.Connected));
 
         mUsbMaskConnection = new UsbMaskConnection();
-
         if (!usbConnected) {
             usbDevice = UsbMaskConnection.searchDevice(usbManager, getApplicationContext());
             if (usbDevice != null) {
@@ -307,13 +304,13 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     private void connect() {
         usbConnected = true;
         // Init DVR recorder
-        recorder = DVR .getInstance(this, true);
+        dvr = DVR.getInstance(this, true);
         try {
-            recorder.init(mVideoReader);
+            dvr.init(mVideoReader);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        mUsbMaskConnection.setUsbDevice(usbManager, usbDevice, recorder);
+        mUsbMaskConnection.setUsbDevice(usbManager, usbDevice, dvr);
         mVideoReader.setUsbMaskConnection(mUsbMaskConnection);
         overlayView.hide();
         mVideoReader.start();
@@ -334,7 +331,8 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         updateVideoZoom();
 
         if(checkStoragePermission()) {
-            if (searchDevice()) {
+            usbDevice = UsbMaskConnection.searchDevice(usbManager, getApplicationContext());
+            if (usbDevice != null) {
                 connect();
             } else {
                 showOverlay(R.string.waiting_for_usb_device, OverlayStatus.Connected);

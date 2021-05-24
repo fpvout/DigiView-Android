@@ -20,8 +20,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.preference.PreferenceManager;
 
 import io.sentry.SentryLevel;
@@ -109,13 +115,13 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     }
 
     private void setFullscreen() {
-        View decorView = getWindow().getDecorView();
-        decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_FULLSCREEN);
+        WindowInsetsControllerCompat insetsControllerCompat = new WindowInsetsControllerCompat(getWindow(), getWindow().getDecorView());
+        insetsControllerCompat.hide(WindowInsetsCompat.Type.statusBars()
+                | WindowInsetsCompat.Type.navigationBars()
+                | WindowInsetsCompat.Type.captionBar()
+                | WindowInsetsCompat.Type.ime()
+        );
+        insetsControllerCompat.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.hide();
@@ -185,14 +191,14 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         }
     }
 
-    private void showSettingsButton() {
-        cancelButtonAnimation();
-
-        if (overlayView.getVisibility() == View.VISIBLE) {
-            buttonAlpha = 1;
-            settingsButton.setAlpha(1);
-        }
-    }
+//    private void showSettingsButton() {
+//        cancelButtonAnimation();
+//
+//        if (overlayView.getVisibility() == View.VISIBLE) {
+//            buttonAlpha = 1;
+//            settingsButton.setAlpha(1);
+//        }
+//    }
 
     private void toggleSettingsButton() {
         if (buttonAlpha == 1 && overlayView.getVisibility() == View.VISIBLE) return;
@@ -327,34 +333,26 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         usbConnected = false;
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        boolean dataCollectionAccepted = preferences.getBoolean("dataCollectionAccepted", false);
-
-        if (requestCode == 1) { // Data Collection agreement Activity
-            if (resultCode == RESULT_OK && dataCollectionAccepted) {
-                SentryAndroid.init(this, options -> options.setBeforeSend((event, hint) -> {
-                    if (SentryLevel.DEBUG.equals(event.getLevel()))
-                        return null;
-                    else
-                        return event;
-                }));
-            }
-
-        }
-        setFullscreen();
-    } //onActivityResult
-
     private void checkDataCollectionAgreement() {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         boolean dataCollectionAccepted = preferences.getBoolean("dataCollectionAccepted", false);
         boolean dataCollectionReplied = preferences.getBoolean("dataCollectionReplied", false);
         if (!dataCollectionReplied) {
             Intent intent = new Intent(this, DataCollectionAgreementPopupActivity.class);
-            startActivityForResult(intent, 1);
+            ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), (ActivityResultCallback<ActivityResult>) result -> {
+                if (result.getResultCode() == RESULT_OK) {
+                    SentryAndroid.init(getApplicationContext(), options -> options.setBeforeSend((event, hint) -> {
+                        if (SentryLevel.DEBUG.equals(event.getLevel()))
+                            return null;
+                        else
+                            return event;
+                    }));
+                }
+                setFullscreen();
+            });
+            activityResultLauncher.launch(intent);
+
+
         } else if (dataCollectionAccepted) {
             SentryAndroid.init(this, options -> options.setBeforeSend((event, hint) -> {
                 if (SentryLevel.DEBUG.equals(event.getLevel()))

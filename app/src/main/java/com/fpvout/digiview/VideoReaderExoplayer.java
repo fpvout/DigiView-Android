@@ -8,13 +8,13 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.SurfaceView;
 
+import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.preference.PreferenceManager;
 
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
-import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.Player;
@@ -25,14 +25,12 @@ import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSpec;
-import com.google.android.exoplayer2.util.NonNullApi;
-import com.google.android.exoplayer2.video.VideoListener;
+import com.google.android.exoplayer2.video.VideoSize;
 
 import usb.AndroidUSBInputStream;
 
 public class VideoReaderExoplayer {
     private static final String TAG = "DIGIVIEW";
-    private Handler videoReaderEventListener;
     private SimpleExoPlayer mPlayer;
     static final String VideoPreset = "VideoPreset";
     private final SurfaceView surfaceView;
@@ -96,20 +94,19 @@ public class VideoReaderExoplayer {
 
             mPlayer.prepare();
             mPlayer.play();
-            mPlayer.addListener(new ExoPlayer.EventListener() {
-                @Override
-                @NonNullApi
-                public void onPlayerError(ExoPlaybackException error) {
-                    switch (error.type) {
-                        case ExoPlaybackException.TYPE_SOURCE:
-                            Log.e(TAG, "PLAYER_SOURCE - TYPE_SOURCE: " + error.getSourceException().getMessage());
-                            (new Handler(Looper.getMainLooper())).postDelayed(() -> restart(), 1000);
-                            break;
-                        case ExoPlaybackException.TYPE_REMOTE:
-                            Log.e(TAG, "PLAYER_SOURCE - TYPE_REMOTE: " + error.getSourceException().getMessage());
-                            break;
-                        case ExoPlaybackException.TYPE_RENDERER:
-                            Log.e(TAG, "PLAYER_SOURCE - TYPE_RENDERER: " + error.getSourceException().getMessage());
+        mPlayer.addListener(new Player.Listener() {
+            @Override
+            public void onPlayerError(@NonNull ExoPlaybackException error) {
+                switch (error.type) {
+                    case ExoPlaybackException.TYPE_SOURCE:
+                        Log.e(TAG, "PLAYER_SOURCE - TYPE_SOURCE: " + error.getSourceException().getMessage());
+                        (new Handler(Looper.getMainLooper())).postDelayed(() -> restart(), 1000);
+                        break;
+                    case ExoPlaybackException.TYPE_REMOTE:
+                        Log.e(TAG, "PLAYER_SOURCE - TYPE_REMOTE: " + error.getSourceException().getMessage());
+                        break;
+                    case ExoPlaybackException.TYPE_RENDERER:
+                        Log.e(TAG, "PLAYER_SOURCE - TYPE_RENDERER: " + error.getSourceException().getMessage());
                             break;
                         case ExoPlaybackException.TYPE_UNEXPECTED:
                             Log.e(TAG, "PLAYER_SOURCE - TYPE_UNEXPECTED: " + error.getSourceException().getMessage());
@@ -117,39 +114,39 @@ public class VideoReaderExoplayer {
                     }
                 }
 
-                @Override
-                public void onPlaybackStateChanged(@NonNullApi int state) {
-                    switch (state) {
-                        case Player.STATE_IDLE:
-                        case Player.STATE_READY:
-                        case Player.STATE_BUFFERING:
-                            break;
-                        case Player.STATE_ENDED:
-                            Log.d(TAG, "PLAYER_STATE - ENDED");
-                            if (videoWaitingListener != null)
-                                videoWaitingListener.onVideoWaiting(); // let MainActivity know so it can hide watermark/show settings button
-                            (new Handler(Looper.getMainLooper())).postDelayed(() -> restart(), 1000);
+            @Override
+            public void onPlaybackStateChanged(int state) {
+                switch (state) {
+                    case Player.STATE_IDLE:
+                    case Player.STATE_READY:
+                    case Player.STATE_BUFFERING:
+                        break;
+                    case Player.STATE_ENDED:
+                        Log.d(TAG, "PLAYER_STATE - ENDED");
+                        if (videoWaitingListener != null)
+                            videoWaitingListener.onVideoWaiting(); // let MainActivity know so it can hide watermark/show settings button
+                        (new Handler(Looper.getMainLooper())).postDelayed(() -> restart(), 1000);
                             break;
                     }
                 }
             });
 
-            mPlayer.addVideoListener(new VideoListener() {
-                @Override
-                public void onRenderedFirstFrame() {
-                    Log.d(TAG, "PLAYER_RENDER - FIRST FRAME");
-                    if (videoPlayingListener != null)
-                        videoPlayingListener.onVideoPlaying(); // let MainActivity know so it can hide watermark/show settings button
-                }
+        mPlayer.addVideoListener(new Player.Listener() {
+            @Override
+            public void onRenderedFirstFrame() {
+                Log.d(TAG, "PLAYER_RENDER - FIRST FRAME");
+                if (videoPlayingListener != null)
+                    videoPlayingListener.onVideoPlaying(); // let MainActivity know so it can hide watermark/show settings button
+            }
 
-                @Override
-                public void onVideoSizeChanged(int width, int height, int unappliedRotationDegrees, float pixelWidthHeightRatio) {
-                    if (!zoomedIn) {
-                        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) surfaceView.getLayoutParams();
-                        params.dimensionRatio = width + ":" + height;
-                        surfaceView.setLayoutParams(params);
-                    }
+            @Override
+            public void onVideoSizeChanged(@NonNull VideoSize videosize) {
+                if (!zoomedIn) {
+                    ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) surfaceView.getLayoutParams();
+                    params.dimensionRatio = videosize.width + ":" + videosize.height;
+                    surfaceView.setLayoutParams(params);
                 }
+            }
             });
     }
 

@@ -18,8 +18,6 @@ public class AndroidUSBOutputStream extends OutputStream {
 	private final UsbDeviceConnection usbConnection;
 	private final UsbEndpoint sendEndPoint;
 
-	private final boolean streamOpen = true;
-
 	/**
 	 * Class constructor. Instantiates a new {@code AndroidUSBOutputStream}
 	 * object with the given parameters.

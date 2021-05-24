@@ -2,6 +2,8 @@ package com.fpvout.digiview;
 
 import android.net.Uri;
 
+import androidx.annotation.NonNull;
+
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSpec;
@@ -20,7 +22,6 @@ public class InputStreamBufferedDataSource implements DataSource {
 
     private final DataSpec dataSpec;
     private InputStream inputStream;
-    private long bytesRemaining;
     private boolean opened;
 
     private CircularByteBuffer readBuffer;
@@ -35,12 +36,13 @@ public class InputStreamBufferedDataSource implements DataSource {
     }
 
     @Override
-    public void addTransferListener(TransferListener transferListener) {
+    public void addTransferListener(@NonNull TransferListener transferListener) {
 
     }
 
     @Override
     public long open(DataSpec dataSpec) throws IOException {
+        long bytesRemaining;
         try {
             long skipped = inputStream.skip(dataSpec.position);
             if (skipped < dataSpec.position)
@@ -60,7 +62,7 @@ public class InputStreamBufferedDataSource implements DataSource {
     }
 
     @Override
-    public int read(byte[] buffer, int offset, int readLength) throws IOException {
+    public int read(@NonNull byte[] buffer, int offset, int readLength) throws IOException {
         if (readBuffer == null)
             throw new IOException(ERROR_THREAD_NOT_INITIALIZED);
 
@@ -68,8 +70,6 @@ public class InputStreamBufferedDataSource implements DataSource {
         int readBytes = 0;
         while (System.currentTimeMillis() < deadLine && readBytes <= 0)
             readBytes = readBuffer.read(buffer, offset, readLength);
-        if (readBytes <= 0)
-            return readBytes;
         return readBytes;
     }
 

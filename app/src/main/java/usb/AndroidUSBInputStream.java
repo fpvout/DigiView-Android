@@ -2,14 +2,12 @@ package usb;
 
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
-import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 public class AndroidUSBInputStream extends InputStream {
 
-	private final String TAG = "USBInputStream";
 	private static final int READ_TIMEOUT = 100;
 
 	private final UsbDeviceConnection usbConnection;
@@ -43,7 +41,7 @@ public class AndroidUSBInputStream extends InputStream {
 		int receivedBytes = usbConnection.bulkTransfer(receiveEndPoint, buffer, buffer.length, READ_TIMEOUT);
 		if (receivedBytes <= 0) {
 			// send magic packet again; Would be great to handle this in UsbMaskConnection directly...
-			Log.d(TAG, "received buffer empty, sending magic packet again...");
+			//Log.d(TAG, "received buffer empty, sending magic packet again...");
 			usbConnection.bulkTransfer(sendEndPoint, "RMVT".getBytes(), "RMVT".getBytes().length, 2000);
 			receivedBytes = usbConnection.bulkTransfer(receiveEndPoint, buffer, buffer.length, READ_TIMEOUT);
 		}

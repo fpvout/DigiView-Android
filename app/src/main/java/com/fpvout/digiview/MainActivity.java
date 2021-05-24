@@ -24,6 +24,8 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -46,9 +48,11 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     private static final int VENDOR_ID = 11427;
     private static final int PRODUCT_ID = 31;
     private int shortAnimationDuration;
-    private float buttonAlpha = 1;
+    private float toolbarAlpha = 0.9f;
     private View settingsButton;
     private View recordButton;
+    private ImageButton thumbnail;
+    private RelativeLayout toolbar;
     private View watermarkView;
     private OverlayView overlayView;
     PendingIntent permissionIntent;
@@ -84,6 +88,9 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         if (actionBar != null) {
             actionBar.hide();
         }
+
+        thumbnail = findViewById(R.id.thumbnail);
+        toolbar = findViewById(R.id.toolbar);
 
         recordButton = findViewById(R.id.recordbt);
         recordButton.setOnClickListener(view -> {
@@ -178,7 +185,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
 
         if (!usbConnected) {
             if (searchDevice()) {
-                connect();
+                //connect();
             } else {
                 overlayView.showOpaque(R.string.waiting_for_usb_device, OverlayStatus.Disconnected);
             }
@@ -265,53 +272,49 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         }
     }
 
+    private void cancelButtonAnimation() {
+        Handler handler = toolbar.getHandler();
+        if (handler != null) {
+            toolbar.getHandler().removeCallbacksAndMessages(null);
+        }
+    }
+
     private void toggleButton() {
-        if (buttonAlpha == 1 && overlayView.getVisibility() == View.VISIBLE) return;
+        if (toolbarAlpha == 0.9 && overlayView.getVisibility() == View.VISIBLE) return;
         // cancel any pending delayed animations first
         cancelButtonAnimation();
-        recordButton.getHandler().removeCallbacksAndMessages(null);
 
-        if (buttonAlpha == 1) {
-            buttonAlpha = 0;
+        int translation = 0;
+        if (toolbarAlpha == 0.9f) {
+            toolbarAlpha = 0;
+            translation = 60;
         } else {
-            buttonAlpha = 1;
+            toolbarAlpha = 0.9f;
         }
 
-        settingsButton.animate()
-                .alpha(buttonAlpha)
+        toolbar.animate()
+                .alpha(toolbarAlpha)
+                .translationX(translation)
                 .setDuration(shortAnimationDuration)
                 .setListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
-                        autoHideSettingsButton();
+                        autoHideToolbar();
                     }
                 });
-
-        recordButton.animate()
-                .alpha(buttonAlpha)
-                .setDuration(shortAnimationDuration);
     }
 
     private void autoHideSettingsButton() {
         if (overlayView.getVisibility() == View.VISIBLE) return;
-        if (buttonAlpha == 0) return;
+        if (toolbarAlpha == 0) return;
 
-        settingsButton.postDelayed(new Runnable() {
+        toolbar.postDelayed(new Runnable() {
             @Override
             public void run() {
-                buttonAlpha = 0;
-                settingsButton.animate()
+                toolbarAlpha = 0;
+                toolbar.animate()
                         .alpha(0)
-                        .setDuration(shortAnimationDuration);
-            }
-        }, 3000);
-
-        recordButton.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                buttonAlpha = 0;
-                recordButton.animate()
-                        .alpha(0)
+                        .translationX(60)
                         .setDuration(shortAnimationDuration);
             }
         }, 3000);
@@ -358,7 +361,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     private void connect() {
         usbConnected = true;
         // Init DVR recorder
-        recorder = DVR.getInstance(this, true);
+        recorder = DVR.getInstance(this, true, overlayView);
         try {
             recorder.init(mVideoReader);
         } catch (IOException e) {
@@ -390,16 +393,12 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
             actionBar.hide();
         }
 
-
-        settingsButton.setAlpha(1);
-        recordButton.setAlpha(1);
-        autoHideSettingsButton();
+        autoHideToolbar();
         updateWatermark();
         updateVideoZoom();
 
-        if(checkStoragePermission()){
-            // permission already granted
-            finishStartup();
+        if(checkStoragePermission()) {
+            connect();
         }
     }
 
@@ -438,7 +437,6 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
 
         if(requestCode == 1){
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
                 finishStartup();
             }
             else {

@@ -32,6 +32,7 @@ public class DVR {
     private File dvrTmpFile;
     private String fileName;
     private StreamDumper streamDumper;
+    public static final String LATEST_THUMB_FILE = "latest.jpeg";
 
     DVR(Activity activity,  boolean recordAmbientAudio){
         this.activity = activity;
@@ -98,6 +99,10 @@ public class DVR {
         } else {
             Toast.makeText(activity, "Stream not ready", Toast.LENGTH_LONG).show();
         }
+    }
+
+    public String getLatestDThumbFile() {
+        return defaultFolder + "/" + LATEST_THUMB_FILE;
     }
 
     public boolean isRecording(){

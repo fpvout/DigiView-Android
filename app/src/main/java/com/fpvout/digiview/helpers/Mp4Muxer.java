@@ -19,7 +19,10 @@ import org.mp4parser.muxer.tracks.AACTrackImpl;
 import org.mp4parser.muxer.tracks.ClippedTrack;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.media.MediaScannerConnection;
+import android.media.ThumbnailUtils;
+import android.provider.MediaStore;
 import android.util.Log;
 
 import com.fpvout.digiview.MainActivity;
@@ -28,6 +31,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
+
+import static com.fpvout.digiview.dvr.DVR.LATEST_THUMB_FILE;
 
 public class Mp4Muxer extends Thread {
 
@@ -39,14 +44,16 @@ public class Mp4Muxer extends Thread {
     private final File videoFile;
     private final File output;
     private final Context context;
+    private final File dumpDir;
 
 
     SeekableByteChannel file;
     MP4Muxer muxer;
     BufferH264ES es;
 
-    public Mp4Muxer(Context context, File h264Dump, File ambientAudio, File output) {
+    public Mp4Muxer(Context context, File dumpDir , File h264Dump, File ambientAudio, File output) {
         this.context = context;
+        this.dumpDir = dumpDir;
         this.h264Dump = h264Dump;
         this.ambientAudioFile = ambientAudio;
         this.videoFile = new File(output.getAbsolutePath() + ".tmp");
@@ -105,6 +112,8 @@ public class Mp4Muxer extends Thread {
             Packet frame = skipToFirstValidFrame();
 
             MuxerTrack track = null;
+            //save first frame as img (thumb)
+
             while (frame  != null) {
                 if (track == null) {
                     track = initVideoTrack(frame);
@@ -130,6 +139,12 @@ public class Mp4Muxer extends Thread {
             FileChannel fc = fileOutputStream.getChannel();
             mp4file.writeContainer(fc);
             fileOutputStream.close();
+
+            Bitmap thumb = ThumbnailUtils.createVideoThumbnail(output.getAbsolutePath() , MediaStore.Images.Thumbnails.MINI_KIND);
+            FileOutputStream thumbOutputStream = new FileOutputStream(new File(dumpDir.getAbsolutePath() + "/" + LATEST_THUMB_FILE));
+            thumb.compress(Bitmap.CompressFormat.JPEG, 100, thumbOutputStream);
+            thumbOutputStream.flush();
+            thumbOutputStream.close();
 
             // add mp4 to gallery
             MediaScannerConnection.scanFile(context,

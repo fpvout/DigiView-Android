@@ -250,13 +250,6 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     }
 
     private void toggleButton() {
-        if (dvr != null) {
-            if (dvr.isRecording()) {
-                toolbar.setX(0);
-                toolbar.setAlpha(0.7f);
-                return;
-            }
-        }
         if (toolbarAlpha == 0.9 && overlayView.getVisibility() == View.VISIBLE) return;
         // cancel any pending delayed animations first
          cancelToolbarAnimation();
@@ -282,11 +275,6 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     }
 
     private void autoHideToolbar() {
-        if (dvr != null) {
-            if (dvr.isRecording()) {
-                return;
-            }
-        }
         if (overlayView.getVisibility() == View.VISIBLE) return;
         if (toolbarAlpha == 0) return;
 

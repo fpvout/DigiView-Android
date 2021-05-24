@@ -9,10 +9,15 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Message;
+import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.os.Handler;
 import android.util.Log;
@@ -42,7 +47,10 @@ import io.sentry.android.core.SentryAndroid;
 
 import static com.fpvout.digiview.UsbMaskConnection.ACTION_USB_PERMISSION;
 import com.fpvout.digiview.dvr.DVR;
+
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.HashMap;
 
 
@@ -51,7 +59,7 @@ import static com.fpvout.digiview.VideoReaderExoplayer.VideoZoomedIn;
 public class MainActivity extends AppCompatActivity implements UsbDeviceListener {
     private static final String TAG = "DIGIVIEW";
     private int shortAnimationDuration;
-    private float toolbarAlpha = 0.9f;
+    private float toolbarAlpha = 0.7f;
     private View settingsButton;
     private View recordButton;
     private ImageButton thumbnail;
@@ -84,6 +92,19 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         setFullscreen();
 
         thumbnail = findViewById(R.id.thumbnail);
+        thumbnail.setOnClickListener(view    -> {
+            StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+            StrictMode.setVmPolicy(builder.build());
+            Intent intent = new Intent();
+            intent.setAction(android.content.Intent.ACTION_VIEW);
+            if (dvr != null) {
+                intent.setDataAndType(Uri.withAppendedPath(Uri.fromFile(dvr.getDefaultFolder()), ""), "video/*");
+            } else {
+                intent.setType("image/*");
+            }
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        });
         toolbar = findViewById(R.id.toolbar);
 
         recordButton = findViewById(R.id.recordbt);
@@ -98,6 +119,12 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
                 Toast.makeText(this, this.getText(R.string.no_dvr_video), Toast.LENGTH_LONG).show();
             }
         });
+
+        dvr = DVR.getInstance(this, true, new Handler(message -> {
+            updateDVRThumb();
+            return true;
+        }));
+        updateDVRThumb();
 
         // Prevent screen from sleeping
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -215,15 +242,6 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         }
     }
 
-    private void showSettingsButton() {
-        cancelToolbarAnimation();
-
-        if (overlayView.getVisibility() == View.VISIBLE) {
-            toolbarAlpha = 0.9f;
-            settingsButton.setAlpha(1);
-        }
-    }
-
     private void cancelToolbarAnimation() {
         Handler handler = toolbar.getHandler();
         if (handler != null) {
@@ -232,16 +250,23 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     }
 
     private void toggleButton() {
+        if (dvr != null) {
+            if (dvr.isRecording()) {
+                toolbar.setX(0);
+                toolbar.setAlpha(0.7f);
+                return;
+            }
+        }
         if (toolbarAlpha == 0.9 && overlayView.getVisibility() == View.VISIBLE) return;
         // cancel any pending delayed animations first
          cancelToolbarAnimation();
 
         int translation = 0;
-        if (toolbarAlpha == 0.9f) {
+        if (toolbarAlpha == 0.7f) {
             toolbarAlpha = 0;
             translation = 60;
         } else {
-            toolbarAlpha = 0.9f;
+            toolbarAlpha = 0.7f;
         }
 
         toolbar.animate()
@@ -257,6 +282,11 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     }
 
     private void autoHideToolbar() {
+        if (dvr != null) {
+            if (dvr.isRecording()) {
+                return;
+            }
+        }
         if (overlayView.getVisibility() == View.VISIBLE) return;
         if (toolbarAlpha == 0) return;
 
@@ -300,11 +330,20 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         this.onStop();
     }
 
+    private void updateDVRThumb() {
+        if (dvr != null) {
+            File file = new File(dvr.getLatestThumbFile());
+            if (file.exists()) {
+                Bitmap bmp = BitmapFactory.decodeFile(dvr.getLatestThumbFile());
+                thumbnail.setImageBitmap(bmp);
+            }
+        }
+    }
+
 
     private void connect() {
         usbConnected = true;
         // Init DVR recorder
-        dvr = DVR.getInstance(this, true);
         try {
             dvr.init(mVideoReader);
         } catch (IOException e) {

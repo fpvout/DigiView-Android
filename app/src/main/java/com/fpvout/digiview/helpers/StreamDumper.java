@@ -2,6 +2,7 @@ package com.fpvout.digiview.helpers;
 
 import android.content.Context;
 import android.os.Environment;
+import android.os.Handler;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -49,7 +50,7 @@ public class StreamDumper  {
         }
     }
 
-    public void stop() {
+    public void stop(Handler completeHandler) {
         try {
             if(fos != null){
                 fos.flush();
@@ -62,7 +63,7 @@ public class StreamDumper  {
             if(!bytesWritten){
                 streamDump.delete();
             }
-
+            completeHandler.sendEmptyMessage(0);
         } catch (IOException exception) {
             exception.printStackTrace();
         }

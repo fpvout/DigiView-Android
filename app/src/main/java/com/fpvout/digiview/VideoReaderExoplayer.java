@@ -129,7 +129,7 @@ public class VideoReaderExoplayer {
                     case Player.STATE_IDLE:
                     case Player.STATE_READY:
                     case Player.STATE_BUFFERING:
-                        streaming = false;
+                        streaming = true;
                             break;
                         case Player.STATE_ENDED:
                             Log.d(TAG, "PLAYER_STATE - ENDED");

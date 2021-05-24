@@ -3,6 +3,7 @@ package com.fpvout.digiview.dvr;
 import android.app.Activity;
 import android.media.MediaRecorder;
 import android.os.Environment;
+import android.os.Handler;
 import android.util.Log;
 import android.widget.ImageButton;
 import android.widget.Toast;
@@ -32,18 +33,20 @@ public class DVR {
     private File dvrTmpFile;
     private String fileName;
     private StreamDumper streamDumper;
+    private static Handler updateAfterRecord;
     public static final String LATEST_THUMB_FILE = "latest.jpeg";
 
-    DVR(Activity activity,  boolean recordAmbientAudio){
+    DVR(Activity activity, boolean recordAmbientAudio, Handler updateAfterRecord){
         this.activity = activity;
         this.recordAmbientAudio = recordAmbientAudio;
+        this.updateAfterRecord = updateAfterRecord;
         defaultFolder =  Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/" + this.activity.getApplicationInfo().loadLabel(this.activity.getPackageManager()).toString();
         streamDumper = new StreamDumper(activity, defaultFolder);
     }
 
-    public static DVR getInstance(Activity context, boolean recordAmbientAudio){
+    public static DVR getInstance(Activity context, boolean recordAmbientAudio, Handler updateAfterRecord){
         if (instance == null) {
-            instance = new DVR(context, recordAmbientAudio);
+            instance = new DVR(context, recordAmbientAudio, updateAfterRecord);
         }
         return instance;
     }
@@ -101,7 +104,7 @@ public class DVR {
         }
     }
 
-    public String getLatestDThumbFile() {
+    public String getLatestThumbFile() {
         return defaultFolder + "/" + LATEST_THUMB_FILE;
     }
 
@@ -122,7 +125,11 @@ public class DVR {
                 e.printStackTrace();
             }
         }
-        streamDumper.stop();
+        streamDumper.stop(updateAfterRecord);
         this.recording = false;
+    }
+
+    public File getDefaultFolder() {
+        return new File(defaultFolder);
     }
 }

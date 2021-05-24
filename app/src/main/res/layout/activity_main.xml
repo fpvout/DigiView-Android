@@ -41,55 +41,55 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" >
-
-        <RelativeLayout
-            android:id="@+id/toolbar"
-            android:layout_width="80dp"
-            android:layout_height="match_parent"
-            android:background="@color/black"
-            android:orientation="vertical"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <ImageButton
-                android:id="@+id/thumbnail"
-                android:layout_width="45dp"
-                android:layout_height="45dp"
-                android:layout_centerInParent="false"
-                android:layout_centerHorizontal="true"
-                android:layout_gravity="center_horizontal|top"
-                android:layout_marginTop="35dp"
-                android:background="@drawable/rounded_corners"
-                android:scaleType="fitXY" />
-
-            <ImageButton
-                android:id="@+id/recordbt"
-                android:layout_width="45dp"
-                android:layout_height="45dp"
-                android:layout_centerInParent="true"
-                android:layout_centerVertical="true"
-                android:layout_gravity="center_horizontal|center_vertical"
-                android:background="@android:color/transparent"
-                android:scaleType="fitXY"
-                app:srcCompat="@drawable/record" />
-
-            <ImageButton
-                android:id="@+id/settingsButton"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_alignWithParentIfMissing="true"
-                android:layout_alignParentBottom="true"
-                android:layout_centerInParent="true"
-                android:layout_gravity="bottom|center_horizontal"
-                android:layout_marginBottom="35dp"
-                android:adjustViewBounds="false"
-                android:background="@android:color/transparent"
-                android:scaleType="fitXY"
-                app:srcCompat="@drawable/exo_ic_settings" />
-
-        </RelativeLayout>
     </com.fpvout.digiview.OverlayView>
+
+    <RelativeLayout
+        android:id="@+id/toolbar"
+        android:layout_width="80dp"
+        android:layout_height="0dp"
+        android:background="@color/black"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageButton
+            android:id="@+id/thumbnail"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_centerInParent="false"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center_horizontal|top"
+            android:layout_marginTop="35dp"
+            android:background="@drawable/rounded_corners"
+            android:scaleType="fitXY" />
+
+        <ImageButton
+            android:id="@+id/recordbt"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_centerInParent="true"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center_horizontal|center_vertical"
+            android:background="@android:color/transparent"
+            android:scaleType="fitXY"
+            app:srcCompat="@drawable/record" />
+
+        <ImageButton
+            android:id="@+id/settingsButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignWithParentIfMissing="true"
+            android:layout_alignParentBottom="true"
+            android:layout_centerInParent="true"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="35dp"
+            android:adjustViewBounds="false"
+            android:background="@android:color/transparent"
+            android:scaleType="fitXY"
+            app:srcCompat="@drawable/exo_ic_settings" />
+
+    </RelativeLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

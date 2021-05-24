@@ -3,6 +3,20 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        digiview {
+                try{
+                    storeFile file(digiviewStoreFile)
+                    storePassword digiviewStorePassword
+                    keyPassword digiviewKeyPassword
+                    keyAlias digiviewKeyAlias
+                }
+                catch (ex) {
+                        println("You should define mStoreFile, mStorePassword, mKeyPassword and mKeyAlias in ~/.gradle/gradle.properties.")
+                }
+        }
+    }
+
     compileSdkVersion 30
     buildToolsVersion "30.0.3"
 
@@ -10,17 +24,37 @@ android {
         applicationId "com.fpvout.digiview"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 1
-        versionName "1.0"
-
+        versionCode 3
+        versionName '1.0.0'
+        resConfigs "en", "de", "fr", "es", "zh", "pt"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
+        debug {
+            applicationIdSuffix '.debug'
+            versionNameSuffix '-debug'
+            signingConfig debug.signingConfig
+            debuggable true
+        }
+        alpha {
+            //applicationIdSuffix '.alpha'
+            versionNameSuffix '-alpha'
+            signingConfig signingConfigs.digiview
+        }
+        beta {
+            //applicationIdSuffix '.beta'
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            versionNameSuffix '-beta'
+            signingConfig signingConfigs.digiview
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.digiview
         }
+
     }
 
     compileOptions {

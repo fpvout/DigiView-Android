@@ -1,12 +1,12 @@
 package com.fpvout.digiview;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.PreferenceManager;
 
 public class DataCollectionAgreementPopupActivity extends AppCompatActivity {
     private SharedPreferences preferences;
@@ -14,7 +14,7 @@ public class DataCollectionAgreementPopupActivity extends AppCompatActivity {
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        preferences = this.getApplicationContext().getSharedPreferences("com.fpvout.digiview", Context.MODE_PRIVATE);
+        preferences = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
         builder = new AlertDialog.Builder(this);
         initializeUI();
     }

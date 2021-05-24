@@ -20,7 +20,6 @@
     <string name="video_preset_aggressive">Aggressive</string>
     <string name="video_preset_legacy">Legacy</string>
     <string name="enable_analytics">Activer les Analytics</string>
-    <string name="enable_analytics_summary">Cette application crashera sûrement moins que votre drone.  Mais si jamais l\'application plante, On aimerait bien le savoir pour le corriger !</string>
     <string name="privacy_policy">politique de confidentialité</string>
     <string name="privacy_policy_summary">Voyez quelles données nous recoltons et comment nous les utilisons.</string>
     <string name="video_player">Lecteur Vidéo</string>

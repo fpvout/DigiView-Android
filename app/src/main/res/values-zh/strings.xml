@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">DigiView</string>
     <string name="digiview_feed">DigiView\nfeed</string>
     <string name="waiting_for_usb_device">等待USB设备…</string>
     <string name="usb_device_approved">USB设备已批准</string>
@@ -23,7 +22,6 @@
     <string name="video_preset_aggressive">激进</string>
     <string name="video_preset_legacy">传统</string>
     <string name="enable_analytics">开启数据分析</string>
-    <string name="enable_analytics_summary">该程序崩溃的次数可能比您炸机次数还少。但即使发生崩溃，我们也想知道，这样才能修复它！</string>
     <string name="privacy_policy">隐私策略</string>
     <string name="privacy_policy_summary">查看我们收集数据的内容以及我们如何使用它们</string>
     <string name="video_player">视频播放器</string>
@@ -34,7 +32,7 @@
     <string name="our_website">我们的网站</string>
     <string name="discord_summary">与我们和其他 DigiView 用户聊天</string>
     <string name="digiview_web_app">DigiView Web应用</string>
-    <string name="digiview_web_app_summary">可以在Chrome和基于Chrome的浏览器中使用，甚至可以在Android上使用！</string>
+    <string name="digiview_web_app_summary">可以在Chrome以及基于Chromium核心的浏览器中使用，甚至可以在Android上运行！</string>
     <string name="github_summary">我们所有的代码都是开源的</string>
     <string name="about">关于</string>
     <string name="app_Version">应用程序版本</string>

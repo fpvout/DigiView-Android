@@ -4,6 +4,7 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.util.Log;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 public class AndroidUSBInputStream extends InputStream {
@@ -51,6 +52,8 @@ public class AndroidUSBInputStream extends InputStream {
 
 
 	@Override
-	public void close(){}
+	public void close() throws IOException {
+		super.close();
+	}
 
 }

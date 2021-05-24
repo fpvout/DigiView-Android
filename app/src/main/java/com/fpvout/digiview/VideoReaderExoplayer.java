@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
 import android.util.Log;
 import android.view.SurfaceView;
 
@@ -38,22 +37,28 @@ public class VideoReaderExoplayer {
     static final String VideoPreset = "VideoPreset";
     private final SurfaceView surfaceView;
     private AndroidUSBInputStream inputStream;
-        private UsbMaskConnection mUsbMaskConnection;
+    private UsbMaskConnection mUsbMaskConnection;
     private boolean zoomedIn;
     private final Context context;
     private PerformancePreset performancePreset = PerformancePreset.getPreset(PerformancePreset.PresetType.DEFAULT);
     static final String VideoZoomedIn = "VideoZoomedIn";
     private final SharedPreferences sharedPreferences;
 
+    private VideoPlayingListener videoPlayingListener = null;
+    private VideoWaitingListener videoWaitingListener = null;
+
+    public void setVideoPlayingEventListener(VideoPlayingListener listener) {
+        this.videoPlayingListener = listener;
+    }
+
+    public void setVideoWaitingEventListener(VideoWaitingListener listener) {
+        this.videoWaitingListener = listener;
+    }
+
     VideoReaderExoplayer(SurfaceView videoSurface, Context c) {
         surfaceView = videoSurface;
         context = c;
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(c);
-    }
-
-    VideoReaderExoplayer(SurfaceView videoSurface, Context c, Handler v) {
-        this(videoSurface, c);
-        videoReaderEventListener = v;
     }
 
     public void setUsbMaskConnection(UsbMaskConnection connection) {
@@ -121,7 +126,8 @@ public class VideoReaderExoplayer {
                             break;
                         case Player.STATE_ENDED:
                             Log.d(TAG, "PLAYER_STATE - ENDED");
-                            sendEvent(VideoReaderEventMessageCode.WAITING_FOR_VIDEO); // let MainActivity know so it can hide watermark/show settings button
+                            if (videoWaitingListener != null)
+                                videoWaitingListener.onVideoWaiting(); // let MainActivity know so it can hide watermark/show settings button
                             (new Handler(Looper.getMainLooper())).postDelayed(() -> restart(), 1000);
                             break;
                     }
@@ -132,7 +138,8 @@ public class VideoReaderExoplayer {
                 @Override
                 public void onRenderedFirstFrame() {
                     Log.d(TAG, "PLAYER_RENDER - FIRST FRAME");
-                    sendEvent(VideoReaderEventMessageCode.VIDEO_PLAYING); // let MainActivity know so it can hide watermark/show settings button
+                    if (videoPlayingListener != null)
+                        videoPlayingListener.onVideoPlaying(); // let MainActivity know so it can hide watermark/show settings button
                 }
 
                 @Override
@@ -144,14 +151,15 @@ public class VideoReaderExoplayer {
                     }
                 }
             });
-        }
+    }
 
-    private void sendEvent(VideoReaderEventMessageCode eventCode) {
-        if (videoReaderEventListener != null) { // let MainActivity know so it can hide watermark/show settings button
-            Message videoReaderEventMessage = new Message();
-            videoReaderEventMessage.obj = eventCode;
-            videoReaderEventListener.sendMessage(videoReaderEventMessage);
-        }
+    public interface VideoPlayingListener {
+        void onVideoPlaying();
+    }
+
+
+    public interface VideoWaitingListener {
+        void onVideoWaiting();
     }
 
     public void toggleZoom() {
@@ -201,6 +209,4 @@ public class VideoReaderExoplayer {
         if (mPlayer != null)
             mPlayer.release();
     }
-
-    public enum VideoReaderEventMessageCode {WAITING_FOR_VIDEO, VIDEO_PLAYING}
 }

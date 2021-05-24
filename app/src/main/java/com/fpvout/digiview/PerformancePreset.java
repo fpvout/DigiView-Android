@@ -25,7 +25,8 @@ public class PerformancePreset {
         DEFAULT,
         CONSERVATIVE,
         AGGRESSIVE,
-        LEGACY
+        LEGACY,
+        LEGACY_BUFFERED
     }
 
     public enum DataSourceType {

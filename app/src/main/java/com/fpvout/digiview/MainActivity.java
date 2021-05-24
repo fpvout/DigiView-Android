@@ -3,6 +3,7 @@ package com.fpvout.digiview;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.LayoutTransition;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -27,12 +28,11 @@ import io.sentry.SentryLevel;
 import io.sentry.android.core.SentryAndroid;
 
 import static com.fpvout.digiview.UsbMaskConnection.ACTION_USB_PERMISSION;
-import static com.fpvout.digiview.VideoReaderExoplayer.VideoReaderEventMessageCode;
 import static com.fpvout.digiview.VideoReaderExoplayer.VideoZoomedIn;
 
 public class MainActivity extends AppCompatActivity implements UsbDeviceListener {
     private static final String TAG = "DIGIVIEW";
-    private final int shortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
+    private int shortAnimationDuration;
     private float buttonAlpha = 1;
     private View settingsButton;
     private View watermarkView;
@@ -64,6 +64,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         // Prevent screen from sleeping
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
+        usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
         // Register app for auto launch
         usbDeviceBroadcastReceiver = new UsbDeviceBroadcastReceiver(this);
         IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
@@ -77,7 +78,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         settingsButton = findViewById(R.id.settingsButton);
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-
+        shortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
         // Enable resizing animations
         ((ViewGroup) findViewById(R.id.mainLayout)).getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
@@ -89,8 +90,9 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
             v.getContext().startActivity(intent);
         });
 
-        Handler videoReaderEventListener = new Handler(this.getMainLooper(), msg -> onVideoReaderEvent((VideoReaderEventMessageCode) msg.obj));
-        mVideoReader = new VideoReaderExoplayer(fpvView, this, videoReaderEventListener);
+        mVideoReader = new VideoReaderExoplayer(fpvView, this);
+        mVideoReader.setVideoPlayingEventListener(this::hideOverlay);
+        mVideoReader.setVideoWaitingEventListener(() -> showOverlay(R.string.waiting_for_video, OverlayStatus.Connected));
 
         mUsbMaskConnection = new UsbMaskConnection();
 
@@ -227,17 +229,6 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         }, 3000);
     }
 
-    private boolean onVideoReaderEvent(VideoReaderEventMessageCode m) {
-        if (VideoReaderEventMessageCode.WAITING_FOR_VIDEO.equals(m)) {
-            Log.d(TAG, "event: WAITING_FOR_VIDEO");
-            showOverlay(R.string.waiting_for_video, OverlayStatus.Connected);
-        } else if (VideoReaderEventMessageCode.VIDEO_PLAYING.equals(m)) {
-            Log.d(TAG, "event: VIDEO_PLAYING");
-            hideOverlay();
-        }
-        return false; // false to continue listening
-    }
-
     private void showOverlay(int textId, OverlayStatus connected) {
         overlayView.show(textId, connected);
         updateWatermark();
@@ -354,6 +345,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
             }
 
         }
+        setFullscreen();
     } //onActivityResult
 
     private void checkDataCollectionAgreement() {

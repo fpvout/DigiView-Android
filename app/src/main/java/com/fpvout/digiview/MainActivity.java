@@ -125,6 +125,12 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
             updateDVRThumb();
             return true;
         }));
+        // Init DVR recorder
+        try {
+            dvr.init();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         updateDVRThumb();
 
         // Prevent screen from sleeping
@@ -326,6 +332,8 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
             if (file.exists()) {
                 Bitmap bmp = BitmapFactory.decodeFile(dvr.getLatestThumbFile());
                 thumbnail.setImageBitmap(bmp);
+            } else {
+                thumbnail.setImageBitmap(null);
             }
         }
     }
@@ -333,12 +341,6 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
 
     private void connect() {
         usbConnected = true;
-        // Init DVR recorder
-        try {
-            dvr.init();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         mUsbMaskConnection.setUsbDevice(usbManager, usbDevice, dvr);
         mVideoReader.setUsbMaskConnection(mUsbMaskConnection);
         overlayView.hide();

@@ -11,6 +11,7 @@ import android.widget.Toast;
 import com.fpvout.digiview.R;
 import com.fpvout.digiview.VideoReaderExoplayer;
 import com.fpvout.digiview.helpers.StreamDumper;
+import com.fpvout.digiview.helpers.ThreadPerTaskExecutor;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,10 +53,15 @@ public class DVR {
     }
 
     public void init() throws IOException {
+        repairNotFinishedDVR();
         recorder = new MediaRecorder();
         recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         recorder.setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS);
         recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+    }
+
+    private void  repairNotFinishedDVR(){
+
     }
 
     public void recordVideoDVR(byte[] buffer, int offset, int readLength) {
@@ -71,37 +77,38 @@ public class DVR {
 
     public void start() {
         if (streaming) {
-            this.recording = true;
-            fileName = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss")
-                    .format(Calendar.getInstance().getTime());
-            ambietAudio = "/DigiView_" + fileName + ".aac";
-            videoFile ="/DigiView_"+fileName+".h264";
-            dvrFile = "/DigiView_" + fileName + ".mp4";
-
-            Log.d(DVR_LOG_TAG, "creating folder for dvr saving ...");
-            File objFolder = new File(defaultFolder);
-            if (!objFolder.exists())
-                objFolder.mkdir();
-
-
-            Log.d(DVR_LOG_TAG, "start recording ...");
-            streamDumper.init(videoFile, ambietAudio, dvrFile);
-
             Toast.makeText(activity, activity.getText(R.string.recording_started), Toast.LENGTH_LONG).show();
             ((ImageButton) activity.findViewById(R.id.recordbt)).setImageResource(R.drawable.stop);
 
+            ThreadPerTaskExecutor executor = new ThreadPerTaskExecutor();
+            executor.execute(() -> {
+                fileName = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss")
+                        .format(Calendar.getInstance().getTime());
+                ambietAudio = "/DigiView_" + fileName + ".aac";
+                videoFile ="/DigiView_"+fileName+".h264";
+                dvrFile = "/DigiView_" + fileName + ".mp4";
 
+                Log.d(DVR_LOG_TAG, "creating folder for dvr saving ...");
+                File objFolder = new File(defaultFolder);
+                if (!objFolder.exists())
+                    objFolder.mkdir();
 
-            if (recordAmbientAudio) {
-                Log.d(DVR_LOG_TAG, "starting ambient recording ...");
-                recorder.setOutputFile(defaultFolder + ambietAudio);
-                try {
-                    recorder.prepare();
-                    recorder.start();   // Ambient Audio Recording is now started
-                } catch (IOException e) {
-                    e.printStackTrace();
+                Log.d(DVR_LOG_TAG, "start recording ...");
+                streamDumper.init(videoFile, ambietAudio, dvrFile);
+                if (recordAmbientAudio) {
+                    Log.d(DVR_LOG_TAG, "starting ambient recording ...");
+                    recorder.setOutputFile(defaultFolder + ambietAudio);
+                    try {
+                        recorder.prepare();
+                        recorder.start();   // Ambient Audio Recording is now started
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
+
+                //start recording (input stream starts collecting data
+                this.recording = true;
+            });
         } else {
             Toast.makeText(activity, "Stream not ready", Toast.LENGTH_LONG).show();
         }
@@ -117,19 +124,23 @@ public class DVR {
 
     public void stop() {
         Log.d(DVR_LOG_TAG, "stop recording ...");
+        this.recording = false;
         Toast.makeText(activity, activity.getText(R.string.recording_stopped), Toast.LENGTH_LONG).show();
         ((ImageButton) activity.findViewById(R.id.recordbt)).setImageResource(R.drawable.record);
 
-        if (recordAmbientAudio) {
-            recorder.stop();
+        ThreadPerTaskExecutor executor = new ThreadPerTaskExecutor();
+        executor.execute(() -> {
+            streamDumper.stop(updateAfterRecord);
+            if (recordAmbientAudio) {
+                recorder.stop();
+            }
+
             try {
                 init();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-        streamDumper.stop(updateAfterRecord);
-        this.recording = false;
+        });
     }
 
     public File getDefaultFolder() {

@@ -13,6 +13,7 @@ import android.widget.Toast;
 import com.fpvout.digiview.R;
 import com.fpvout.digiview.UsbMaskConnection;
 import com.fpvout.digiview.VideoReaderExoplayer;
+import com.fpvout.digiview.helpers.DataListener;
 import com.fpvout.digiview.helpers.StreamDumper;
 import com.fpvout.digiview.helpers.ThreadPerTaskExecutor;
 
@@ -75,20 +76,21 @@ public class DVR {
             Toast.makeText(activity, activity.getText(R.string.recording_started), Toast.LENGTH_LONG).show();
             ((ImageButton) activity.findViewById(R.id.recordbt)).setImageResource(R.drawable.stop);
 
-            connection.getInputStream().setInputStreamListener(new Handler(message -> {
-                if (streamDumper != null) {
-                    if (isRecording()) {
-                        byte[] buffer = (byte[]) message.obj;
-                        if (buffer != null) {
-                            streamDumper.dump(buffer, message.what, buffer.length);
-                        }
-                    }
-                }
-                return true;
-            }));
-
             ThreadPerTaskExecutor executor = new ThreadPerTaskExecutor();
             executor.execute(() -> {
+                connection.getInputStream().setInputStreamListener(new DataListener() {
+                    @Override
+                    public void calllback(byte[] buffer, int offset, int length) {
+                        if (streamDumper != null) {
+                            if (isRecording()) {
+                                if (buffer != null) {
+                                    streamDumper.dump(buffer, offset, length);
+                                }
+                            }
+                        }
+                    }
+                });
+
                 fileName = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss")
                         .format(Calendar.getInstance().getTime());
                 ambietAudio = "/DigiView_" + fileName + ".aac";
@@ -112,7 +114,6 @@ public class DVR {
                         e.printStackTrace();
                     }
                 }
-
                 //start recording (input stream starts collecting data
                 this.recording = true;
             });

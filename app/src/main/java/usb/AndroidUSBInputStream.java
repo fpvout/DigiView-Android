@@ -2,10 +2,8 @@ package usb;
 
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
-import android.os.Handler;
 import android.os.Message;
-
-import com.fpvout.digiview.dvr.DVR;
+import com.fpvout.digiview.helpers.DataListener;
 
 /**
  * This class acts as a wrapper to read data from the USB Interface in Android
@@ -24,7 +22,7 @@ public class AndroidUSBInputStream extends InputStream {
 	private final UsbEndpoint sendEndPoint;
 
 	private boolean working = false;
-	private Handler inputHandler = null;
+	private DataListener inputListener = null;
 
 	/**
 	 * Class constructor. Instantiates a new {@code AndroidUSBInputStream}
@@ -57,19 +55,17 @@ public class AndroidUSBInputStream extends InputStream {
 			usbConnection.bulkTransfer(sendEndPoint, "RMVT".getBytes(), "RMVT".getBytes().length, 2000);
 			receivedBytes = usbConnection.bulkTransfer(receiveEndPoint, buffer, buffer.length, READ_TIMEOUT);
 		} else {
-			if (inputHandler != null) {
-				Message msg = new Message();
-				msg.what = offset; //OFFSET
-				msg.obj = Arrays.copyOf(buffer, buffer.length);
-				this.inputHandler.sendMessage(msg);
+			if (inputListener != null) {
+				byte[] bufferCopy = Arrays.copyOf(buffer, buffer.length);
+				this.inputListener.calllback(bufferCopy, offset, bufferCopy.length);
 			}
 		}
 
 		return receivedBytes;
 	}
 
-	public void setInputStreamListener(Handler inputHandler) {
-		this.inputHandler = inputHandler;
+	public void setInputStreamListener(DataListener inputListener) {
+		this.inputListener = inputListener;
 	}
 
 

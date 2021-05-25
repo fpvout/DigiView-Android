@@ -121,24 +121,13 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
             }
         });
 
-        dvr = DVR.getInstance(this, true, new Handler(message -> {
-            updateDVRThumb();
-            return true;
-        }));
-        // Init DVR recorder
-        try {
-            dvr.init();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        updateDVRThumb();
-
         // Prevent screen from sleeping
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
         // Register app for auto launch
         usbDeviceBroadcastReceiver = new UsbDeviceBroadcastReceiver(this);
+
         IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
         registerReceiver(usbDeviceBroadcastReceiver, filter);
         IntentFilter filterDetached = new IntentFilter(UsbManager.ACTION_USB_DEVICE_DETACHED);
@@ -167,6 +156,13 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         mVideoReader.setVideoWaitingEventListener(() -> showOverlay(R.string.waiting_for_video, OverlayStatus.Connected));
 
         mUsbMaskConnection = new UsbMaskConnection();
+
+        dvr = DVR.getInstance(this, true, new Handler(message -> {
+            updateDVRThumb();
+            return true;
+        }), mUsbMaskConnection);
+        updateDVRThumb();
+
         if (!usbConnected) {
             usbDevice = UsbMaskConnection.searchDevice(usbManager, getApplicationContext());
             if (usbDevice != null) {
@@ -363,16 +359,17 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         updateVideoZoom();
 
         if(checkStoragePermission()) {
-            usbDevice = UsbMaskConnection.searchDevice(usbManager, getApplicationContext());
-            if (usbDevice != null) {
-                connect();
-            } else {
-                showOverlay(R.string.waiting_for_usb_device, OverlayStatus.Connected);
-            }
+            finishStartup();
         }
     }
 
     private void finishStartup(){
+        // Init DVR recorder
+        try {
+            dvr.init();
+        } catch (IOException e) {
+            Log.i(TAG, "DVR - init failed");
+        }
         if (!usbConnected) {
             usbDevice = UsbMaskConnection.searchDevice(usbManager, getApplicationContext());
             if (usbDevice != null) {

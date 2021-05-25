@@ -2,6 +2,8 @@ package usb;
 
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
+import android.os.Handler;
+import android.os.Message;
 
 import com.fpvout.digiview.dvr.DVR;
 
@@ -22,9 +24,7 @@ public class AndroidUSBInputStream extends InputStream {
 	private final UsbEndpoint sendEndPoint;
 
 	private boolean working = false;
-
-
-	private DVR dvr;
+	private Handler inputHandler = null;
 
 	/**
 	 * Class constructor. Instantiates a new {@code AndroidUSBInputStream}
@@ -36,10 +36,9 @@ public class AndroidUSBInputStream extends InputStream {
 	 * @see UsbDeviceConnection
 	 * @see UsbEndpoint
 	 */
-	public AndroidUSBInputStream( UsbEndpoint readEndpoint, UsbEndpoint sendEndpoint, UsbDeviceConnection connection, DVR dvr) {
+	public AndroidUSBInputStream( UsbEndpoint readEndpoint, UsbEndpoint sendEndpoint, UsbDeviceConnection connection) {
 		this.usbConnection = connection;
 		this.receiveEndPoint = readEndpoint;
-		this.dvr = dvr;
 		this.sendEndPoint = sendEndpoint;
 	}
 
@@ -58,11 +57,19 @@ public class AndroidUSBInputStream extends InputStream {
 			usbConnection.bulkTransfer(sendEndPoint, "RMVT".getBytes(), "RMVT".getBytes().length, 2000);
 			receivedBytes = usbConnection.bulkTransfer(receiveEndPoint, buffer, buffer.length, READ_TIMEOUT);
 		} else {
-			byte[] copiedBuffer = Arrays.copyOf(buffer, buffer.length);
-			this.dvr.recordVideoDVR(copiedBuffer,offset , copiedBuffer.length);
+			if (inputHandler != null) {
+				Message msg = new Message();
+				msg.what = offset; //OFFSET
+				msg.obj = Arrays.copyOf(buffer, buffer.length);
+				this.inputHandler.sendMessage(msg);
+			}
 		}
 
 		return receivedBytes;
+	}
+
+	public void setInputStreamListener(Handler inputHandler) {
+		this.inputHandler = inputHandler;
 	}
 
 

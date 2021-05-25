@@ -33,6 +33,10 @@ public class UsbMaskConnection {
 
     }
 
+    public AndroidUSBInputStream getInputStream(){
+        return mInputStream;
+    }
+
     public static UsbDevice searchDevice(UsbManager usbManager, Context c) {
         PendingIntent permissionIntent = PendingIntent.getBroadcast(c, 0, new Intent(ACTION_USB_PERMISSION), 0);
 
@@ -86,7 +90,7 @@ public class UsbMaskConnection {
         usbConnection.claimInterface(usbInterface, true);
 
         mOutputStream = new AndroidUSBOutputStream(usbInterface.getEndpoint(0), usbConnection);
-        mInputStream = new AndroidUSBInputStream(usbInterface.getEndpoint(1), usbInterface.getEndpoint(0), usbConnection, dvr);
+        mInputStream = new AndroidUSBInputStream(usbInterface.getEndpoint(1), usbInterface.getEndpoint(0), usbConnection);
         ready = true;
     }
 }

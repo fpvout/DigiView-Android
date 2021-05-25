@@ -21,19 +21,6 @@ public class PerformancePreset {
         dataSourceType = mDataSourceType;
     }
 
-    public enum PresetType {
-        DEFAULT,
-        CONSERVATIVE,
-        AGGRESSIVE,
-        LEGACY,
-        LEGACY_BUFFERED
-    }
-
-    public enum DataSourceType {
-        INPUT_STREAM,
-        BUFFERED_INPUT_STREAM
-    }
-
     static PerformancePreset getPreset(PresetType p) {
         switch (p) {
             case CONSERVATIVE:
@@ -66,7 +53,6 @@ public class PerformancePreset {
         }
     }
 
-
     @Override
     @NonNull
     public String toString() {
@@ -79,5 +65,19 @@ public class PerformancePreset {
                 ", exoPlayerBufferForPlaybackAfterRebufferMs=" + exoPlayerBufferForPlaybackAfterRebufferMs +
                 ", dataSourceType=" + dataSourceType +
                 '}';
+    }
+
+    public enum PresetType {
+        DEFAULT,
+        CONSERVATIVE,
+        AGGRESSIVE,
+        LEGACY,
+        LEGACY_BUFFERED
+    }
+
+
+    public enum DataSourceType {
+        INPUT_STREAM,
+        BUFFERED_INPUT_STREAM
     }
 }

@@ -22,7 +22,7 @@ public class UsbDeviceBroadcastReceiver extends BroadcastReceiver {
             UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
 
             if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
-                if(device != null){
+                if (device != null) {
                     listener.usbDeviceApproved(device);
                 }
             }

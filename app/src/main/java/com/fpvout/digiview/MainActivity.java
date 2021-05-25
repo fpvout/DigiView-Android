@@ -38,11 +38,7 @@ import static com.fpvout.digiview.VideoReaderExoplayer.VideoZoomedIn;
 
 public class MainActivity extends AppCompatActivity implements UsbDeviceListener {
     private static final String TAG = "DIGIVIEW";
-    private int shortAnimationDuration;
-    private float buttonAlpha = 1;
-    private View settingsButton;
-    private View watermarkView;
-    private OverlayView overlayView;
+    private static final String ShowWatermark = "ShowWatermark";
     UsbDeviceBroadcastReceiver usbDeviceBroadcastReceiver;
     UsbManager usbManager;
     UsbDevice usbDevice;
@@ -50,10 +46,14 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     VideoReaderExoplayer mVideoReader;
     boolean usbConnected = false;
     SurfaceView fpvView;
+    private int shortAnimationDuration;
+    private float buttonAlpha = 1;
+    private View settingsButton;
+    private View watermarkView;
+    private OverlayView overlayView;
     private GestureDetector gestureDetector;
     private ScaleGestureDetector scaleGestureDetector;
     private SharedPreferences sharedPreferences;
-    private static final String ShowWatermark = "ShowWatermark";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

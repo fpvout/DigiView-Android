@@ -30,20 +30,25 @@ import com.google.android.exoplayer2.video.VideoSize;
 import usb.AndroidUSBInputStream;
 
 public class VideoReaderExoplayer {
-    private static final String TAG = "DIGIVIEW";
-    private SimpleExoPlayer mPlayer;
     static final String VideoPreset = "VideoPreset";
+    static final String VideoZoomedIn = "VideoZoomedIn";
+    private static final String TAG = "DIGIVIEW";
     private final SurfaceView surfaceView;
+    private final Context context;
+    private final SharedPreferences sharedPreferences;
+    private SimpleExoPlayer mPlayer;
     private AndroidUSBInputStream inputStream;
     private UsbMaskConnection mUsbMaskConnection;
     private boolean zoomedIn;
-    private final Context context;
     private PerformancePreset performancePreset = PerformancePreset.getPreset(PerformancePreset.PresetType.DEFAULT);
-    static final String VideoZoomedIn = "VideoZoomedIn";
-    private final SharedPreferences sharedPreferences;
-
     private VideoPlayingListener videoPlayingListener = null;
     private VideoWaitingListener videoWaitingListener = null;
+
+    VideoReaderExoplayer(SurfaceView videoSurface, Context c) {
+        surfaceView = videoSurface;
+        context = c;
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(c);
+    }
 
     public void setVideoPlayingEventListener(VideoPlayingListener listener) {
         this.videoPlayingListener = listener;
@@ -51,12 +56,6 @@ public class VideoReaderExoplayer {
 
     public void setVideoWaitingEventListener(VideoWaitingListener listener) {
         this.videoWaitingListener = listener;
-    }
-
-    VideoReaderExoplayer(SurfaceView videoSurface, Context c) {
-        surfaceView = videoSurface;
-        context = c;
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(c);
     }
 
     public void setUsbMaskConnection(UsbMaskConnection connection) {
@@ -150,15 +149,6 @@ public class VideoReaderExoplayer {
             });
     }
 
-    public interface VideoPlayingListener {
-        void onVideoPlaying();
-    }
-
-
-    public interface VideoWaitingListener {
-        void onVideoWaiting();
-    }
-
     public void toggleZoom() {
         zoomedIn = !zoomedIn;
 
@@ -205,5 +195,13 @@ public class VideoReaderExoplayer {
     public void stop() {
         if (mPlayer != null)
             mPlayer.release();
+    }
+
+    public interface VideoPlayingListener {
+        void onVideoPlaying();
+    }
+
+    public interface VideoWaitingListener {
+        void onVideoWaiting();
     }
 }

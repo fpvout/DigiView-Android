@@ -20,10 +20,10 @@ public class UsbMaskConnection {
     private static final int VENDOR_ID = 11427;
     private static final int PRODUCT_ID = 31;
     private final byte[] magicPacket = "RMVT".getBytes();
-    private UsbDeviceConnection usbConnection;
-    private UsbInterface usbInterface;
     AndroidUSBInputStream mInputStream;
     AndroidUSBOutputStream mOutputStream;
+    private UsbDeviceConnection usbConnection;
+    private UsbInterface usbInterface;
     private boolean ready = false;
 
     public UsbMaskConnection() {

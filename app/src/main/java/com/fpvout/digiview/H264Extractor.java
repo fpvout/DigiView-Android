@@ -21,12 +21,10 @@ import static com.google.android.exoplayer2.extractor.ts.TsPayloadReader.FLAG_DA
  */
 public final class H264Extractor implements Extractor {
     private static int MAX_SYNC_FRAME_SIZE = 131072;
-
-    private long firstSampleTimestampUs;
     private static long sampleTime = 10000; // todo: try to lower this. it directly infer on speed and latency. this should be equal to 16666 to reach 60fps but works better with lower value
     private final H264Reader reader;
     private final ParsableByteArray sampleData;
-
+    private long firstSampleTimestampUs;
     private boolean startedPacket;
 
     public H264Extractor(int mMaxSyncFrameSize, int mSampleTime) {

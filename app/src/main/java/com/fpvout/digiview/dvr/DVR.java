@@ -29,12 +29,12 @@ public class DVR {
     private String ambietAudio;
     private String videoFile;
     private String dvrFile;
-    private VideoReaderExoplayer mPlayer;
     private File dvrTmpFile;
     private String fileName;
     private StreamDumper streamDumper;
     private static Handler updateAfterRecord;
     public static final String LATEST_THUMB_FILE = "latest.jpeg";
+    private boolean streaming = false;
 
     DVR(Activity activity, boolean recordAmbientAudio, Handler updateAfterRecord){
         this.activity = activity;
@@ -51,9 +51,7 @@ public class DVR {
         return instance;
     }
 
-    public void init(VideoReaderExoplayer mPlayer) throws IOException {
-        this.mPlayer = mPlayer;
-
+    public void init() throws IOException {
         recorder = new MediaRecorder();
         recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         recorder.setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS);
@@ -61,13 +59,18 @@ public class DVR {
     }
 
     public void recordVideoDVR(byte[] buffer, int offset, int readLength) {
+        if (buffer != null){
+            streaming = true;
+        } else {
+            streaming = false;
+        }
         if (isRecording()) {
             streamDumper.dump( buffer,  offset, readLength);
         }
     }
 
     public void start() {
-        if ( mPlayer.isStreaming()) {
+        if (streaming) {
             this.recording = true;
             fileName = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss")
                     .format(Calendar.getInstance().getTime());
@@ -120,7 +123,7 @@ public class DVR {
         if (recordAmbientAudio) {
             recorder.stop();
             try {
-                init(mPlayer);
+                init();
             } catch (IOException e) {
                 e.printStackTrace();
             }

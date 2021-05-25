@@ -13,7 +13,6 @@ import android.view.SurfaceView;
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
-import com.fpvout.digiview.dvr.DVR;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
@@ -58,12 +57,8 @@ public class VideoReaderExoplayer {
 
     VideoReaderExoplayer(SurfaceView videoSurface, Context c) {
         surfaceView = videoSurface;
-            context = c;
-            sharedPreferences = PreferenceManager.getDefaultSharedPreferences(c);
-        }
-
-    public boolean isStreaming(){
-        return streaming;
+        context = c;
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(c);
     }
 
     public void setUsbMaskConnection(UsbMaskConnection connection) {
@@ -129,14 +124,12 @@ public class VideoReaderExoplayer {
                     case Player.STATE_IDLE:
                     case Player.STATE_READY:
                     case Player.STATE_BUFFERING:
-                        streaming = true;
                             break;
                         case Player.STATE_ENDED:
                             Log.d(TAG, "PLAYER_STATE - ENDED");
                             if (videoWaitingListener != null)
                             videoWaitingListener.onVideoWaiting(); // let MainActivity know so it can hide watermark/show settings button
                             (new Handler(Looper.getMainLooper())).postDelayed(() -> restart(), 1000);
-                            streaming = false;
                             break;
                     }
                 }

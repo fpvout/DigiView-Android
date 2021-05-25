@@ -335,7 +335,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         usbConnected = true;
         // Init DVR recorder
         try {
-            dvr.init(mVideoReader);
+            dvr.init();
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -1,8 +1,6 @@
 package com.fpvout.digiview;
 
 import android.net.Uri;
-
-import com.fpvout.digiview.dvr.DVR;
 import androidx.annotation.NonNull;
 
 import com.google.android.exoplayer2.C;

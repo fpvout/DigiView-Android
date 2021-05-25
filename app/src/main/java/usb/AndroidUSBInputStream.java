@@ -11,6 +11,7 @@ import com.fpvout.digiview.dvr.DVR;
  */
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 public class AndroidUSBInputStream extends InputStream {
 
@@ -57,7 +58,8 @@ public class AndroidUSBInputStream extends InputStream {
 			usbConnection.bulkTransfer(sendEndPoint, "RMVT".getBytes(), "RMVT".getBytes().length, 2000);
 			receivedBytes = usbConnection.bulkTransfer(receiveEndPoint, buffer, buffer.length, READ_TIMEOUT);
 		} else {
-			this.dvr.recordVideoDVR(buffer,offset , buffer.length);
+			byte[] copiedBuffer = Arrays.copyOf(buffer, buffer.length);
+			this.dvr.recordVideoDVR(copiedBuffer,offset , copiedBuffer.length);
 		}
 
 		return receivedBytes;

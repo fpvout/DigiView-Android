@@ -253,7 +253,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     }
 
     private void toggleButton() {
-        if (toolbarAlpha == 0.9 && overlayView.getVisibility() == View.VISIBLE) return;
+        if (overlayView.getVisibility() == View.VISIBLE) return;
         // cancel any pending delayed animations first
          cancelToolbarAnimation();
 
@@ -293,6 +293,8 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
 
     private void showOverlay(int textId, OverlayStatus connected) {
         overlayView.show(textId, connected);
+        toolbar.setAlpha(0.7f);
+        toolbar.setTranslationY(0);
         updateWatermark();
         autoHideToolbar();
         updateVideoZoom();

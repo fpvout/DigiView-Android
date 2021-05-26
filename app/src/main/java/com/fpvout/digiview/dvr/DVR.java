@@ -71,8 +71,6 @@ public class DVR {
                 if (file.getAbsolutePath().endsWith(".h264")) {
                     File ambientAudio = new File(file.getAbsolutePath().replace(".h264", ".aac"));
                     if (ambientAudio.exists()) {
-                        Looper.prepare();
-                        Toast.makeText(activity, activity.getString(R.string.repair_dvr), Toast.LENGTH_LONG).show();
                         File output = new File(file.getAbsolutePath().replace(".h264", ".mp4"));
                         new Mp4Muxer(activity, dvrFolder , file, ambientAudio,output, false).start();
                     }

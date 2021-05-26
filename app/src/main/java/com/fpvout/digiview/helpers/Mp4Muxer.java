@@ -28,6 +28,7 @@ import android.util.Log;
 import com.fpvout.digiview.MainActivity;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
@@ -45,19 +46,21 @@ public class Mp4Muxer extends Thread {
     private final File output;
     private final Context context;
     private final File dumpDir;
+    private boolean thumbnail = false;
 
 
     SeekableByteChannel file;
     MP4Muxer muxer;
     BufferH264ES es;
 
-    public Mp4Muxer(Context context, File dumpDir , File h264Dump, File ambientAudio, File output) {
+    public Mp4Muxer(Context context, File dumpDir , File h264Dump, File ambientAudio, File output, boolean thumbnail) {
         this.context = context;
         this.dumpDir = dumpDir;
         this.h264Dump = h264Dump;
         this.ambientAudioFile = ambientAudio;
         this.videoFile = new File(output.getAbsolutePath() + ".tmp");
         this.output = output;
+        this.thumbnail = thumbnail;
     }
 
     private void init() throws IOException {
@@ -128,23 +131,15 @@ public class Mp4Muxer extends Thread {
             muxer.finish();
             file.close();
 
-            Movie movie = MovieCreator.build(videoFile.getAbsolutePath());
-            AACTrackImpl aacTrack = new AACTrackImpl(new FileDataSourceImpl(ambientAudioFile));
-            ClippedTrack aacCroppedTrack = new ClippedTrack(aacTrack, 1, aacTrack.getSamples().size());
-            movie.addTrack(aacCroppedTrack);
+            mergeAudioVideoFiles(videoFile, ambientAudioFile, output);
 
-            Container mp4file = new DefaultMp4Builder().build(movie);
-
-            FileOutputStream fileOutputStream = new FileOutputStream(output);
-            FileChannel fc = fileOutputStream.getChannel();
-            mp4file.writeContainer(fc);
-            fileOutputStream.close();
-
-            Bitmap thumb = ThumbnailUtils.createVideoThumbnail(output.getAbsolutePath() , MediaStore.Images.Thumbnails.MINI_KIND);
-            FileOutputStream thumbOutputStream = new FileOutputStream(new File(dumpDir.getAbsolutePath() + "/" + LATEST_THUMB_FILE));
-            thumb.compress(Bitmap.CompressFormat.JPEG, 100, thumbOutputStream);
-            thumbOutputStream.flush();
-            thumbOutputStream.close();
+            if (this.thumbnail) {
+                Bitmap thumb = ThumbnailUtils.createVideoThumbnail(output.getAbsolutePath(), MediaStore.Images.Thumbnails.MINI_KIND);
+                FileOutputStream thumbOutputStream = new FileOutputStream(new File(dumpDir.getAbsolutePath() + "/" + LATEST_THUMB_FILE));
+                thumb.compress(Bitmap.CompressFormat.JPEG, 100, thumbOutputStream);
+                thumbOutputStream.flush();
+                thumbOutputStream.close();
+            }
 
             // add mp4 to gallery
             MediaScannerConnection.scanFile(context,
@@ -158,5 +153,19 @@ public class Mp4Muxer extends Thread {
         } catch (IOException exception){
             Log.e("DIGIVIEW", "MUXER: " + exception.getMessage());
         }
+    }
+
+    public void mergeAudioVideoFiles(File _videoFile, File _ambientFile, File _output) throws IOException {
+        Movie movie = MovieCreator.build(_videoFile.getAbsolutePath());
+        AACTrackImpl aacTrack = new AACTrackImpl(new FileDataSourceImpl(_ambientFile));
+        ClippedTrack aacCroppedTrack = new ClippedTrack(aacTrack, 1, aacTrack.getSamples().size());
+        movie.addTrack(aacCroppedTrack);
+
+        Container mp4file = new DefaultMp4Builder().build(movie);
+
+        FileOutputStream fileOutputStream = new FileOutputStream(_output);
+        FileChannel fc = fileOutputStream.getChannel();
+        mp4file.writeContainer(fc);
+        fileOutputStream.close();
     }
 }

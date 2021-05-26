@@ -4,27 +4,21 @@ import android.app.Activity;
 import android.media.MediaRecorder;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.util.Log;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.fpvout.digiview.R;
 import com.fpvout.digiview.UsbMaskConnection;
-import com.fpvout.digiview.VideoReaderExoplayer;
 import com.fpvout.digiview.helpers.DataListener;
+import com.fpvout.digiview.helpers.Mp4Muxer;
 import com.fpvout.digiview.helpers.StreamDumper;
 import com.fpvout.digiview.helpers.ThreadPerTaskExecutor;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-
-import androidx.annotation.NonNull;
-import usb.AndroidUSBInputStream;
 
 public class DVR {
     private final Activity activity;
@@ -68,7 +62,21 @@ public class DVR {
     }
 
     private void  repairNotFinishedDVR(){
-
+        File dvrFolder = new File(defaultFolder);
+        if (dvrFolder.exists()) {
+            File[] files = dvrFolder.listFiles();
+            for (int i = 0; i < files.length; ++i) {
+                File file = files[i];
+                if (file.getAbsolutePath().endsWith(".h264")) {
+                    File ambientAudio = new File(file.getAbsolutePath().replace(".h264", ".aac"));
+                    if (ambientAudio.exists()) {
+                        Toast.makeText(activity, activity.getString(R.string.repair_dvr), Toast.LENGTH_LONG).show();
+                        File output = new File(file.getAbsolutePath().replace(".h264", ".mp4"));
+                        new Mp4Muxer(activity, dvrFolder , file, ambientAudio,output, false).start();
+                    }
+                }
+            }
+        }
     }
 
     public void start() {

@@ -47,4 +47,5 @@
     <string name="saved_dvr">dvr has been saved</string>
     <string name="dvr_merge_audio_video">merging audio and video of the dvr</string>
     <string name="storage_rights_required">Storage access is required.</string>
+    <string name="repair_dvr">repairing dvrs ...</string>
 </resources>

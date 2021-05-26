@@ -57,7 +57,7 @@ public class StreamDumper  {
                 fos.close();
 
                 if(bytesWritten) {
-                    new Mp4Muxer(this.context, dumpDir, streamDump, streamAmbient,outFile).start();
+                    new Mp4Muxer(this.context, dumpDir, streamDump, streamAmbient,outFile, true).start();
                 }
             }
             if(!bytesWritten){

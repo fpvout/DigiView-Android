@@ -1,0 +1,545 @@
+package com.fpvout.digiview;
+
+import android.content.Context;
+import android.media.MediaCodec;
+import android.media.MediaFormat;
+import android.media.MediaRecorder;
+import android.os.Build;
+import android.view.Surface;
+import android.view.SurfaceView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.pedro.encoder.Frame;
+import com.pedro.encoder.audio.AudioEncoder;
+import com.pedro.encoder.audio.GetAacData;
+import com.pedro.encoder.input.audio.CustomAudioEffect;
+import com.pedro.encoder.input.audio.GetMicrophoneData;
+import com.pedro.encoder.input.audio.MicrophoneManager;
+import com.pedro.encoder.input.audio.MicrophoneManagerManual;
+import com.pedro.encoder.input.audio.MicrophoneMode;
+import com.pedro.encoder.utils.CodecUtil;
+import com.pedro.encoder.video.FormatVideoEncoder;
+import com.pedro.encoder.video.GetVideoData;
+import com.pedro.encoder.video.VideoEncoder;
+import com.pedro.rtplibrary.util.FpsListener;
+import com.pedro.rtplibrary.util.RecordController;
+import com.pedro.rtplibrary.view.GlInterface;
+import com.pedro.rtplibrary.view.OffScreenGlThread;
+
+import java.io.FileDescriptor;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+
+@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+public abstract class ExoPlayerRTMPBase implements GetAacData, GetVideoData, GetMicrophoneData {
+
+    private OffScreenGlThread glInterface;
+    protected Context context;
+    private SimpleExoPlayer player;
+    protected VideoEncoder videoEncoder;
+    private MicrophoneManager microphoneManager;
+    private AudioEncoder audioEncoder;
+    private boolean streaming = false;
+    protected SurfaceView surfaceView;
+    private boolean videoEnabled = true;
+    protected RecordController recordController;
+    private FpsListener fpsListener = new FpsListener();
+    private boolean audioInitialized = false;
+
+    public ExoPlayerRTMPBase(Context context, SimpleExoPlayer player, boolean useOpengl) {
+        this.context = context;
+        this.player = player;
+        if (useOpengl) {
+            glInterface = new OffScreenGlThread(context);
+            glInterface.init();
+        }
+        this.surfaceView = null;
+        videoEncoder = new VideoEncoder(this);
+        audioEncoder = new AudioEncoder(this);
+        //Necessary use same thread to read input buffer and encode it with internal audio or audio is choppy.
+        setMicrophoneMode(MicrophoneMode.SYNC);
+        recordController = new RecordController();
+    }
+
+    /**
+     * Must be called before prepareAudio.
+     *
+     * @param microphoneMode mode to work accord to audioEncoder. By default SYNC:
+     * SYNC using same thread. This mode could solve choppy audio or audio frame discarded.
+     * ASYNC using other thread.
+     */
+    public void setMicrophoneMode(MicrophoneMode microphoneMode) {
+        switch (microphoneMode) {
+            case SYNC:
+                microphoneManager = new MicrophoneManagerManual();
+                audioEncoder = new AudioEncoder(this);
+                audioEncoder.setGetFrame(((MicrophoneManagerManual) microphoneManager).getGetFrame());
+                break;
+            case ASYNC:
+                microphoneManager = new MicrophoneManager(this);
+                audioEncoder = new AudioEncoder(this);
+                break;
+        }
+    }
+
+    /**
+     * Set an audio effect modifying microphone's PCM buffer.
+     */
+    public void setCustomAudioEffect(CustomAudioEffect customAudioEffect) {
+        microphoneManager.setCustomAudioEffect(customAudioEffect);
+    }
+
+    /**
+     * @param callback get fps while record or stream
+     */
+    public void setFpsListener(FpsListener.Callback callback) {
+        fpsListener.setCallback(callback);
+    }
+
+    /**
+     * Basic auth developed to work with Wowza. No tested with other server
+     *
+     * @param user auth.
+     * @param password auth.
+     */
+    public abstract void setAuthorization(String user, String password);
+
+    /**
+     * Call this method before use @startStream. If not you will do a stream without video.
+     *
+     * @param width resolution in px.
+     * @param height resolution in px.
+     * @param fps frames per second of the stream.
+     * @param bitrate H264 in bps.
+     * @param rotation could be 90, 180, 270 or 0 (Normally 0 if you are streaming in landscape or 90
+     * if you are streaming in Portrait). This only affect to stream result. This work rotating with
+     * encoder.
+     * NOTE: Rotation with encoder is silence ignored in some devices.
+     * @return true if success, false if you get a error (Normally because the encoder selected
+     * doesn't support any configuration seated or your device hasn't a H264 encoder).
+     */
+    public boolean prepareVideo(int width, int height, int fps, int bitrate, int rotation,
+                                int avcProfile, int avcProfileLevel, int iFrameInterval) {
+        boolean result =
+                videoEncoder.prepareVideoEncoder(width, height, fps, bitrate, rotation, iFrameInterval,
+                        FormatVideoEncoder.SURFACE, avcProfile, avcProfileLevel);
+        if (glInterface != null) {
+            if (rotation == 90 || rotation == 270) {
+                glInterface.setEncoderSize(videoEncoder.getHeight(), videoEncoder.getWidth());
+            } else {
+                glInterface.setEncoderSize(videoEncoder.getWidth(), videoEncoder.getHeight());
+            }
+        }
+        return result;
+    }
+
+    public boolean prepareVideo(int width, int height, int fps, int bitrate, int rotation) {
+        return prepareVideo(width, height, fps, bitrate, rotation, -1, -1, 2);
+    }
+
+    public boolean prepareVideo(int width, int height, int bitrate) {
+        return prepareVideo(width, height, 30, bitrate, 0);
+    }
+
+    protected abstract void prepareAudioRtp(boolean isStereo, int sampleRate);
+
+    /**
+     * Call this method before use @startStream. If not you will do a stream without audio.
+     *
+     * @param bitrate AAC in kb.
+     * @param sampleRate of audio in hz. Can be 8000, 16000, 22500, 32000, 44100.
+     * @param isStereo true if you want Stereo audio (2 audio channels), false if you want Mono audio
+     * (1 audio channel).
+     * @param echoCanceler true enable echo canceler, false disable.
+     * @param noiseSuppressor true enable noise suppressor, false  disable.
+     * @return true if success, false if you get a error (Normally because the encoder selected
+     * doesn't support any configuration seated or your device hasn't a AAC encoder).
+     */
+    public boolean prepareAudio(int audioSource, int bitrate, int sampleRate, boolean isStereo, boolean echoCanceler,
+                                boolean noiseSuppressor) {
+        if (!microphoneManager.createMicrophone(audioSource, sampleRate, isStereo, echoCanceler, noiseSuppressor)) {
+            return false;
+        }
+        prepareAudioRtp(isStereo, sampleRate);
+        audioInitialized = audioEncoder.prepareAudioEncoder(bitrate, sampleRate, isStereo,
+                microphoneManager.getMaxInputSize());
+        return audioInitialized;
+    }
+
+    public boolean prepareAudio(int bitrate, int sampleRate, boolean isStereo, boolean echoCanceler,
+                                boolean noiseSuppressor) {
+        return prepareAudio(MediaRecorder.AudioSource.DEFAULT, bitrate, sampleRate, isStereo, echoCanceler,
+                noiseSuppressor);
+    }
+
+    public boolean prepareAudio(int bitrate, int sampleRate, boolean isStereo) {
+        return prepareAudio(bitrate, sampleRate, isStereo, false, false);
+    }
+
+    /**
+     * Same to call:
+     * rotation = 0;
+     * if (Portrait) rotation = 90;
+     * prepareVideo(640, 480, 30, 1200 * 1024, true, 0);
+     *
+     * @return true if success, false if you get a error (Normally because the encoder selected
+     * doesn't support any configuration seated or your device hasn't a H264 encoder).
+     */
+    public boolean prepareVideo() {
+        return prepareVideo(640, 480, 30, 1200 * 1024, 0);
+    }
+
+    /**
+     * Same to call:
+     * prepareAudio(64 * 1024, 32000, true, false, false);
+     *
+     * @return true if success, false if you get a error (Normally because the encoder selected
+     * doesn't support any configuration seated or your device hasn't a AAC encoder).
+     */
+    public boolean prepareAudio() {
+        return prepareAudio(64 * 1024, 32000, true, false, false);
+    }
+
+    /**
+     * @param forceVideo force type codec used. FIRST_COMPATIBLE_FOUND, SOFTWARE, HARDWARE
+     * @param forceAudio force type codec used. FIRST_COMPATIBLE_FOUND, SOFTWARE, HARDWARE
+     */
+    public void setForce(CodecUtil.Force forceVideo, CodecUtil.Force forceAudio) {
+        videoEncoder.setForce(forceVideo);
+        audioEncoder.setForce(forceAudio);
+    }
+
+    /**
+     * Starts recording an MP4 video. Needs to be called while streaming.
+     *
+     * @param path Where file will be saved.
+     * @throws IOException If initialized before a stream.
+     */
+    public void startRecord(@NonNull String path, @Nullable RecordController.Listener listener)
+            throws IOException {
+        recordController.startRecord(path, listener);
+        if (!streaming) {
+            startEncoders();
+        } else if (videoEncoder.isRunning()) {
+            resetVideoEncoder();
+        }
+    }
+
+    public void startRecord(@NonNull final String path) throws IOException {
+        startRecord(path, null);
+    }
+
+    /**
+     * Starts recording an MP4 video. Needs to be called while streaming.
+     *
+     * @param fd Where the file will be saved.
+     * @throws IOException If initialized before a stream.
+     */
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void startRecord(@NonNull final FileDescriptor fd,
+                            @Nullable RecordController.Listener listener) throws IOException {
+        recordController.startRecord(fd, listener);
+        if (!streaming) {
+            startEncoders();
+        } else if (videoEncoder.isRunning()) {
+            resetVideoEncoder();
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void startRecord(@NonNull final FileDescriptor fd) throws IOException {
+        startRecord(fd, null);
+    }
+
+    /**
+     * Stop record MP4 video started with @startRecord. If you don't call it file will be unreadable.
+     */
+    public void stopRecord() {
+        recordController.stopRecord();
+        if (!streaming) stopStream();
+    }
+
+    protected abstract void startStreamRtp(String url);
+
+    /**
+     * Need be called after @prepareVideo or/and @prepareAudio.
+     *
+     * @param url of the stream like:
+     * protocol://ip:port/application/streamName
+     *
+     * RTSP: rtsp://192.168.1.1:1935/live/pedroSG94
+     * RTSPS: rtsps://192.168.1.1:1935/live/pedroSG94
+     * RTMP: rtmp://192.168.1.1:1935/live/pedroSG94
+     * RTMPS: rtmps://192.168.1.1:1935/live/pedroSG94
+     */
+    public void startStream(String url) {
+        streaming = true;
+        if (!recordController.isRunning()) {
+            startEncoders();
+        } else {
+            resetVideoEncoder();
+        }
+        startStreamRtp(url);
+    }
+
+    private void startEncoders() {
+        videoEncoder.start();
+        if (audioInitialized) audioEncoder.start();
+        if (glInterface != null) {
+            glInterface.init();
+            glInterface.setFps(videoEncoder.getFps());
+            glInterface.start();
+            glInterface.addMediaCodecSurface(videoEncoder.getInputSurface());
+        }
+        Surface surface =
+                (glInterface != null) ? glInterface.getSurface() : videoEncoder.getInputSurface();
+
+        player.setVideoSurface(surface);
+
+        if (audioInitialized) microphoneManager.start();
+    }
+
+    private void resetVideoEncoder() {
+        player.setVideoSurface(null);
+        if (glInterface != null) {
+            glInterface.removeMediaCodecSurface();
+        }
+        videoEncoder.forceKeyFrame();
+        if (glInterface != null) {
+            glInterface.addMediaCodecSurface(videoEncoder.getInputSurface());
+        }
+        player.setVideoSurface(glInterface != null ? glInterface.getSurface() : videoEncoder.getInputSurface());
+    }
+
+    protected abstract void stopStreamRtp();
+
+    /**
+     * Stop stream started with @startStream.
+     */
+    public void stopStream() {
+        if (streaming) {
+            streaming = false;
+            stopStreamRtp();
+        }
+        if (!recordController.isRecording()) {
+            if (audioInitialized) microphoneManager.stop();
+            if (glInterface != null) {
+                glInterface.removeMediaCodecSurface();
+                glInterface.stop();
+            }
+            videoEncoder.stop();
+            audioEncoder.stop();
+            recordController.resetFormats();
+        }
+    }
+
+    public boolean reTry(long delay, String reason) {
+        boolean result = shouldRetry(reason);
+        if (result) {
+            reTry(delay);
+        }
+        return result;
+    }
+
+    /**
+     * Replace with reTry(long delay, String reason);
+     */
+    @Deprecated
+    public void reTry(long delay) {
+        resetVideoEncoder();
+        reConnect(delay);
+    }
+
+    /**
+     * Replace with reTry(long delay, String reason);
+     */
+    @Deprecated
+    public abstract boolean shouldRetry(String reason);
+
+    public abstract void setReTries(int reTries);
+
+    protected abstract void reConnect(long delay);
+
+    //cache control
+    public abstract boolean hasCongestion();
+
+    public abstract void resizeCache(int newSize) throws RuntimeException;
+
+    public abstract int getCacheSize();
+
+    public abstract long getSentAudioFrames();
+
+    public abstract long getSentVideoFrames();
+
+    public abstract long getDroppedAudioFrames();
+
+    public abstract long getDroppedVideoFrames();
+
+    public abstract void resetSentAudioFrames();
+
+    public abstract void resetSentVideoFrames();
+
+    public abstract void resetDroppedAudioFrames();
+
+    public abstract void resetDroppedVideoFrames();
+
+    public GlInterface getGlInterface() {
+        if (glInterface != null) {
+            return glInterface;
+        } else {
+            throw new RuntimeException("You can't do it. You are not using Opengl");
+        }
+    }
+
+    /**
+     * Mute microphone, can be called before, while and after stream.
+     */
+    public void disableAudio() {
+        if (audioInitialized) {
+            microphoneManager.mute();
+        }
+    }
+
+    /**
+     * Enable a muted microphone, can be called before, while and after stream.
+     */
+    public void enableAudio() {
+        if (audioInitialized) {
+            microphoneManager.unMute();
+        }
+    }
+
+    /**
+     * Get mute state of microphone.
+     *
+     * @return true if muted, false if enabled
+     */
+    public boolean isAudioMuted() {
+        return microphoneManager.isMuted();
+    }
+
+    /**
+     * Get video camera state
+     *
+     * @return true if disabled, false if enabled
+     */
+    public boolean isVideoEnabled() {
+        return videoEnabled;
+    }
+
+    public int getBitrate() {
+        return videoEncoder.getBitRate();
+    }
+
+    public int getResolutionValue() {
+        return videoEncoder.getWidth() * videoEncoder.getHeight();
+    }
+
+    public int getStreamWidth() {
+        return videoEncoder.getWidth();
+    }
+
+    public int getStreamHeight() {
+        return videoEncoder.getHeight();
+    }
+
+    /**
+     * Set video bitrate of H264 in bits per second while stream.
+     *
+     * @param bitrate H264 in bits per second.
+     */
+    public void setVideoBitrateOnFly(int bitrate) {
+        videoEncoder.setVideoBitrateOnFly(bitrate);
+    }
+
+    /**
+     * Set limit FPS while stream. This will be override when you call to prepareVideo method.
+     * This could produce a change in iFrameInterval.
+     *
+     * @param fps frames per second
+     */
+    public void setLimitFPSOnFly(int fps) {
+        videoEncoder.setFps(fps);
+    }
+
+    /**
+     * Get stream state.
+     *
+     * @return true if streaming, false if not streaming.
+     */
+    public boolean isStreaming() {
+        return streaming;
+    }
+
+    /**
+     * Get record state.
+     *
+     * @return true if recording, false if not recoding.
+     */
+    public boolean isRecording() {
+        return recordController.isRunning();
+    }
+
+    public void pauseRecord() {
+        recordController.pauseRecord();
+    }
+
+    public void resumeRecord() {
+        recordController.resumeRecord();
+    }
+
+    public RecordController.Status getRecordStatus() {
+        return recordController.getStatus();
+    }
+
+    protected abstract void getAacDataRtp(ByteBuffer aacBuffer, MediaCodec.BufferInfo info);
+
+    @Override
+    public void getAacData(ByteBuffer aacBuffer, MediaCodec.BufferInfo info) {
+        recordController.recordAudio(aacBuffer, info);
+        if (streaming) getAacDataRtp(aacBuffer, info);
+    }
+
+    protected abstract void onSpsPpsVpsRtp(ByteBuffer sps, ByteBuffer pps, ByteBuffer vps);
+
+    @Override
+    public void onSpsPps(ByteBuffer sps, ByteBuffer pps) {
+        if (streaming) onSpsPpsVpsRtp(sps, pps, null);
+    }
+
+    @Override
+    public void onSpsPpsVps(ByteBuffer sps, ByteBuffer pps, ByteBuffer vps) {
+        if (streaming) onSpsPpsVpsRtp(sps, pps, vps);
+    }
+
+    protected abstract void getH264DataRtp(ByteBuffer h264Buffer, MediaCodec.BufferInfo info);
+
+    @Override
+    public void getVideoData(ByteBuffer h264Buffer, MediaCodec.BufferInfo info) {
+        fpsListener.calculateFps();
+        recordController.recordVideo(h264Buffer, info);
+        if (streaming) getH264DataRtp(h264Buffer, info);
+    }
+
+    @Override
+    public void inputPCMData(Frame frame) {
+        audioEncoder.inputPCMData(frame);
+    }
+
+    @Override
+    public void onVideoFormat(MediaFormat mediaFormat) {
+        recordController.setVideoFormat(mediaFormat);
+    }
+
+    @Override
+    public void onAudioFormat(MediaFormat mediaFormat) {
+        recordController.setAudioFormat(mediaFormat);
+    }
+
+    public abstract void setLogs(boolean enable);
+}
+

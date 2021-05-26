@@ -1,5 +1,6 @@
 package com.fpvout.digiview;
 
+import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.LayoutTransition;
@@ -23,6 +24,7 @@ import android.view.WindowManager;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.preference.PreferenceManager;
 
 import java.util.HashMap;
@@ -54,6 +56,8 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     private ScaleGestureDetector scaleGestureDetector;
     private SharedPreferences sharedPreferences;
     private static final String ShowWatermark = "ShowWatermark";
+    private String rtmpUrl = "rtmp://a.rtmp.youtube.com/live2/xxx";
+    private RTMPService rtmpService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,6 +116,8 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
 
         mUsbMaskConnection = new UsbMaskConnection();
         Handler videoReaderEventListener = new Handler(this.getMainLooper(), msg -> onVideoReaderEvent((VideoReaderExoplayer.VideoReaderEventMessageCode) msg.obj));
+
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, 200);
 
         mVideoReader = new VideoReaderExoplayer(fpvView, this, videoReaderEventListener);
 
@@ -278,6 +284,8 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         mVideoReader.setUsbMaskConnection(mUsbMaskConnection);
         overlayView.hide();
         mVideoReader.start();
+        rtmpService = new RTMPService(this, mVideoReader.getPlayer(), rtmpUrl);
+        rtmpService.start();
         updateWatermark();
         autoHideSettingsButton();
         showOverlay(R.string.waiting_for_video, OverlayStatus.Connected);
@@ -345,6 +353,9 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         Log.d(TAG, "APP - On Stop");
 
         mUsbMaskConnection.stop();
+        if (rtmpService != null) {
+            rtmpService.stop();
+        }
         mVideoReader.stop();
         usbConnected = false;
     }
@@ -355,6 +366,9 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         Log.d(TAG, "APP - On Pause");
 
         mUsbMaskConnection.stop();
+        if (rtmpService != null) {
+            rtmpService.stop();
+        }
         mVideoReader.stop();
         usbConnected = false;
     }
@@ -365,6 +379,9 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         Log.d(TAG, "APP - On Destroy");
 
         mUsbMaskConnection.stop();
+        if (rtmpService != null) {
+            rtmpService.stop();
+        }
         mVideoReader.stop();
         usbConnected = false;
     }
@@ -385,9 +402,8 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
                         return event;
                 }));
             }
-
         }
-    } //onActivityResult
+    }
 
     private void checkDataCollectionAgreement() {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -404,7 +420,5 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
                     return event;
             }));
         }
-
     }
-
 }

@@ -31,6 +31,8 @@ public class PerformancePreset {
                 return new PerformancePreset(30720, 200, 32768, 65536, 0, 0, DataSourceType.BUFFERED_INPUT_STREAM);
             case LEGACY_BUFFERED:
                 return new PerformancePreset(30720, 300, 32768, 65536, 34, 34, DataSourceType.BUFFERED_INPUT_STREAM);
+            case VIDEO_STREAM_SERVICE:
+                return new PerformancePreset(131072, 10000, 500, 2000, 17, 17, DataSourceType.VIDEO_STREAM_SERVICE);
             case DEFAULT:
             default:
                 return new PerformancePreset(131072, 10000, 500, 2000, 17, 17, DataSourceType.INPUT_STREAM);
@@ -47,6 +49,8 @@ public class PerformancePreset {
                 return getPreset(PresetType.LEGACY);
             case "new_legacy":
                 return getPreset(PresetType.LEGACY_BUFFERED);
+            case "video_stream_service":
+                return getPreset(PresetType.VIDEO_STREAM_SERVICE);
             case "default":
             default:
                 return getPreset(PresetType.DEFAULT);
@@ -72,12 +76,14 @@ public class PerformancePreset {
         CONSERVATIVE,
         AGGRESSIVE,
         LEGACY,
-        LEGACY_BUFFERED
+        LEGACY_BUFFERED,
+        VIDEO_STREAM_SERVICE
     }
 
 
     public enum DataSourceType {
         INPUT_STREAM,
-        BUFFERED_INPUT_STREAM
+        BUFFERED_INPUT_STREAM,
+        VIDEO_STREAM_SERVICE
     }
 }

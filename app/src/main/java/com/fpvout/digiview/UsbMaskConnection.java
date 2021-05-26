@@ -25,6 +25,7 @@ public class UsbMaskConnection {
     private UsbDeviceConnection usbConnection;
     private UsbInterface usbInterface;
     private boolean ready = false;
+    private VideoStreamService videoStreamService;
 
     public UsbMaskConnection() {
     }
@@ -50,17 +51,21 @@ public class UsbMaskConnection {
 
     public void start(){
         mOutputStream.write(magicPacket);
+        videoStreamService.start();
     }
 
     public void stop() {
         ready = false;
         try {
+            if (videoStreamService != null)
+                videoStreamService.stop();
+
             if (mInputStream != null)
                 mInputStream.close();
 
             if (mOutputStream != null)
                 mOutputStream.close();
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
 
@@ -74,6 +79,10 @@ public class UsbMaskConnection {
         return ready;
     }
 
+    public VideoStreamService getVideoStreamService() {
+        return videoStreamService;
+    }
+
     public void setUsbDevice(UsbManager usbManager, UsbDevice d) {
         usbConnection = usbManager.openDevice(d);
         usbInterface = d.getInterface(3);
@@ -82,6 +91,8 @@ public class UsbMaskConnection {
 
         mOutputStream = new AndroidUSBOutputStream(usbInterface.getEndpoint(0), usbConnection);
         mInputStream = new AndroidUSBInputStream(usbInterface.getEndpoint(1), usbInterface.getEndpoint(0), usbConnection);
+        videoStreamService = new VideoStreamService(mInputStream);
+        start();
         ready = true;
     }
 }

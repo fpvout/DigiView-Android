@@ -81,10 +81,14 @@ public class VideoReaderExoplayer {
             switch (performancePreset.dataSourceType) {
                 case INPUT_STREAM:
                     return (DataSource) new InputStreamDataSource(dataSpec, inputStream);
-                    case BUFFERED_INPUT_STREAM:
-                    default:
-                        return (DataSource) new InputStreamBufferedDataSource(dataSpec, inputStream);
-                }
+                case BUFFERED_INPUT_STREAM:
+                    return (DataSource) new InputStreamBufferedDataSource(dataSpec, inputStream);
+                case VIDEO_STREAM_SERVICE:
+                default:
+                    VideoStreamServiceDataSource v = new VideoStreamServiceDataSource(dataSpec);
+                    mUsbMaskConnection.getVideoStreamService().addVideoStreamListener(v::onVideoStreamData);
+                    return v;
+            }
             };
 
             ExtractorsFactory extractorsFactory = () ->new Extractor[] {new H264Extractor(performancePreset.h264ReaderMaxSyncFrameSize, performancePreset.h264ReaderSampleTime)};

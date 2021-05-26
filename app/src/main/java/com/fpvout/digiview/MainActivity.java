@@ -78,6 +78,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     private ScaleGestureDetector scaleGestureDetector;
     private SharedPreferences sharedPreferences;
     private static final String ShowWatermark = "ShowWatermark";
+    private boolean overlayIsShown = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -280,7 +281,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
 
     private void autoHideToolbar() {
         if (overlayView.getVisibility() == View.VISIBLE) return;
-        if (toolbarAlpha == 0) return;
+        if (overlayIsShown) return;
 
         toolbar.postDelayed(() -> {
             toolbarAlpha = 0;
@@ -293,8 +294,9 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
 
     private void showOverlay(int textId, OverlayStatus connected) {
         overlayView.show(textId, connected);
-        toolbar.setAlpha(0.7f);
-        toolbar.setTranslationY(0);
+        overlayIsShown = true;
+        toolbar.setTranslationX(0);
+        toolbar.setAlpha(1);
         updateWatermark();
         autoHideToolbar();
         updateVideoZoom();
@@ -303,6 +305,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
 
     private void hideOverlay() {
         overlayView.hide();
+        overlayIsShown = false;
         updateWatermark();
         autoHideToolbar();
         updateVideoZoom();

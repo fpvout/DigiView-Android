@@ -12,7 +12,6 @@ import com.google.android.exoplayer2.extractor.ts.H264Reader;
 import com.google.android.exoplayer2.extractor.ts.TsPayloadReader;
 import com.google.android.exoplayer2.util.ParsableByteArray;
 import com.google.android.exoplayer2.extractor.ts.SeiReader;
-import com.google.android.exoplayer2.util.Util;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,11 +24,10 @@ public final class H264Extractor implements Extractor {
     /** Factory for {@link H264Extractor} instances. */
     public static final ExtractorsFactory FACTORY = () -> new Extractor[] {new H264Extractor()};
 
-    private static final int MAX_SYNC_FRAME_SIZE = 30 * 1024;
-    private static final int ID3_TAG = Util.getIntegerCodeForString("ID3");
+    private static int MAX_SYNC_FRAME_SIZE = 131072;
 
     private long firstSampleTimestampUs;
-    private long sampleTime = 200; // todo: try to lower this. it directly infer on speed and latency
+    private static long sampleTime = 10000; // todo: try to lower this. it directly infer on speed and latency. this should be equal to 16666 to reach 60fps but works better with lower value
     private final H264Reader reader;
     private final ParsableByteArray sampleData;
 
@@ -39,7 +37,17 @@ public final class H264Extractor implements Extractor {
         this(0);
     }
 
+    public H264Extractor(int mMaxSyncFrameSize, int mSampleTime) {
+        this(0, mMaxSyncFrameSize, mSampleTime);
+    }
+
     public H264Extractor(long firstSampleTimestampUs) {
+        this(firstSampleTimestampUs, MAX_SYNC_FRAME_SIZE, (int) sampleTime);
+    }
+
+    public H264Extractor(long firstSampleTimestampUs, int mMaxSyncFrameSize, int mSampleTime) {
+        MAX_SYNC_FRAME_SIZE = mMaxSyncFrameSize;
+        sampleTime = mSampleTime;
         this.firstSampleTimestampUs = firstSampleTimestampUs;
         reader = new H264Reader(new SeiReader(new ArrayList<Format>()),false,true);
         sampleData = new ParsableByteArray(MAX_SYNC_FRAME_SIZE);
@@ -86,8 +94,6 @@ public final class H264Extractor implements Extractor {
         }
         firstSampleTimestampUs+=sampleTime;
         reader.packetStarted(firstSampleTimestampUs, FLAG_DATA_ALIGNMENT_INDICATOR);
-        // TODO: Make it possible for the reader to consume the dataSource directly, so that it becomes
-        // unnecessary to copy the data through packetBuffer.
         reader.consume(sampleData);
         return RESULT_CONTINUE;
     }

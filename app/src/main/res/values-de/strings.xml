@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="digiview_feed">DigiView\nfeed</string>
+    <string name="waiting_for_usb_device">Warte auf USB Gerät…</string>
+    <string name="usb_device_approved">USB Gerät genehmigt</string>
+    <string name="usb_device_detached_waiting">USB Gerät getrennt\n\nWarte auf USB Gerät…</string>
+    <string name="usb_device_found">USB Gerät gefunden.</string>
+    <string name="waiting_for_video">Warte auf Video…</string>
+    <string name="title_activity_data_collection">Datenerfassungsvereinbarung</string>
+    <string name="data_collection_header">Absturzdaten an das DigiView-Team melden?</string>
+    <string name="data_collection_text">Diese App wird wahrscheinlich seltener abstürzen als deine Drohne.\n Falls doch, würden wir gerne davon erfahren!\n\nWir verwenden Sentry, um Fehler zu verfolgen und diese App zu verbessern.</string>
+    <string name="data_collection_agree_button">Zustimmen</string>
+    <string name="data_collection_deny_button">Ablehnen</string>
+
+    <string name="title_activity_settings">Einstellungen</string>
+
+    <!-- Settings -->
+    <string name="performance">Leistung</string>
+    <string name="privacy">Privatsphäre</string>
+    <string name="video_preset">Video-Voreinstellung</string>
+    <string name="video_preset_default">Standard</string>
+    <string name="video_preset_conservative">Konservativ</string>
+    <string name="video_preset_aggressive">Aggressiv</string>
+    <string name="video_preset_legacy">Legacy</string>
+    <string name="enable_analytics">Analytics akivieren</string>
+    <string name="privacy_policy">Datenschutzbestimmungen</string>
+    <string name="privacy_policy_summary">Sehe, welche Daten wir sammeln und wie wir sie verwenden</string>
+    <string name="video_player">Videoplayer</string>
+    <string name="full_screen">Vollbild</string>
+    <string name="full_screen_summary">Kann auch durch zweimaliges Tippen auf den Videoplayer umgeschaltet werden.</string>
+    <string name="show_watermark">DigiView-Wasserzeichen anzeigen</string>
+    <string name="links">Links</string>
+    <string name="our_website">Unsere Website</string>
+    <string name="discord_summary">Chatte mit uns und anderen DigiView-Benutzern</string>
+    <string name="digiview_web_app">DigiView Web App</string>
+    <string name="digiview_web_app_summary">Funktioniert mit Chrome und Chrome-basierten Browsern, auch auf Android!</string>
+    <string name="github_summary">Unser gesamter Code ist Open Source</string>
+    <string name="about">Über</string>
+    <string name="app_Version">App Version</string>
+    <string name="copyright">Copyright</string>
+    <string name="open_source_license">Open-Source Lizenz</string>
+    <string name="open_source_license_summary">MIT Lizenz</string>
+</resources>

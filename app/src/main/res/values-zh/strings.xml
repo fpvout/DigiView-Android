@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="digiview_feed">DigiView\nfeed</string>
+    <string name="waiting_for_usb_device">等待USB设备…</string>
+    <string name="usb_device_approved">USB设备已批准</string>
+    <string name="usb_device_detached_waiting">USB设备已断开\n\n等待USB设备…</string>
+    <string name="usb_device_found">已发现USB设备.</string>
+    <string name="waiting_for_video">等待视频…</string>
+    <string name="title_activity_data_collection">数据收集协议</string>
+    <string name="data_collection_header" >向DigiView团队报告崩溃数据？</string>
+    <string name="data_collection_text">该程序崩溃的次数可能比您炸机次数还少。\n 但即使发生崩溃，我们也想知道！\n\n我们使用Sentry跟踪错误并持续改进此应用程序。</string>
+    <string name="data_collection_deny_button">拒绝</string>
+    <string name="data_collection_agree_button">同意</string>
+    <string name="title_activity_settings">设置</string>
+
+    <!-- Settings -->
+    <string name="performance">性能</string>
+    <string name="privacy">隐私</string>
+    <string name="video_preset">视频预设</string>
+    <string name="video_preset_default">默认</string>
+    <string name="video_preset_conservative">保守</string>
+    <string name="video_preset_aggressive">激进</string>
+    <string name="video_preset_legacy">传统</string>
+    <string name="enable_analytics">开启数据分析</string>
+    <string name="privacy_policy">隐私策略</string>
+    <string name="privacy_policy_summary">查看我们收集数据的内容以及我们如何使用它们</string>
+    <string name="video_player">视频播放器</string>
+    <string name="full_screen">全屏</string>
+    <string name="full_screen_summary">也可以通过在视频播放器上点按两次或双指捏合来进行切换。</string>
+    <string name="show_watermark">显示 DigiView 水印</string>
+    <string name="links">相关链接</string>
+    <string name="our_website">我们的网站</string>
+    <string name="discord_summary">与我们和其他 DigiView 用户聊天</string>
+    <string name="digiview_web_app">DigiView Web应用</string>
+    <string name="digiview_web_app_summary">可以在Chrome以及基于Chromium核心的浏览器中使用，甚至可以在Android上运行！</string>
+    <string name="github_summary">我们所有的代码都是开源的</string>
+    <string name="about">关于</string>
+    <string name="app_Version">应用程序版本</string>
+    <string name="copyright">版权所有</string>
+    <string name="open_source_license">开源证书</string>
+    <string name="open_source_license_summary">MIT License</string>
+
+</resources>

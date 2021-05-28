@@ -2,16 +2,55 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mainLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/black"
+    android:animateLayoutChanges="true"
     tools:context=".MainActivity">
 
     <SurfaceView
         android:id="@+id/fpvView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
     </SurfaceView>
 
+    <TextView
+        android:id="@+id/watermarkView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/digiview_feed"
+        android:layout_marginStart="20dp"
+        android:layout_marginBottom="20dp"
+        android:drawablePadding="-2dp"
+        android:alpha="0.3"
+        app:drawableTopCompat="@drawable/ic_goggles"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="@id/fpvView"
+        style="@style/text_logo" />
+
+    <com.fpvout.digiview.OverlayView
+        android:id="@+id/overlayView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/settingsButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="25dp"
+        android:layout_marginTop="25dp"
+        android:clickable="true"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:srcCompat="@drawable/exo_ic_settings" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

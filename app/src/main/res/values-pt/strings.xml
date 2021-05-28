@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="digiview_feed">DigiView\nfeed</string>
+    <string name="waiting_for_usb_device">Aguardando pelo dispositivo USB…</string>
+    <string name="usb_device_approved">Dispositivo USB aprovado</string>
+    <string name="usb_device_detached_waiting">Dispositivo USB desconectado\n\nAguardando pelo dispositivo USB…</string>
+    <string name="usb_device_found">Dispositivo USB encontrado.</string>
+    <string name="waiting_for_video">Aguardando video…</string>
+    <string name="title_activity_data_collection">Acordo de coleta de dados</string>
+    <string name="data_collection_deny_button">Negar</string>
+    <string name="data_collection_agree_button">Aceitar</string>
+    <string name="data_collection_header">Relatar dados de falha para o time da DigiView?</string>
+    <string name="data_collection_text">Esse app provavelmente vai cair menos do que o seu drone.\n Mesmo assim, se ocorrer um erro gostaríamos de saber!\n\nUtilizamos Sentry para rastrear "bugs" e assim melhorar esse app.</string>
+    <string name="title_activity_settings">Configurações</string>
+
+    <!-- Settings -->
+    <string name="performance">Performance</string>
+    <string name="privacy">Privado</string>
+    <string name="video_preset">Definições de Video</string>
+    <string name="video_preset_default">Padrão</string>
+    <string name="video_preset_conservative">Conservador</string>
+    <string name="video_preset_aggressive">Agressivo</string>
+    <string name="video_preset_legacy">Legado</string>
+    <string name="enable_analytics">Ativar Análise de Dados</string>
+    <string name="privacy_policy">Política de Privacidade</string>
+    <string name="privacy_policy_summary">Veja os dados que coletamos e como os utilizamos</string>
+    <string name="video_player">Reprodução Vídeo</string>
+    <string name="full_screen">Tela Cheia</string>
+    <string name="full_screen_summary">Também pode ser acionada com duplo clique ou com gesto de pinça na tela de reprodução do video.</string>
+    <string name="show_watermark">Mostrar marca d\'água DigiView</string>
+    <string name="links">Links</string>
+    <string name="our_website">Nosso Website</string>
+    <string name="discord_summary">Venha conversar conosco e com outros usuários DigiView</string>
+    <string name="digiview_web_app">DigiView Web App</string>
+    <string name="digiview_web_app_summary">Funciona no Chrome e navegadores baseados no Chrome, mesmo no Android!</string>
+    <string name="github_summary">Todo o nosso código é "open source"</string>
+    <string name="about">Sobre</string>
+    <string name="app_Version">Versão App</string>
+    <string name="copyright">Direitos Autorais</string>
+    <string name="open_source_license">Licença Open-Source</string>
+    <string name="open_source_license_summary">Licença MIT</string>
+
+</resources>

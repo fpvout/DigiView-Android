@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/data_collection_main">
+
+    <LinearLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/data_collection_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textColor="@color/digiview_purple"
+            android:text="@string/data_collection_deny_button" />
+
+        <TextView
+            android:id="@+id/header_text"
+            android:layout_width="wrap_content"
+            android:layout_height="56dp"
+            android:layout_weight="2"
+            android:gravity="center_vertical"
+            android:textAlignment="center"
+            android:textSize="15sp"
+            android:scrollHorizontally="true"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/data_collection_header"
+            tools:ignore="RtlCompat,RtlSymmetry" />
+
+        <Button
+            android:id="@+id/data_collection_confirm"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textColor="@color/digiview_purple"
+            android:text="@string/data_collection_agree_button" />
+
+    </LinearLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"/>
+
+    <ScrollView android:layout_height="match_parent"
+        android:layout_width="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/data_collection_content"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:text="@string/data_collection_text"/>
+
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>

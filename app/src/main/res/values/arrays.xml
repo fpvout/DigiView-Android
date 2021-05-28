@@ -1,0 +1,18 @@
+<resources>
+    <!-- Reply Preference -->
+    <string-array name="video_preset_titles">
+        <item>@string/video_preset_default</item>
+        <item>@string/video_preset_conservative</item>
+        <item>@string/video_preset_aggressive</item>
+        <item>@string/video_preset_legacy</item>
+        <item>@string/video_preset_legacy_buffered</item>
+    </string-array>
+
+    <string-array name="video_preset_values">
+        <item>default</item>
+        <item>conservative</item>
+        <item>aggressive</item>
+        <item>legacy</item>
+        <item>legacy_buffered</item>
+    </string-array>
+</resources>

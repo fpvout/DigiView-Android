@@ -20,6 +20,7 @@ import java.io.InputStream;
 
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
+import android.util.Log;
 
 /**
  * This class acts as a wrapper to read data from the USB Interface in Android
@@ -27,23 +28,19 @@ import android.hardware.usb.UsbEndpoint;
  */
 public class AndroidUSBInputStream extends InputStream {
 
+	private final String TAG = "USBInputStream";
 	// Constants.
-	private static final int READ_BUFFER_SIZE = 50 * 1024 * 1024;
 	private static final int OFFSET = 0;
 	private static final int READ_TIMEOUT = 100;
-
-	private static final String ERROR_THREAD_NOT_INITIALIZED = "Read thread not initialized, call first 'startReadThread()'";
 
 	// Variables.
 	private UsbDeviceConnection usbConnection;
 
 	private UsbEndpoint receiveEndPoint;
+	private final UsbEndpoint sendEndPoint;
 
 	private boolean working = false;
 
-	private Thread receiveThread;
-
-	private CircularByteBuffer readBuffer;
 
 	/**
 	 * Class constructor. Instantiates a new {@code AndroidUSBInputStream}
@@ -55,117 +52,32 @@ public class AndroidUSBInputStream extends InputStream {
 	 * @see UsbDeviceConnection
 	 * @see UsbEndpoint
 	 */
-	public AndroidUSBInputStream( UsbEndpoint readEndpoint, UsbDeviceConnection connection) {
+	public AndroidUSBInputStream( UsbEndpoint readEndpoint, UsbEndpoint sendEndpoint, UsbDeviceConnection connection) {
 		this.usbConnection = connection;
 		this.receiveEndPoint = readEndpoint;
+		this.sendEndPoint = sendEndpoint;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see java.io.InputStream#read()
-	 */
 	@Override
 	public int read() throws IOException {
-		byte[] buffer = new byte[1];
-		read(buffer);
-		return buffer[0] & 0xFF;
+		byte[] buffer = new byte[131072];
+		return read(buffer, 0,  buffer.length);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see java.io.InputStream#read(byte[])
-	 */
-	@Override
-	public int read(byte[] buffer) throws IOException {
-		return read(buffer, 0, buffer.length);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see java.io.InputStream#read(byte[], int, int)
-	 */
 	@Override
 	public int read(byte[] buffer, int offset, int length) throws IOException {
-		if (readBuffer == null)
-			throw new IOException(ERROR_THREAD_NOT_INITIALIZED);
-
-		long deadLine = System.currentTimeMillis() + READ_TIMEOUT;
-		int readBytes = 0;
-		while (System.currentTimeMillis() < deadLine && readBytes <= 0)
-			readBytes = readBuffer.read(buffer, offset, length);
-		if (readBytes <= 0)
-			return -1;
-		byte[] readData = new byte[readBytes];
-		System.arraycopy(buffer, offset, readData, 0, readBytes);
-		//Log.d("USBInputStream","Received a read request of " + length + " bytes, returning " + readData.length + ": " + readData.toString());
-		return readBytes;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see java.io.InputStream#available()
-	 */
-	@Override
-	public int available() throws IOException {
-		if (readBuffer == null)
-			throw new IOException(ERROR_THREAD_NOT_INITIALIZED);
-
-		return readBuffer.availableToRead();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see java.io.InputStream#skip(long)
-	 */
-	@Override
-	public long skip(long byteCount) throws IOException {
-		if (readBuffer == null)
-			throw new IOException(ERROR_THREAD_NOT_INITIALIZED);
-		if(byteCount <= 0){
-			return 0;
+		int receivedBytes = usbConnection.bulkTransfer(receiveEndPoint, buffer, buffer.length, READ_TIMEOUT);
+		if (receivedBytes <= 0) {
+			// send magic packet again; Would be great to handle this in UsbMaskConnection directly...
+			Log.d(TAG, "received buffer empty, sending magic packet again...");
+			usbConnection.bulkTransfer(sendEndPoint, "RMVT".getBytes(), "RMVT".getBytes().length, 2000);
+			receivedBytes = usbConnection.bulkTransfer(receiveEndPoint, buffer, buffer.length, READ_TIMEOUT);
 		}
-		return readBuffer.skip((int)byteCount);
+		return receivedBytes;
 	}
 
-	/**
-	 * Starts the USB input stream read thread to start reading data from the
-	 * USB Android connection.
-	 * 
-	 * @see #close()
-	 */
-	public void startReadThread() {
-		if (!working) {
-			working = true;
-			readBuffer = new CircularByteBuffer(READ_BUFFER_SIZE);
-			receiveThread = new Thread() {
-				@Override
-				public void run() {
-					while (working) {
-						byte[] buffer = new byte[1024];
-						int receivedBytes = usbConnection.bulkTransfer(receiveEndPoint, buffer, buffer.length, READ_TIMEOUT) - OFFSET;
-						if (receivedBytes > 0) {
-							byte[] data = new byte[receivedBytes];
-							System.arraycopy(buffer, OFFSET, data, 0, receivedBytes);
-							//Log.d("USBInputStream","Message received: " + data.toString());
-							readBuffer.write(buffer, OFFSET, receivedBytes);
-						}
-					}
-				}
-			};
-			receiveThread.start();
-		}
-	}
 
-	/**
-	 * Stops the USB input stream read thread.
-	 *
-	 * @see #startReadThread()
-	 */
 	@Override
-	public void close() throws IOException {
-		working = false;
-		if (receiveThread != null)
-			receiveThread.interrupt();
-		super.close();
-	}
+	public void close() throws IOException {}
+
 }

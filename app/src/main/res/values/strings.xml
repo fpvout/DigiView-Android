@@ -1,4 +1,44 @@
 <resources>
-    <string name="app_name">DigiView</string>
-    <string name="connectButtonText">Connect</string>
+    <string name="app_name" translatable="false">DigiView</string>
+    <string name="digiview_feed">DigiView\nfeed</string>
+    <string name="waiting_for_usb_device">Please Connect Goggles</string>
+    <string name="usb_device_approved">USB device approved</string>
+    <string name="usb_device_detached_waiting">Goggles Disconnected</string>
+    <string name="usb_device_found">Goggles Connected</string>
+    <string name="waiting_for_video">Waiting For Video…</string>
+    <string name="title_activity_data_collection">Data Collection Agreement</string>
+    <string name="data_collection_deny_button">No Thanks</string>
+    <string name="data_collection_agree_button">Sure!</string>
+    <string name="data_collection_header" >Report crash data to the DigiView team?</string>
+    <string name="data_collection_text">This app will probably crash less than your drone, but if it does, we\'d like to know!</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Settings -->
+    <string name="performance">Performance</string>
+    <string name="privacy">Privacy</string>
+    <string name="video_preset">Video Preset</string>
+    <string name="video_preset_default">Default</string>
+    <string name="video_preset_conservative">Conservative</string>
+    <string name="video_preset_aggressive">Aggressive</string>
+    <string name="video_preset_legacy">Legacy</string>
+    <string name="video_preset_legacy_buffered">Legacy Buffered</string>
+    <string name="enable_analytics">Enable Analytics</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="privacy_policy_summary">See what data we collect and how we use it</string>
+    <string name="video_player">Video Player</string>
+    <string name="full_screen">Full Screen</string>
+    <string name="full_screen_summary">Can also be toggled by double-tapping or pinching on the video player.</string>
+    <string name="show_watermark">Show DigiView watermark</string>
+    <string name="links">Links</string>
+    <string name="our_website">Our Website</string>
+    <string name="discord_summary">Come chat with us and other DigiView users</string>
+    <string name="digiview_web_app">DigiView Web App</string>
+    <string name="digiview_web_app_summary">Works in Chrome and Chrome-based browsers, even on Android!</string>
+    <string name="github_summary">All our code is open source</string>
+    <string name="about">About</string>
+    <string name="app_Version">App Version</string>
+    <string name="copyright">Copyright</string>
+    <string name="open_source_license">Open-Source License</string>
+    <string name="open_source_license_summary">MIT License</string>
+
 </resources>

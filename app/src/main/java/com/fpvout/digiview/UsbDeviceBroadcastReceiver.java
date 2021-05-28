@@ -5,10 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
-import android.util.Log;
 
 public class UsbDeviceBroadcastReceiver extends BroadcastReceiver {
-    private static final String ACTION_USB_PERMISSION = "com.example.ijdfpvviewer.USB_PERMISSION";
+    private static final String ACTION_USB_PERMISSION = "com.fpvout.digiview.USB_PERMISSION";
     private final UsbDeviceListener listener;
 
     public UsbDeviceBroadcastReceiver(UsbDeviceListener listener ){
@@ -23,7 +22,6 @@ public class UsbDeviceBroadcastReceiver extends BroadcastReceiver {
 
             if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
                 if(device != null){
-                    Log.d("UsbDeviceBroadcastReceiver", "Usb device approved");
                     listener.usbDeviceApproved(device);
                 }
             }

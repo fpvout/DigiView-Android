@@ -39,5 +39,16 @@
     <string name="copyright">版权所有</string>
     <string name="open_source_license">开源证书</string>
     <string name="open_source_license_summary">MIT License</string>
+    <string name="streaming">Streaming</string>
+    <string name="rtmp_url">RTMP Url</string>
+    <string name="rtmp_key">RTMP Key</string>
+    <string name="record_audio">Record audio</string>
+    <string name="audio_source">Audio source</string>
+    <string name="audio_source_default">Default</string>
+    <string name="audio_source_internal">Internal audio</string>
+    <string name="output_width">Output Width</string>
+    <string name="output_height">Output Height</string>
+    <string name="output_framerate">Output Framerate</string>
+    <string name="output_bitrate">Output Bitrate</string>
 
 </resources>

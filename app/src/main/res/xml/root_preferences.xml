@@ -47,6 +47,56 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="@string/streaming" app:summary="Streaming will record your entire screen">
+
+        <EditTextPreference
+            app:key="RtmpUrl"
+            app:title="@string/rtmp_url"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            app:key="RtmpKey"
+            app:title="@string/rtmp_key" />
+
+        <EditTextPreference
+            app:key="OutputWidth"
+            app:title="@string/output_width"
+            app:defaultValue="1280"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            app:key="OutputHeight"
+            app:title="@string/output_height"
+            app:defaultValue="720"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            app:key="OutputFramerate"
+            app:title="@string/output_framerate"
+            app:defaultValue="60"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            app:key="OutputBitrate"
+            app:title="@string/output_bitrate"
+            app:defaultValue="1200"
+            app:useSimpleSummaryProvider="true" />
+
+        <SwitchPreferenceCompat
+            app:key="RecordAudio"
+            app:title="@string/record_audio"
+            app:defaultValue="true" />
+
+        <ListPreference
+            app:defaultValue="default"
+            app:entries="@array/audio_source_titles"
+            app:entryValues="@array/audio_source_values"
+            app:key="AudioSource"
+            app:title="@string/audio_source"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
     <PreferenceCategory app:title="@string/links">
 
         <Preference

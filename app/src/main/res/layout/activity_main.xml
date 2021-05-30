@@ -53,4 +53,28 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@drawable/exo_ic_settings" />
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/liveButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="25dp"
+        android:layout_marginBottom="25dp"
+        android:clickable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:srcCompat="@drawable/exo_icon_play" />
+
+    <ProgressBar
+        android:layout_width="1px"
+        android:layout_height="1px"
+        android:minWidth="1px"
+        android:minHeight="1px"
+        android:maxWidth="1px"
+        android:maxHeight="1px"
+        android:indeterminate="true"
+        android:indeterminateBehavior="repeat"
+        android:indeterminateDrawable="@drawable/streaming_pixel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

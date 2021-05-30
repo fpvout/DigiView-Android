@@ -1,5 +1,4 @@
 <resources>
-    <!-- Reply Preference -->
     <string-array name="video_preset_titles">
         <item>@string/video_preset_default</item>
         <item>@string/video_preset_conservative</item>
@@ -14,5 +13,15 @@
         <item>aggressive</item>
         <item>legacy</item>
         <item>legacy_buffered</item>
+    </string-array>
+
+    <string-array name="audio_source_titles">
+        <item>@string/audio_source_default</item>
+        <item>@string/audio_source_internal</item>
+    </string-array>
+
+    <string-array name="audio_source_values">
+        <item>default</item>
+        <item>internal</item>
     </string-array>
 </resources>

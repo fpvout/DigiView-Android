@@ -54,4 +54,7 @@
     <string name="output_height">Output Height</string>
     <string name="output_framerate">Output Framerate</string>
     <string name="output_bitrate">Output Bitrate</string>
+    <string name="rtmp_connection_failed">Failed to connect to RTMP server</string>
+    <string name="rtmp_auth_error">RTMP authentication failed</string>
+    <string name="rtmp_settings_empty">Please, check your streaming RTMP URL and Key</string>
 </resources>

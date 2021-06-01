@@ -16,7 +16,6 @@ import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.preference.PreferenceManager;
 
-import com.pedro.rtplibrary.base.DisplayBase;
 import com.pedro.rtplibrary.rtmp.RtmpDisplay;
 
 import net.ossrs.rtmp.ConnectCheckerRtmp;
@@ -30,7 +29,7 @@ public class StreamingService extends Service {
     private static ConnectCheckerRtmp connectChecker;
     private static Intent mediaProjectionData;
     private static int mediaProjectionResultCode;
-    private static DisplayBase rtmpDisplayBase;
+    private static RtmpDisplay rtmpDisplayBase;
     private static int dpi;
     private String endpoint;
     @Nullable
@@ -55,8 +54,7 @@ public class StreamingService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.e(TAG, "Start");
-        endpoint = String.format("%s/%s", sharedPreferences.getString("RtmpUrl", null), sharedPreferences.getString("RtmpKey", null));
-
+        endpoint = String.format("%s/%s", sharedPreferences.getString("RtmpUrl", ""), sharedPreferences.getString("RtmpKey", ""));
         prepareStreaming();
         startStreaming();
 

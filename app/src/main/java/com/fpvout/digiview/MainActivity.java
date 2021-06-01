@@ -23,6 +23,8 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -52,11 +54,11 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     private static final int VENDOR_ID = 11427;
     private static final int PRODUCT_ID = 31;
     private int shortAnimationDuration;
-    private float buttonAlpha = 1;
     private View settingsButton;
     private ConstraintLayout liveButtons;
     private FloatingActionButton liveButton;
     private FloatingActionButton muteButton;
+    private TextView bitrateTextview;
     private View watermarkView;
     private OverlayView overlayView;
     PendingIntent permissionIntent;
@@ -93,11 +95,16 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         public void onConnectionFailedRtmp(String reason) {
             stopService(new Intent(getApplicationContext(), StreamingService.class));
             updateLiveButtonIcon();
+            runOnUiThread(() -> {
+                Toast.makeText(getApplicationContext(), getString(R.string.rtmp_connection_failed), Toast.LENGTH_SHORT).show();
+            });
         }
 
         @Override
         public void onNewBitrateRtmp(long bitrate) {
-
+            runOnUiThread(() -> {
+                bitrateTextview.setText(String.format("%s kbps", bitrate / 1024));
+            });
         }
 
         @Override
@@ -108,6 +115,9 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         @Override
         public void onAuthErrorRtmp() {
             updateLiveButtonIcon();
+            runOnUiThread(() -> {
+                Toast.makeText(getApplicationContext(), getString(R.string.rtmp_auth_error), Toast.LENGTH_SHORT).show();
+            });
         }
 
         @Override
@@ -162,6 +172,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         });
 
         liveButtons = findViewById(R.id.liveButtons);
+        bitrateTextview = findViewById(R.id.bitrateText);
         StreamingService.init(this, connectChecker);
 
         muteButton = findViewById(R.id.muteButton);
@@ -173,10 +184,16 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         liveButton = findViewById(R.id.liveButton);
         liveButton.setOnClickListener(v -> {
             if (!StreamingService.isStreaming()) {
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
-                    startActivityForResult(StreamingService.sendIntent(), MEDIA_PROJECTION_PERMISSION);
+                if (sharedPreferences.getString("RtmpUrl", "").isEmpty() || sharedPreferences.getString("RtmpKey", "").isEmpty()) {
+                    Toast.makeText(this, getString(R.string.rtmp_settings_empty), Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent(v.getContext(), SettingsActivity.class);
+                    v.getContext().startActivity(intent);
                 } else {
-                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, RECORD_AUDIO_PERMISSION);
+                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+                        startActivityForResult(StreamingService.sendIntent(), MEDIA_PROJECTION_PERMISSION);
+                    } else {
+                        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, RECORD_AUDIO_PERMISSION);
+                    }
                 }
             } else {
                 stopService(new Intent(this, StreamingService.class));

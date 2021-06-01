@@ -84,6 +84,18 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/liveButton"
             app:srcCompat="@drawable/ic_microphone_solid"/>
+
+        <TextView
+            android:id="@+id/bitrateText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/liveButton"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@id/muteButton"
+            app:layout_constraintEnd_toEndOf="@id/liveButton"
+            android:textColor="@color/white"
+            android:shadowColor="@color/black"
+            android:shadowRadius="10"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ProgressBar

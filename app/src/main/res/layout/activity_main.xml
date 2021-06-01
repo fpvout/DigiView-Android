@@ -53,28 +53,38 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@drawable/exo_ic_settings" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/liveButton"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/liveButtons"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="25dp"
-        android:layout_marginBottom="25dp"
-        android:clickable="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@drawable/exo_icon_play" />
+        android:clipChildren="false"
+        android:clipToPadding="false">
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:alpha="0"
-        android:id="@+id/muteButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="15dp"
-        android:layout_marginBottom="25dp"
-        android:clickable="true"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/liveButton"
-        app:srcCompat="@drawable/ic_microphone_solid" />
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/liveButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:layout_marginBottom="25dp"
+            android:layout_marginEnd="25dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/liveButton"
+            app:srcCompat="@drawable/exo_icon_play" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/muteButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:alpha="0"
+            android:clickable="true"
+            android:layout_marginEnd="15dp"
+            android:layout_marginBottom="25dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/liveButton"
+            app:srcCompat="@drawable/ic_microphone_solid"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ProgressBar
         android:layout_width="1px"

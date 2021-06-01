@@ -26,8 +26,8 @@ public class StreamingService extends Service {
     private static NotificationManager notificationManager;
     private static SharedPreferences sharedPreferences;
     private static final String channelId = "streamingServiceNotification";
-    private static int notificationId = 12345;
     private static Context appContext;
+    private static ConnectCheckerRtmp connectChecker;
     private static Intent mediaProjectionData;
     private static int mediaProjectionResultCode;
     private static DisplayBase rtmpDisplayBase;
@@ -65,7 +65,7 @@ public class StreamingService extends Service {
 
     private void prepareStreaming() {
         stopStreaming();
-        rtmpDisplayBase = new RtmpDisplay(appContext, true, (ConnectCheckerRtmp) appContext);
+        rtmpDisplayBase = new RtmpDisplay(appContext, true, connectChecker);
         rtmpDisplayBase.setIntentResult(mediaProjectionResultCode, mediaProjectionData);
     }
 
@@ -79,6 +79,7 @@ public class StreamingService extends Service {
                     0,
                     dpi
             )) {
+                Log.i(TAG, String.valueOf(Integer.parseInt(sharedPreferences.getString("OutputFramerate", "60"))));
                 boolean audioInitialized;
                 if (sharedPreferences.getString("AudioSource", "0").equals("internal") && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     audioInitialized = rtmpDisplayBase.prepareInternalAudio(64 * 1024, 32000, true, false, false);
@@ -135,12 +136,15 @@ public class StreamingService extends Service {
         }
     }
 
-    public static void init(Context context) {
+    public static void init(Context context, ConnectCheckerRtmp connectCheckerRtmp) {
         appContext = context;
+        connectChecker = connectCheckerRtmp;
+
         DisplayMetrics dm = context.getResources().getDisplayMetrics();
         dpi = dm.densityDpi;
+
         if (rtmpDisplayBase == null) {
-            rtmpDisplayBase = new RtmpDisplay(context, true, (ConnectCheckerRtmp) context);
+            rtmpDisplayBase = new RtmpDisplay(appContext, true, connectChecker);
         }
     }
 

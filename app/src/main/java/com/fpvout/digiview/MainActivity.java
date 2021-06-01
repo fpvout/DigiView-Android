@@ -28,6 +28,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
@@ -42,7 +43,7 @@ import java.util.HashMap;
 import io.sentry.SentryLevel;
 import io.sentry.android.core.SentryAndroid;
 
-public class MainActivity extends AppCompatActivity implements UsbDeviceListener, ConnectCheckerRtmp, ActivityCompat.OnRequestPermissionsResultCallback {
+public class MainActivity extends AppCompatActivity implements UsbDeviceListener, ActivityCompat.OnRequestPermissionsResultCallback {
     private static final String TAG = "DIGIVIEW";
     private static final String ACTION_USB_PERMISSION = "com.fpvout.digiview.USB_PERMISSION";
     private static final int DATA_COLLECTION_AGREEMENT = 1;
@@ -53,6 +54,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     private int shortAnimationDuration;
     private float buttonAlpha = 1;
     private View settingsButton;
+    private ConstraintLayout liveButtons;
     private FloatingActionButton liveButton;
     private FloatingActionButton muteButton;
     private View watermarkView;
@@ -69,16 +71,48 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     private ScaleGestureDetector scaleGestureDetector;
     private SharedPreferences sharedPreferences;
     private static final String ShowWatermark = "ShowWatermark";
-    private Runnable hideSettingsButtonRunnable = new Runnable() {
+    private final Runnable hideSettingsButtonRunnable = new Runnable() {
         @Override
         public void run() {
             toggleView(settingsButton, false);
         }
     };
-    private Runnable hideLiveButtonRunnable = new Runnable() {
+    private final Runnable hideLiveButtonRunnable = new Runnable() {
         @Override
         public void run() {
-            toggleView(liveButton, false);
+            toggleView(liveButtons, false);
+        }
+    };
+    private final ConnectCheckerRtmp connectChecker = new ConnectCheckerRtmp() {
+        @Override
+        public void onConnectionSuccessRtmp() {
+            updateLiveButtonIcon();
+        }
+
+        @Override
+        public void onConnectionFailedRtmp(String reason) {
+            stopService(new Intent(getApplicationContext(), StreamingService.class));
+            updateLiveButtonIcon();
+        }
+
+        @Override
+        public void onNewBitrateRtmp(long bitrate) {
+
+        }
+
+        @Override
+        public void onDisconnectRtmp() {
+            updateLiveButtonIcon();
+        }
+
+        @Override
+        public void onAuthErrorRtmp() {
+            updateLiveButtonIcon();
+        }
+
+        @Override
+        public void onAuthSuccessRtmp() {
+            updateLiveButtonIcon();
         }
     };
 
@@ -127,7 +161,9 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
             v.getContext().startActivity(intent);
         });
 
-        StreamingService.init(this);
+        liveButtons = findViewById(R.id.liveButtons);
+        StreamingService.init(this, connectChecker);
+
         muteButton = findViewById(R.id.muteButton);
         muteButton.setOnClickListener(v -> {
             StreamingService.toggleMute();
@@ -183,11 +219,11 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
                 settingsButton.postDelayed(hideSettingsButtonRunnable, 3000);
             }
         });
-        liveButton.removeCallbacks(hideLiveButtonRunnable);
-        toggleView(liveButton, new AnimatorListenerAdapter() {
+        liveButtons.removeCallbacks(hideLiveButtonRunnable);
+        toggleView(liveButtons, new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                liveButton.postDelayed(hideLiveButtonRunnable, 3000);
+                liveButtons.postDelayed(hideLiveButtonRunnable, 3000);
             }
         });
     }
@@ -196,7 +232,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         toggleView(watermarkView, sharedPreferences.getBoolean(ShowWatermark, true), 0.3f);
 
         toggleView(settingsButton, false);
-        toggleView(liveButton, false);
+        toggleView(liveButtons, false);
         toggleView(overlayView, false);
     }
 
@@ -206,8 +242,8 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         settingsButton.removeCallbacks(hideSettingsButtonRunnable);
         toggleView(settingsButton, true);
 
-        liveButton.removeCallbacks(hideLiveButtonRunnable);
-        toggleView(liveButton, true);
+        liveButtons.removeCallbacks(hideLiveButtonRunnable);
+        toggleView(liveButtons, true);
     }
 
     private void toggleView(View view, @Nullable AnimatorListenerAdapter animatorListener) {
@@ -464,36 +500,5 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
                 liveButton.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.exo_icon_play, this.getTheme()));
             }
         });
-    }
-
-    @Override
-    public void onConnectionSuccessRtmp() {
-        this.updateLiveButtonIcon();
-    }
-
-    @Override
-    public void onConnectionFailedRtmp(String reason) {
-        stopService(new Intent(this, StreamingService.class));
-        this.updateLiveButtonIcon();
-    }
-
-    @Override
-    public void onNewBitrateRtmp(long bitrate) {
-
-    }
-
-    @Override
-    public void onDisconnectRtmp() {
-        this.updateLiveButtonIcon();
-    }
-
-    @Override
-    public void onAuthErrorRtmp() {
-        this.updateLiveButtonIcon();
-    }
-
-    @Override
-    public void onAuthSuccessRtmp() {
-        this.updateLiveButtonIcon();
     }
 }

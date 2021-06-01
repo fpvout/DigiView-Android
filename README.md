@@ -9,7 +9,7 @@ Working with Android 7+ and devices supporting USB Host mode.
 [DigiView Wiki](https://github.com/fpvout/fpvout.com/wiki)
 
 ## Download
-You can download the **Beta** Release [from Google Play Store](https://play.google.com/store/apps/details?id=com.fpvout.digiview). If you need an apk, you can get one [here](https://github.com/fpvout/DigiView-Android/suites/2805917403/artifacts/62405082).
+You can download the **Beta** Release [from Google Play Store](https://play.google.com/store/apps/details?id=com.fpvout.digiview). If you need an apk, you can get one [here](https://github.com/fpvout/DigiView-Android/releases/download/v1.0.0-beta/DigiView_1.0.0_Beta.apk).
 
 **Note:** App is still in development so you might run into some bugs or even a crash.
 

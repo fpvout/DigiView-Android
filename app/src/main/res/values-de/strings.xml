@@ -46,6 +46,10 @@
     <string name="record_audio">Record audio</string>
     <string name="audio_source">Audio source</string>
     <string name="audio_source_default">Default</string>
+    <string name="audio_source_mic">Mic</string>
+    <string name="audio_source_cam">Camera</string>
+    <string name="audio_source_communication">Communication</string>
+    <string name="audio_source_performance">Performance</string>
     <string name="audio_source_internal">Internal audio</string>
     <string name="output_width">Output Width</string>
     <string name="output_height">Output Height</string>

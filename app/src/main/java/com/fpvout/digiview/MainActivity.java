@@ -54,6 +54,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     private float buttonAlpha = 1;
     private View settingsButton;
     private FloatingActionButton liveButton;
+    private FloatingActionButton muteButton;
     private View watermarkView;
     private OverlayView overlayView;
     PendingIntent permissionIntent;
@@ -127,6 +128,12 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         });
 
         StreamingService.init(this);
+        muteButton = findViewById(R.id.muteButton);
+        muteButton.setOnClickListener(v -> {
+            StreamingService.toggleMute();
+            updateLiveButtonIcon();
+        });
+
         liveButton = findViewById(R.id.liveButton);
         liveButton.setOnClickListener(v -> {
             if (!StreamingService.isStreaming()) {
@@ -444,8 +451,16 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     private void updateLiveButtonIcon() {
         runOnUiThread(() -> {
             if (StreamingService.isStreaming()) {
+                if (StreamingService.isMuted()) {
+                    muteButton.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_microphone_slash_solid, this.getTheme()));
+                } else {
+                    muteButton.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_microphone_solid, this.getTheme()));
+                }
+
+                toggleView(muteButton, true);
                 liveButton.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.exo_icon_stop, this.getTheme()));
             } else {
+                toggleView(muteButton, false);
                 liveButton.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.exo_icon_play, this.getTheme()));
             }
         });

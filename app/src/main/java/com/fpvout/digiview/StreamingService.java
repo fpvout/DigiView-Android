@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.IBinder;
+import android.util.DisplayMetrics;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -30,6 +31,7 @@ public class StreamingService extends Service {
     private static Intent mediaProjectionData;
     private static int mediaProjectionResultCode;
     private static DisplayBase rtmpDisplayBase;
+    private static int dpi;
     private String endpoint;
     @Nullable
     @Override
@@ -75,9 +77,24 @@ public class StreamingService extends Service {
                     Integer.parseInt(sharedPreferences.getString("OutputFramerate", "60")),
                     Integer.parseInt(sharedPreferences.getString("OutputBitrate", "1200")) * 1024,
                     0,
-                    320
-            ) && rtmpDisplayBase.prepareAudio()) {
-                rtmpDisplayBase.startStream(endpoint);
+                    dpi
+            )) {
+                boolean audioInitialized;
+                if (sharedPreferences.getString("AudioSource", "0").equals("internal") && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    audioInitialized = rtmpDisplayBase.prepareInternalAudio(64 * 1024, 32000, true, false, false);
+                } else {
+                    audioInitialized = rtmpDisplayBase.prepareAudio(Integer.parseInt(sharedPreferences.getString("AudioSource", "0")), 64 * 1024, 32000, false, false, false);
+                }
+
+                if (audioInitialized) {
+                    if (!sharedPreferences.getBoolean("RecordAudio", true)) {
+                        rtmpDisplayBase.disableAudio();
+                    } else {
+                        rtmpDisplayBase.enableAudio();
+                    }
+
+                    rtmpDisplayBase.startStream(endpoint);
+                }
             }
         }
     }
@@ -104,8 +121,24 @@ public class StreamingService extends Service {
         return rtmpDisplayBase != null && rtmpDisplayBase.isStreaming();
     }
 
+    public static boolean isMuted() {
+        return rtmpDisplayBase != null && rtmpDisplayBase.isAudioMuted();
+    }
+
+    public static void toggleMute() {
+        if (isStreaming()) {
+            if (rtmpDisplayBase.isAudioMuted()) {
+                rtmpDisplayBase.enableAudio();
+            } else {
+                rtmpDisplayBase.disableAudio();
+            }
+        }
+    }
+
     public static void init(Context context) {
         appContext = context;
+        DisplayMetrics dm = context.getResources().getDisplayMetrics();
+        dpi = dm.densityDpi;
         if (rtmpDisplayBase == null) {
             rtmpDisplayBase = new RtmpDisplay(context, true, (ConnectCheckerRtmp) context);
         }

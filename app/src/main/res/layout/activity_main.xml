@@ -64,6 +64,18 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@drawable/exo_icon_play" />
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:alpha="0"
+        android:id="@+id/muteButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="15dp"
+        android:layout_marginBottom="25dp"
+        android:clickable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/liveButton"
+        app:srcCompat="@drawable/ic_microphone_solid" />
+
     <ProgressBar
         android:layout_width="1px"
         android:layout_height="1px"

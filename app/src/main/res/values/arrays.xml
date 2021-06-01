@@ -17,11 +17,17 @@
 
     <string-array name="audio_source_titles">
         <item>@string/audio_source_default</item>
-        <item>@string/audio_source_internal</item>
+        <item>@string/audio_source_mic</item>
+        <item>@string/audio_source_cam</item>
+        <item>@string/audio_source_communication</item>
+        <item>@string/audio_source_performance</item>
     </string-array>
 
     <string-array name="audio_source_values">
-        <item>default</item>
-        <item>internal</item>
+        <item>0</item>
+        <item>1</item>
+        <item>5</item>
+        <item>7</item>
+        <item>10</item>
     </string-array>
 </resources>

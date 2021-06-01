@@ -1,0 +1,44 @@
+
+<resources>
+    <string name="app_name" translatable="false">DigiView</string>
+    <string name="digiview_feed">DigiView\nfeed</string>
+    <string name="waiting_for_usb_device">Verbind De Goggles</string>
+    <string name="usb_device_approved">USB Apparaat Goedgekeurd</string>
+    <string name="usb_device_detached_waiting">Goggles Verbinding Verbroken</string>
+    <string name="usb_device_found">Goggles Verbonden</string>
+    <string name="waiting_for_video">Wachten Op Video…</string>
+    <string name="title_activity_data_collection">Data Collection Agreement</string>
+    <string name="data_collection_deny_button">Nee, bedankt</string>
+    <string name="data_collection_agree_button">Ja hoor!</string>
+    <string name="data_collection_header" >Deel crash-informatie met het DigiView team?</string>
+    <string name="data_collection_text">Deze app crashed waarschijnlijk minder vaak dan je drone, maar als het gebeurt willen we het graag weten!</string>
+    <string name="title_activity_settings">Instellingen</string>
+
+    <!-- Settings -->
+    <string name="performance">Prestatie</string>
+    <string name="privacy">Privacy</string>
+    <string name="video_preset">Video Preset</string>
+    <string name="video_preset_default">Standaard</string>
+    <string name="video_preset_conservative">Behouden</string>
+    <string name="video_preset_aggressive">Aggresief</string>
+    <string name="video_preset_legacy">Legacy</string>
+    <string name="video_preset_legacy_buffered">Legacy Buffered</string>
+    <string name="enable_analytics">Analyse Inschakelen</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="privacy_policy_summary">Bekijk welke data we verzamelen en hoe we deze gebruiken</string>
+    <string name="video_player">Video Speler</string>
+    <string name="full_screen">Volledig Scherm</string>
+    <string name="full_screen_summary">Kan ook ingeschakeld worden door dubbel-tap of het pinchen van de videospeler.</string>
+    <string name="show_watermark">DigiView watermerk weergeven</string>
+    <string name="links">Links</string>
+    <string name="our_website">Onze Website</string>
+    <string name="discord_summary">Chat met ons en andere DigiView gebruikers</string>
+    <string name="digiview_web_app">DigiView Web App</string>
+    <string name="digiview_web_app_summary">Werkt in Chrome en Chrome-based browsers, zelfs op Android!</string>
+    <string name="github_summary">Al onze code is open-source</string>
+    <string name="about">Over</string>
+    <string name="app_Version">App Versie</string>
+    <string name="copyright">Copyright</string>
+    <string name="open_source_license">Open-Source License</string>
+    <string name="open_source_license_summary">MIT License</string>
+</resources>

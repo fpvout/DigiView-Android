@@ -64,6 +64,9 @@ public class StreamingService extends Service {
     private void prepareStreaming() {
         stopStreaming();
         rtmpDisplayBase = new RtmpDisplay(appContext, true, connectChecker);
+        if (!sharedPreferences.getString("RtmpUsername", "").isEmpty() && !sharedPreferences.getString("RtmpPassword", "").isEmpty()) {
+            rtmpDisplayBase.setAuthorization(sharedPreferences.getString("RtmpUsername", ""), sharedPreferences.getString("RtmpPassword", ""));
+        }
         rtmpDisplayBase.setIntentResult(mediaProjectionResultCode, mediaProjectionData);
     }
 
@@ -143,6 +146,9 @@ public class StreamingService extends Service {
 
         if (rtmpDisplayBase == null) {
             rtmpDisplayBase = new RtmpDisplay(appContext, true, connectChecker);
+            if (!sharedPreferences.getString("RtmpUsername", "").isEmpty() && !sharedPreferences.getString("RtmpPassword", "").isEmpty()) {
+                rtmpDisplayBase.setAuthorization(sharedPreferences.getString("RtmpUsername", ""), sharedPreferences.getString("RtmpPassword", ""));
+            }
         }
     }
 

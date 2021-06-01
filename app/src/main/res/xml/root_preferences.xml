@@ -59,6 +59,15 @@
             app:title="@string/rtmp_key" />
 
         <EditTextPreference
+            app:key="RtmpUsername"
+            app:title="@string/rtmp_username"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            app:key="RtmpPassword"
+            app:title="@string/rtmp_password" />
+
+        <EditTextPreference
             app:key="OutputWidth"
             app:title="@string/output_width"
             app:defaultValue="1280"

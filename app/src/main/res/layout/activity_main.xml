@@ -71,7 +71,7 @@
             android:layout_marginEnd="25dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/liveButton"
-            app:srcCompat="@drawable/exo_icon_play" />
+            app:srcCompat="@drawable/ic_live_icon" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/muteButton"

@@ -517,7 +517,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
                 liveButton.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.exo_icon_stop, this.getTheme()));
             } else {
                 toggleView(muteButton, false);
-                liveButton.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.exo_icon_play, this.getTheme()));
+                liveButton.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_live_icon, this.getTheme()));
             }
         });
     }

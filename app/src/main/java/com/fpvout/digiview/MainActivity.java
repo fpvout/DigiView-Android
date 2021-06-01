@@ -110,6 +110,9 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         @Override
         public void onDisconnectRtmp() {
             updateLiveButtonIcon();
+            runOnUiThread(() -> {
+                bitrateTextview.setText("");
+            });
         }
 
         @Override

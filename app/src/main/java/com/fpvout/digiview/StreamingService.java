@@ -41,7 +41,7 @@ public class StreamingService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.e(TAG, "Create");
+        Log.d(TAG, "Create");
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -53,7 +53,7 @@ public class StreamingService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.e(TAG, "Start");
+        Log.d(TAG, "Start");
         endpoint = String.format("%s/%s", sharedPreferences.getString("RtmpUrl", ""), sharedPreferences.getString("RtmpKey", ""));
         prepareStreaming();
         startStreaming();
@@ -80,7 +80,6 @@ public class StreamingService extends Service {
                     0,
                     dpi
             )) {
-                Log.i(TAG, String.valueOf(Integer.parseInt(sharedPreferences.getString("OutputFramerate", "60"))));
                 boolean audioInitialized;
                 if (sharedPreferences.getString("AudioSource", "0").equals("internal") && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     audioInitialized = rtmpDisplayBase.prepareInternalAudio(64 * 1024, 32000, true, false, false);
@@ -145,6 +144,7 @@ public class StreamingService extends Service {
         dpi = dm.densityDpi;
 
         if (rtmpDisplayBase == null) {
+            sharedPreferences = PreferenceManager.getDefaultSharedPreferences(appContext);
             rtmpDisplayBase = new RtmpDisplay(appContext, true, connectChecker);
             if (!sharedPreferences.getString("RtmpUsername", "").isEmpty() && !sharedPreferences.getString("RtmpPassword", "").isEmpty()) {
                 rtmpDisplayBase.setAuthorization(sharedPreferences.getString("RtmpUsername", ""), sharedPreferences.getString("RtmpPassword", ""));

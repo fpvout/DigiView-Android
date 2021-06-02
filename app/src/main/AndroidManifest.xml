@@ -51,7 +51,7 @@
         </activity>
 
         <service
-            android:name=".StreamingService"
+            android:name=".streaming.StreamingService"
             android:foregroundServiceType="mediaProjection" />
 
         <meta-data

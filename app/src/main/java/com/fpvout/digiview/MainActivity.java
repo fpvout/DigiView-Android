@@ -36,6 +36,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.preference.PreferenceManager;
 
+import com.fpvout.digiview.streaming.StreamingService;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import net.ossrs.rtmp.ConnectCheckerRtmp;
@@ -187,7 +188,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         liveButton = findViewById(R.id.liveButton);
         liveButton.setOnClickListener(v -> {
             if (!StreamingService.isStreaming()) {
-                if (sharedPreferences.getString("RtmpUrl", "").isEmpty() || sharedPreferences.getString("RtmpKey", "").isEmpty()) {
+                if (sharedPreferences.getString("StreamRtmpUrl", "").isEmpty() || sharedPreferences.getString("StreamRtmpKey", "").isEmpty()) {
                     Toast.makeText(this, getString(R.string.rtmp_settings_empty), Toast.LENGTH_LONG).show();
                     Intent intent = new Intent(v.getContext(), SettingsActivity.class);
                     v.getContext().startActivity(intent);

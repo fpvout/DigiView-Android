@@ -10,6 +10,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.ListPreference;
 import androidx.preference.PreferenceFragmentCompat;
 
+import com.fpvout.digiview.streaming.StreamAudioSource;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -48,13 +50,16 @@ public class SettingsActivity extends AppCompatActivity {
             setPreferencesFromResource(R.xml.root_preferences, rootKey);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                ListPreference audioSourcePreference = findPreference("AudioSource");
+                ListPreference audioSourcePreference = findPreference("StreamAudioSource");
 
                 ArrayList<CharSequence> entries = new ArrayList<>(Arrays.asList(audioSourcePreference.getEntries()));
                 ArrayList<CharSequence> entryValues = new ArrayList<>(Arrays.asList(audioSourcePreference.getEntryValues()));
 
-                entries.add(getString(R.string.audio_source_internal));
-                entryValues.add("internal");
+                entries.add(getString(R.string.stream_audio_source_performance));
+                entryValues.add(StreamAudioSource.PERFORMANCE);
+
+                entries.add(getString(R.string.stream_audio_source_internal));
+                entryValues.add(StreamAudioSource.INTERNAL);
 
                 audioSourcePreference.setEntries(entries.toArray(new CharSequence[0]));
                 audioSourcePreference.setEntryValues(entryValues.toArray(new CharSequence[0]));

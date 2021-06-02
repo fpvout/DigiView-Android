@@ -1,4 +1,4 @@
-package com.fpvout.digiview;
+package com.fpvout.digiview.streaming;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -32,6 +32,7 @@ public class StreamingService extends Service {
     private static RtmpDisplay rtmpDisplayBase;
     private static int dpi;
     private String endpoint;
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -54,7 +55,7 @@ public class StreamingService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "Start");
-        endpoint = String.format("%s/%s", sharedPreferences.getString("RtmpUrl", ""), sharedPreferences.getString("RtmpKey", ""));
+        endpoint = String.format("%s/%s", sharedPreferences.getString("StreamRtmpUrl", ""), sharedPreferences.getString("StreamRtmpKey", ""));
         prepareStreaming();
         startStreaming();
 
@@ -64,31 +65,45 @@ public class StreamingService extends Service {
     private void prepareStreaming() {
         stopStreaming();
         rtmpDisplayBase = new RtmpDisplay(appContext, true, connectChecker);
-        if (!sharedPreferences.getString("RtmpUsername", "").isEmpty() && !sharedPreferences.getString("RtmpPassword", "").isEmpty()) {
-            rtmpDisplayBase.setAuthorization(sharedPreferences.getString("RtmpUsername", ""), sharedPreferences.getString("RtmpPassword", ""));
+        if (!sharedPreferences.getString("StreamRtmpUsername", "").isEmpty() && !sharedPreferences.getString("StreamRtmpPassword", "").isEmpty()) {
+            rtmpDisplayBase.setAuthorization(sharedPreferences.getString("StreamRtmpUsername", ""), sharedPreferences.getString("StreamRtmpPassword", ""));
         }
         rtmpDisplayBase.setIntentResult(mediaProjectionResultCode, mediaProjectionData);
     }
 
     private void startStreaming() {
         if (!rtmpDisplayBase.isStreaming()) {
+            StreamResolution streamResolution = StreamResolution.getResolution(sharedPreferences.getString("StreamResolution", StreamResolution.DEFAULT));
             if (rtmpDisplayBase.prepareVideo(
-                    Integer.parseInt(sharedPreferences.getString("OutputWidth", "1280")),
-                    Integer.parseInt(sharedPreferences.getString("OutputHeight", "720")),
-                    Integer.parseInt(sharedPreferences.getString("OutputFramerate", "60")),
-                    Integer.parseInt(sharedPreferences.getString("OutputBitrate", "1200")) * 1024,
+                    streamResolution.getWidth(),
+                    streamResolution.getHeight(),
+                    StreamFramerate.getFramerate(sharedPreferences.getString("StreamFramerate", StreamFramerate.DEFAULT)),
+                    StreamBitrate.getBitrate(sharedPreferences.getString("StreamBitrate", StreamBitrate.DEFAULT)),
                     0,
                     dpi
             )) {
                 boolean audioInitialized;
-                if (sharedPreferences.getString("AudioSource", "0").equals("internal") && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    audioInitialized = rtmpDisplayBase.prepareInternalAudio(64 * 1024, 32000, true, false, false);
+                if (sharedPreferences.getString("StreamAudioSource", StreamAudioSource.DEFAULT).equals(StreamAudioSource.INTERNAL) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    audioInitialized = rtmpDisplayBase.prepareInternalAudio(
+                        StreamAudioBitrate.getBitrate(sharedPreferences.getString("StreamAudioBitrate", StreamAudioBitrate.DEFAULT)),
+                        StreamAudioSampleRate.getSampleRate(sharedPreferences.getString("StreamAudioSampleRate", StreamAudioSampleRate.DEFAULT)),
+                        sharedPreferences.getBoolean("StreamAudioStereo", true),
+                        false,
+                        false
+                    );
                 } else {
-                    audioInitialized = rtmpDisplayBase.prepareAudio(Integer.parseInt(sharedPreferences.getString("AudioSource", "0")), 64 * 1024, 32000, false, false, false);
+                    audioInitialized = rtmpDisplayBase.prepareAudio(
+                        StreamAudioSource.getAudioSource(sharedPreferences.getString("StreamAudioSource", StreamAudioSource.DEFAULT)),
+                        StreamAudioBitrate.getBitrate(sharedPreferences.getString("StreamAudioBitrate", StreamAudioBitrate.DEFAULT)),
+                        StreamAudioSampleRate.getSampleRate(sharedPreferences.getString("StreamAudioSampleRate", StreamAudioSampleRate.DEFAULT)),
+                        sharedPreferences.getBoolean("StreamAudioStereo", true),
+                        false,
+                        false
+                    );
                 }
 
                 if (audioInitialized) {
-                    if (!sharedPreferences.getBoolean("RecordAudio", true)) {
+                    if (!sharedPreferences.getBoolean("StreamRecordAudio", true)) {
                         rtmpDisplayBase.disableAudio();
                     } else {
                         rtmpDisplayBase.enableAudio();
@@ -146,8 +161,8 @@ public class StreamingService extends Service {
         if (rtmpDisplayBase == null) {
             sharedPreferences = PreferenceManager.getDefaultSharedPreferences(appContext);
             rtmpDisplayBase = new RtmpDisplay(appContext, true, connectChecker);
-            if (!sharedPreferences.getString("RtmpUsername", "").isEmpty() && !sharedPreferences.getString("RtmpPassword", "").isEmpty()) {
-                rtmpDisplayBase.setAuthorization(sharedPreferences.getString("RtmpUsername", ""), sharedPreferences.getString("RtmpPassword", ""));
+            if (!sharedPreferences.getString("StreamRtmpUsername", "").isEmpty() && !sharedPreferences.getString("StreamRtmpPassword", "").isEmpty()) {
+                rtmpDisplayBase.setAuthorization(sharedPreferences.getString("StreamRtmpUsername", ""), sharedPreferences.getString("StreamRtmpPassword", ""));
             }
         }
     }

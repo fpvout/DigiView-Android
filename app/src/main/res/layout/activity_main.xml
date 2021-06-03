@@ -75,9 +75,9 @@
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/muteButton"
+            android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:alpha="0"
             android:clickable="true"
             android:layout_marginEnd="15dp"
             android:layout_marginBottom="25dp"
@@ -87,6 +87,7 @@
 
         <TextView
             android:id="@+id/bitrateText"
+            android:visibility="gone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toBottomOf="@id/liveButton"
@@ -97,6 +98,8 @@
             android:shadowColor="@color/black"
             android:shadowRadius="10"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+
 
     <ProgressBar
         android:layout_width="1px"

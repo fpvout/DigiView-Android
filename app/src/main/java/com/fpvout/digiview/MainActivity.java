@@ -23,6 +23,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.Animation;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -55,8 +56,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     private static final int VENDOR_ID = 11427;
     private static final int PRODUCT_ID = 31;
     private int shortAnimationDuration;
-    private View settingsButton;
-    private ConstraintLayout liveButtons;
+    private FloatingActionButton settingsButton;
     private FloatingActionButton liveButton;
     private FloatingActionButton muteButton;
     private TextView bitrateTextview;
@@ -74,16 +74,13 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     private ScaleGestureDetector scaleGestureDetector;
     private SharedPreferences sharedPreferences;
     private static final String ShowWatermark = "ShowWatermark";
-    private final Runnable hideSettingsButtonRunnable = new Runnable() {
+    private final Runnable hideButtonsRunnable = new Runnable() {
         @Override
         public void run() {
             toggleView(settingsButton, false);
-        }
-    };
-    private final Runnable hideLiveButtonRunnable = new Runnable() {
-        @Override
-        public void run() {
-            toggleView(liveButtons, false);
+            toggleView(liveButton, false);
+            toggleView(muteButton, false);
+            toggleView(bitrateTextview, false);
         }
     };
     private final ConnectCheckerRtmp connectChecker = new ConnectCheckerRtmp() {
@@ -104,6 +101,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         @Override
         public void onNewBitrateRtmp(long bitrate) {
             runOnUiThread(() -> {
+                bitrateTextview.setVisibility(View.VISIBLE);
                 bitrateTextview.setText(String.format("%s kbps", bitrate / 1024));
             });
         }
@@ -113,6 +111,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
             updateLiveButtonIcon();
             runOnUiThread(() -> {
                 bitrateTextview.setText("");
+                bitrateTextview.setVisibility(View.GONE);
             });
         }
 
@@ -175,7 +174,6 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
             v.getContext().startActivity(intent);
         });
 
-        liveButtons = findViewById(R.id.liveButtons);
         bitrateTextview = findViewById(R.id.bitrateText);
         StreamingService.init(this, connectChecker);
 
@@ -229,73 +227,80 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     private void toggleFullOverlay() {
         if (overlayView.getAlpha() > 0.0f) return;
 
-        if (sharedPreferences.getBoolean(ShowWatermark, true)) {
-            toggleView(watermarkView, 0.3f);
+        toggleView(settingsButton, hideButtonsRunnable);
+        toggleView(liveButton, hideButtonsRunnable);
+        if (StreamingService.isStreaming()) {
+            toggleView(bitrateTextview, hideButtonsRunnable);
+            toggleView(muteButton, hideButtonsRunnable);
         }
-
-        settingsButton.removeCallbacks(hideSettingsButtonRunnable);
-        toggleView(settingsButton, new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                settingsButton.postDelayed(hideSettingsButtonRunnable, 3000);
-            }
-        });
-        liveButtons.removeCallbacks(hideLiveButtonRunnable);
-        toggleView(liveButtons, new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                liveButtons.postDelayed(hideLiveButtonRunnable, 3000);
-            }
-        });
     }
 
     private void hideFullOverlay() {
         toggleView(watermarkView, sharedPreferences.getBoolean(ShowWatermark, true), 0.3f);
 
         toggleView(settingsButton, false);
-        toggleView(liveButtons, false);
+        toggleView(liveButton, false);
+        toggleView(muteButton, false);
+        toggleView(bitrateTextview, false);
         toggleView(overlayView, false);
     }
 
     private void showFullOverlay() {
         toggleView(watermarkView, false);
 
-        settingsButton.removeCallbacks(hideSettingsButtonRunnable);
         toggleView(settingsButton, true);
-
-        liveButtons.removeCallbacks(hideLiveButtonRunnable);
-        toggleView(liveButtons, true);
+        toggleView(liveButton, true);
+        if (StreamingService.isStreaming()) {
+            toggleView(muteButton, true);
+            toggleView(bitrateTextview, true);
+        }
     }
 
-    private void toggleView(View view, @Nullable AnimatorListenerAdapter animatorListener) {
-        toggleView(view, view.getAlpha() ==  0.0f, 1.0f, animatorListener);
+    private void toggleView(View view, @Nullable Runnable runnable) {
+        toggleView(view, view.getAlpha() == 0.0f, 1.0f, runnable);
     }
 
-    private void toggleView(View view, float visibleAlpha) {
-        toggleView(view, view.getAlpha() ==  0.0f, visibleAlpha);
+    private void toggleView(FloatingActionButton view, @Nullable Runnable runnable) {
+        toggleView(view, view.getVisibility() != View.VISIBLE, runnable);
     }
 
     private void toggleView(View view, boolean visible) {
         toggleView(view, visible, 1.0f, null);
     }
 
+    private void toggleView(FloatingActionButton view, boolean visible) {
+        toggleView(view, visible, null);
+    }
+
     private void toggleView(View view, boolean visible, float visibleAlpha) {
         toggleView(view, visible, visibleAlpha, null);
     }
 
-    private void toggleView(View view, boolean visible, float visibleAlpha, @Nullable AnimatorListenerAdapter animatorListener) {
+    private void toggleView(View view, boolean visible, float visibleAlpha, @Nullable Runnable runnable) {
         if (!visible) {
+            view.removeCallbacks(runnable);
             view.animate().cancel();
             view.animate()
-                .alpha(0)
-                .setDuration(shortAnimationDuration)
-                .setListener(null);
+                    .alpha(0)
+                    .setDuration(shortAnimationDuration)
+                    .setListener(null);
         } else {
+            view.removeCallbacks(runnable);
             view.animate().cancel();
             view.animate()
-                .alpha(visibleAlpha)
-                .setDuration(shortAnimationDuration)
-                .setListener(animatorListener);
+                    .alpha(visibleAlpha)
+                    .setDuration(shortAnimationDuration);
+            view.postDelayed(runnable, 3000);
+        }
+    }
+
+    private void toggleView(FloatingActionButton view, boolean visible, @Nullable Runnable runnable) {
+        if (!visible) {
+            view.hide();
+        } else {
+            view.removeCallbacks(runnable);
+            view.show();
+            view.postDelayed(runnable, 3000);
         }
     }
 
@@ -514,7 +519,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
                     muteButton.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_microphone_solid, this.getTheme()));
                 }
 
-                toggleView(muteButton, true);
+                toggleView(muteButton, true, overlayView.getAlpha() > 0.0f ? null : hideButtonsRunnable);
                 liveButton.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.exo_icon_stop, this.getTheme()));
             } else {
                 toggleView(muteButton, false);

@@ -12,6 +12,7 @@ import java.util.ArrayList;
 public class VideoStreamService {
 
     private static final int READ_BUFFER_SIZE = 131072;
+    private static final int MAX_VIDEO_STREAM_LISTENER = 10;
     private static final String TAG = "VideoStreamService";
     private final ArrayList<VideoStreamListener> videoStreamListeners;
     InputStream videoStream;
@@ -56,8 +57,12 @@ public class VideoStreamService {
     }
 
     public void addVideoStreamListener(VideoStreamListener listener) {
-        Log.d(TAG, "addVideoStreamListener");
-        videoStreamListeners.add(listener);
+        if (videoStreamListeners.size() < MAX_VIDEO_STREAM_LISTENER) {
+            Log.d(TAG, "addVideoStreamListener");
+            videoStreamListeners.add(listener);
+        } else {
+            Log.d(TAG, "addVideoStreamListener: Limit reached !");
+        }
     }
 
     public void removeVideoStreamListener(VideoStreamListener listener) {

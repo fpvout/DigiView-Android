@@ -85,9 +85,7 @@ public class VideoReaderExoplayer {
                     return (DataSource) new InputStreamBufferedDataSource(dataSpec, inputStream);
                 case VIDEO_STREAM_SERVICE:
                 default:
-                    VideoStreamServiceDataSource v = new VideoStreamServiceDataSource(dataSpec);
-                    mUsbMaskConnection.getVideoStreamService().addVideoStreamListener(v::onVideoStreamData);
-                    return v;
+                    return new VideoStreamServiceDataSource(dataSpec, mUsbMaskConnection.getVideoStreamService());
             }
             };
 

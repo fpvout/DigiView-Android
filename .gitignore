@@ -14,3 +14,7 @@
 .externalNativeBuild
 .cxx
 local.properties
+app/debug
+app/alpha
+app/beta
+app/release

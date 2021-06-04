@@ -1,5 +1,6 @@
 plugins {
     id 'com.android.application'
+    id "com.starter.easylauncher" version "4.0.0"
 }
 
 android {
@@ -11,7 +12,7 @@ android {
                     keyPassword digiviewKeyPassword
                     keyAlias digiviewKeyAlias
                 }
-                catch (ex) {
+                catch (ignored) {
                         println("You should define mStoreFile, mStorePassword, mKeyPassword and mKeyAlias in ~/.gradle/gradle.properties : "+ ex.message)
                 }
         }

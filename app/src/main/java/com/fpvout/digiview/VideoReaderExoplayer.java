@@ -101,13 +101,13 @@ public class VideoReaderExoplayer {
                             (new Handler(Looper.getMainLooper())).postDelayed(() -> restart(), 1000);
                             break;
                         case ExoPlaybackException.TYPE_REMOTE:
-                            Log.e(TAG, "PLAYER_SOURCE - TYPE_REMOTE: " + error.getSourceException().getMessage());
+                            Log.e(TAG, "PLAYER_SOURCE - TYPE_REMOTE: " + error.getMessage());
                             break;
                         case ExoPlaybackException.TYPE_RENDERER:
-                            Log.e(TAG, "PLAYER_SOURCE - TYPE_RENDERER: " + error.getSourceException().getMessage());
+                            Log.e(TAG, "PLAYER_SOURCE - TYPE_RENDERER: " + error.getRendererException().getMessage());
                             break;
                         case ExoPlaybackException.TYPE_UNEXPECTED:
-                            Log.e(TAG, "PLAYER_SOURCE - TYPE_UNEXPECTED: " + error.getSourceException().getMessage());
+                            Log.e(TAG, "PLAYER_SOURCE - TYPE_UNEXPECTED: " + error.getUnexpectedException().getMessage());
                             break;
                     }
                 }

@@ -61,4 +61,6 @@
     <string name="stream_audio_stereo_summary">Only if your device or the audio source supports it</string>
     <string name="stream_audio_sample_rate">Audio sample rate</string>
     <string name="stream_audio_bitrate">Audio bitrate</string>
+    <string name="stream_portrait">Force portrait mode</string>
+    <string name="stream_portrait_summary">Your video stream will be rotated in portrait mode</string>
 </resources>

@@ -16,8 +16,6 @@ import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.preference.PreferenceManager;
 
-import com.pedro.rtplibrary.rtmp.RtmpDisplay;
-
 import net.ossrs.rtmp.ConnectCheckerRtmp;
 
 public class StreamingService extends Service {
@@ -29,7 +27,7 @@ public class StreamingService extends Service {
     private static ConnectCheckerRtmp connectChecker;
     private static Intent mediaProjectionData;
     private static int mediaProjectionResultCode;
-    private static RtmpDisplay rtmpDisplayBase;
+    private static CustomRtmpDisplay rtmpDisplayBase;
     private static int dpi;
     private String endpoint;
 
@@ -64,7 +62,7 @@ public class StreamingService extends Service {
 
     private void prepareStreaming() {
         stopStreaming();
-        rtmpDisplayBase = new RtmpDisplay(appContext, true, connectChecker);
+        rtmpDisplayBase = new CustomRtmpDisplay(appContext, true, connectChecker);
         if (!sharedPreferences.getString("StreamRtmpUsername", "").isEmpty() && !sharedPreferences.getString("StreamRtmpPassword", "").isEmpty()) {
             rtmpDisplayBase.setAuthorization(sharedPreferences.getString("StreamRtmpUsername", ""), sharedPreferences.getString("StreamRtmpPassword", ""));
         }
@@ -79,7 +77,7 @@ public class StreamingService extends Service {
                     streamResolution.getHeight(),
                     StreamFramerate.getFramerate(sharedPreferences.getString("StreamFramerate", StreamFramerate.DEFAULT)),
                     StreamBitrate.getBitrate(sharedPreferences.getString("StreamBitrate", StreamBitrate.DEFAULT)),
-                    0,
+                    sharedPreferences.getBoolean("StreamPortrait", false) ? 90 : 0,
                     dpi
             )) {
                 boolean audioInitialized;
@@ -160,7 +158,7 @@ public class StreamingService extends Service {
 
         if (rtmpDisplayBase == null) {
             sharedPreferences = PreferenceManager.getDefaultSharedPreferences(appContext);
-            rtmpDisplayBase = new RtmpDisplay(appContext, true, connectChecker);
+            rtmpDisplayBase = new CustomRtmpDisplay(appContext, true, connectChecker);
             if (!sharedPreferences.getString("StreamRtmpUsername", "").isEmpty() && !sharedPreferences.getString("StreamRtmpPassword", "").isEmpty()) {
                 rtmpDisplayBase.setAuthorization(sharedPreferences.getString("StreamRtmpUsername", ""), sharedPreferences.getString("StreamRtmpPassword", ""));
             }

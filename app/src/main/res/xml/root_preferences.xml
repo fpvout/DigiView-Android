@@ -92,6 +92,12 @@
             app:useSimpleSummaryProvider="true" />
 
         <SwitchPreferenceCompat
+            app:key="StreamPortrait"
+            app:defaultValue="false"
+            app:title="@string/stream_portrait"
+            app:summary="@string/stream_portrait_summary" />
+
+        <SwitchPreferenceCompat
             app:key="StreamRecordAudio"
             app:defaultValue="true"
             app:title="@string/stream_record_audio"

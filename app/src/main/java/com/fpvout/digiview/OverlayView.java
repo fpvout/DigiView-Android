@@ -2,7 +2,6 @@ package com.fpvout.digiview;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -22,18 +21,11 @@ public class OverlayView extends ConstraintLayout {
         imageView = findViewById(R.id.backdrop_image);
     }
 
-    public void hide(){
-        setVisibility(View.GONE);
-    }
-
     public void show(int textResourceId, OverlayStatus status){
         showInfo(getContext().getString(textResourceId), status);
     }
 
     private void showInfo(String text, OverlayStatus status){
-
-        setVisibility(View.VISIBLE);
-
         textView.setText(text);
 
         int image = R.drawable.ic_goggles_white;

@@ -87,14 +87,14 @@ public class VideoReaderExoplayer {
                 default:
                     return new VideoStreamServiceDataSource(dataSpec, mUsbMaskConnection.getVideoStreamService());
             }
-            };
+        };
 
-            ExtractorsFactory extractorsFactory = () ->new Extractor[] {new H264Extractor(performancePreset.h264ReaderMaxSyncFrameSize, performancePreset.h264ReaderSampleTime)};
-            MediaSource mediaSource = new ProgressiveMediaSource.Factory(dataSourceFactory, extractorsFactory).createMediaSource(MediaItem.fromUri(Uri.EMPTY));
-            mPlayer.setMediaSource(mediaSource);
+        ExtractorsFactory extractorsFactory = () -> new Extractor[]{new H264Extractor(performancePreset.h264ReaderMaxSyncFrameSize, performancePreset.h264ReaderSampleTime)};
+        MediaSource mediaSource = new ProgressiveMediaSource.Factory(dataSourceFactory, extractorsFactory).createMediaSource(MediaItem.fromUri(Uri.EMPTY));
+        mPlayer.setMediaSource(mediaSource);
 
-            mPlayer.prepare();
-            mPlayer.play();
+        mPlayer.prepare();
+        mPlayer.play();
         mPlayer.addListener(new Player.Listener() {
             @Override
             public void onPlayerError(@NonNull ExoPlaybackException error) {
@@ -108,12 +108,12 @@ public class VideoReaderExoplayer {
                         break;
                     case ExoPlaybackException.TYPE_RENDERER:
                         Log.e(TAG, "PLAYER_SOURCE - TYPE_RENDERER: " + error.getSourceException().getMessage());
-                            break;
-                        case ExoPlaybackException.TYPE_UNEXPECTED:
-                            Log.e(TAG, "PLAYER_SOURCE - TYPE_UNEXPECTED: " + error.getSourceException().getMessage());
-                            break;
-                    }
+                        break;
+                    case ExoPlaybackException.TYPE_UNEXPECTED:
+                        Log.e(TAG, "PLAYER_SOURCE - TYPE_UNEXPECTED: " + error.getSourceException().getMessage());
+                        break;
                 }
+            }
 
             @Override
             public void onPlaybackStateChanged(int state) {
@@ -127,10 +127,10 @@ public class VideoReaderExoplayer {
                         if (videoWaitingListener != null)
                             videoWaitingListener.onVideoWaiting(); // let MainActivity know so it can hide watermark/show settings button
                         (new Handler(Looper.getMainLooper())).postDelayed(() -> restart(), 1000);
-                            break;
-                    }
+                        break;
                 }
-            });
+            }
+        });
 
         mPlayer.addVideoListener(new Player.Listener() {
             @Override
@@ -148,7 +148,7 @@ public class VideoReaderExoplayer {
                     surfaceView.setLayoutParams(params);
                 }
             }
-            });
+        });
     }
 
     public void toggleZoom() {
@@ -167,32 +167,32 @@ public class VideoReaderExoplayer {
             Format videoFormat = mPlayer.getVideoFormat();
             if (videoFormat == null) return;
 
-                params.dimensionRatio = videoFormat.width + ":" + videoFormat.height;
-            }
-
-            surfaceView.setLayoutParams(params);
+            params.dimensionRatio = videoFormat.width + ":" + videoFormat.height;
         }
 
-        public void zoomIn() {
-            if (!zoomedIn) {
-                toggleZoom();
-            }
-        }
+        surfaceView.setLayoutParams(params);
+    }
 
-        public void zoomOut() {
-            if (zoomedIn) {
-                toggleZoom();
-            }
+    public void zoomIn() {
+        if (!zoomedIn) {
+            toggleZoom();
         }
+    }
 
-        public void restart() {
-            mPlayer.release();
-
-            if (mUsbMaskConnection.isReady()) {
-                mUsbMaskConnection.start();
-                start();
-            }
+    public void zoomOut() {
+        if (zoomedIn) {
+            toggleZoom();
         }
+    }
+
+    public void restart() {
+        mPlayer.release();
+
+        if (mUsbMaskConnection.isReady()) {
+            mUsbMaskConnection.start();
+            start();
+        }
+    }
 
     public void stop() {
         if (mPlayer != null)

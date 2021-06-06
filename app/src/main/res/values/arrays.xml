@@ -1,5 +1,4 @@
 <resources>
-    <!-- Reply Preference -->
     <string-array name="video_preset_titles">
         <item>@string/video_preset_default</item>
         <item>@string/video_preset_conservative</item>

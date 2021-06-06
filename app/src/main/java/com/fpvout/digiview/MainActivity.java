@@ -1,7 +1,5 @@
 package com.fpvout.digiview;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.LayoutTransition;
 import android.content.Context;
 import android.content.Intent;
@@ -10,7 +8,6 @@ import android.content.SharedPreferences;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -24,17 +21,19 @@ import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.preference.PreferenceManager;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 import io.sentry.SentryLevel;
 import io.sentry.android.core.SentryAndroid;
 
 import static com.fpvout.digiview.UsbMaskConnection.ACTION_USB_PERMISSION;
-import static com.fpvout.digiview.VideoReaderExoplayer.VideoZoomedIn;
 
 public class MainActivity extends AppCompatActivity implements UsbDeviceListener {
     private static final String TAG = "DIGIVIEW";
@@ -47,13 +46,18 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     boolean usbConnected = false;
     SurfaceView fpvView;
     private int shortAnimationDuration;
-    private float buttonAlpha = 1;
-    private View settingsButton;
+    private FloatingActionButton settingsButton;
     private View watermarkView;
     private OverlayView overlayView;
     private GestureDetector gestureDetector;
     private ScaleGestureDetector scaleGestureDetector;
     private SharedPreferences sharedPreferences;
+    private final Runnable hideButtonsRunnable = new Runnable() {
+        @Override
+        public void run() {
+            toggleView(settingsButton, false);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         });
 
         mVideoReader = new VideoReaderExoplayer(fpvView, this);
-        mVideoReader.setVideoPlayingEventListener(this::hideOverlay);
+        mVideoReader.setVideoPlayingEventListener(this::hideFullOverlay);
         mVideoReader.setVideoWaitingEventListener(() -> showOverlay(R.string.waiting_for_video, OverlayStatus.Connected));
 
         mUsbMaskConnection = new UsbMaskConnection();
@@ -132,7 +136,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onSingleTapConfirmed(MotionEvent e) {
-                toggleSettingsButton();
+                toggleFullOverlay();
                 return super.onSingleTapConfirmed(e);
             }
 
@@ -163,93 +167,74 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         return super.onTouchEvent(event);
     }
 
-    private void updateWatermark() {
-        if (overlayView.getVisibility() == View.VISIBLE) {
-            watermarkView.setAlpha(0);
-            return;
-        }
+    private void toggleFullOverlay() {
+        if (overlayView.getAlpha() > 0.0f) return;
 
-        if (sharedPreferences.getBoolean(ShowWatermark, true)) {
-            watermarkView.setAlpha(0.3F);
-        } else {
-            watermarkView.setAlpha(0F);
-        }
+        toggleView(settingsButton, hideButtonsRunnable);
     }
 
-    private void updateVideoZoom() {
-        if (sharedPreferences.getBoolean(VideoZoomedIn, true)) {
-            mVideoReader.zoomIn();
-        } else {
-            mVideoReader.zoomOut();
-        }
+    private void hideFullOverlay() {
+        toggleView(watermarkView, sharedPreferences.getBoolean(ShowWatermark, true), 0.3f);
+
+        toggleView(settingsButton, false);
+        toggleView(overlayView, false);
     }
 
-    private void cancelButtonAnimation() {
-        Handler handler = settingsButton.getHandler();
-        if (handler != null) {
-            handler.removeCallbacksAndMessages(null);
-        }
-    }
+    private void showFullOverlay() {
+        toggleView(watermarkView, false);
 
-//    private void showSettingsButton() {
-//        cancelButtonAnimation();
-//
-//        if (overlayView.getVisibility() == View.VISIBLE) {
-//            buttonAlpha = 1;
-//            settingsButton.setAlpha(1);
-//        }
-//    }
-
-    private void toggleSettingsButton() {
-        if (buttonAlpha == 1 && overlayView.getVisibility() == View.VISIBLE) return;
-
-        // cancel any pending delayed animations first
-        cancelButtonAnimation();
-
-        if (buttonAlpha == 1) {
-            buttonAlpha = 0;
-        } else {
-            buttonAlpha = 1;
-        }
-
-        settingsButton.animate()
-                .alpha(buttonAlpha)
-                .setDuration(shortAnimationDuration)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        autoHideSettingsButton();
-                    }
-                });
-    }
-
-    private void autoHideSettingsButton() {
-        if (overlayView.getVisibility() == View.VISIBLE) return;
-        if (buttonAlpha == 0) return;
-
-        settingsButton.postDelayed(() -> {
-            buttonAlpha = 0;
-            settingsButton.animate()
-                    .alpha(0)
-                    .setDuration(shortAnimationDuration);
-        }, 3000);
+        toggleView(settingsButton, true);
     }
 
     private void showOverlay(int textId, OverlayStatus connected) {
+        toggleView(overlayView, true);
+        showFullOverlay();
         overlayView.show(textId, connected);
-        updateWatermark();
-        autoHideSettingsButton();
-        updateVideoZoom();
-
     }
 
-    private void hideOverlay() {
-        overlayView.hide();
-        updateWatermark();
-        autoHideSettingsButton();
-        updateVideoZoom();
+    private void toggleView(FloatingActionButton view, @Nullable Runnable runnable) {
+        toggleView(view, view.getVisibility() != View.VISIBLE, runnable);
     }
 
+    private void toggleView(View view, boolean visible) {
+        toggleView(view, visible, 1.0f, null);
+    }
+
+    private void toggleView(FloatingActionButton view, boolean visible) {
+        toggleView(view, visible, null);
+    }
+
+    private void toggleView(View view, boolean visible, float visibleAlpha) {
+        toggleView(view, visible, visibleAlpha, null);
+    }
+
+    private void toggleView(View view, boolean visible, float visibleAlpha, @Nullable Runnable runnable) {
+        if (!visible) {
+            view.removeCallbacks(runnable);
+            view.animate().cancel();
+            view.animate()
+                    .alpha(0)
+                    .setDuration(shortAnimationDuration)
+                    .setListener(null);
+        } else {
+            view.removeCallbacks(runnable);
+            view.animate().cancel();
+            view.animate()
+                    .alpha(visibleAlpha)
+                    .setDuration(shortAnimationDuration);
+            view.postDelayed(runnable, 3000);
+        }
+    }
+
+    private void toggleView(FloatingActionButton view, boolean visible, @Nullable Runnable runnable) {
+        if (!visible) {
+            view.hide();
+        } else {
+            view.removeCallbacks(runnable);
+            view.show();
+            view.postDelayed(runnable, 3000);
+        }
+    }
 
     @Override
     public void usbDeviceApproved(UsbDevice device) {
@@ -266,15 +251,11 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         this.onStop();
     }
 
-
     private void connect() {
         usbConnected = true;
         mUsbMaskConnection.setUsbDevice(usbManager, usbDevice);
         mVideoReader.setUsbMaskConnection(mUsbMaskConnection);
-        overlayView.hide();
         mVideoReader.start();
-        updateWatermark();
-        autoHideSettingsButton();
         showOverlay(R.string.waiting_for_video, OverlayStatus.Connected);
     }
 
@@ -295,11 +276,6 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
                 showOverlay(R.string.waiting_for_usb_device, OverlayStatus.Disconnected);
             }
         }
-
-        settingsButton.setAlpha(1);
-        autoHideSettingsButton();
-        updateWatermark();
-        updateVideoZoom();
     }
 
 

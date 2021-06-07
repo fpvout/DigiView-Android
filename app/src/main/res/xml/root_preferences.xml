@@ -139,7 +139,7 @@
 
         <Preference
             android:title="@string/our_website"
-            app:summary="fpvout.com">
+            app:summary="https://fpvout.com">
             <intent
                 android:action="android.intent.action.VIEW"
                 android:data="https://fpvout.com" />

@@ -295,10 +295,13 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     }
 
     private void toggleView(FloatingActionButton view, boolean visible, @Nullable Runnable runnable) {
+        if (view.getHandler() != null) {
+            view.getHandler().removeCallbacksAndMessages(null);
+        }
+
         if (!visible) {
             view.hide();
         } else {
-            view.removeCallbacks(runnable);
             view.show();
             view.postDelayed(runnable, 3000);
         }

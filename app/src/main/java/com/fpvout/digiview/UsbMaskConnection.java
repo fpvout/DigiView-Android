@@ -19,7 +19,6 @@ public class UsbMaskConnection {
     public static final String ACTION_USB_PERMISSION = "com.fpvout.digiview.USB_PERMISSION";
     private static final int VENDOR_ID = 11427;
     private static final int PRODUCT_ID = 31;
-    private final byte[] magicPacket = "RMVT".getBytes();
     AndroidUSBInputStream mInputStream;
     AndroidUSBOutputStream mOutputStream;
     private UsbDeviceConnection usbConnection;
@@ -50,7 +49,6 @@ public class UsbMaskConnection {
     }
 
     public void start(){
-        mOutputStream.write(magicPacket);
         videoStreamService.start();
     }
 
@@ -91,8 +89,7 @@ public class UsbMaskConnection {
 
         mOutputStream = new AndroidUSBOutputStream(usbInterface.getEndpoint(0), usbConnection);
         mInputStream = new AndroidUSBInputStream(usbInterface.getEndpoint(1), usbInterface.getEndpoint(0), usbConnection);
-        videoStreamService = new VideoStreamService(mInputStream);
-        start();
+        videoStreamService = new VideoStreamService(mInputStream, mOutputStream);
         ready = true;
     }
 }

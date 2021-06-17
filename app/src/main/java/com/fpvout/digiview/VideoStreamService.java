@@ -4,6 +4,7 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 
 /**
@@ -16,12 +17,14 @@ public class VideoStreamService {
     private static final String TAG = "VideoStreamService";
     private final ArrayList<VideoStreamListener> videoStreamListeners;
     InputStream videoStream;
+    private final byte[] magicPacket = "RMVT".getBytes();
     private boolean isRunning = false;
     private Thread streamServiceThread;
+    OutputStream outStream;
 
-
-    public VideoStreamService(InputStream inputStream) {
+    public VideoStreamService(InputStream inputStream, OutputStream outputStream) {
         videoStream = inputStream;
+        outStream = outputStream;
         videoStreamListeners = new ArrayList<>();
     }
 
@@ -32,6 +35,7 @@ public class VideoStreamService {
             streamServiceThread = new Thread(() -> {
                 while (isRunning) {
                     try {
+                        outStream.write(magicPacket);
                         byte[] buffer = new byte[READ_BUFFER_SIZE];
                         int bytesReceived = videoStream.read(buffer, 0, READ_BUFFER_SIZE);
                         if (bytesReceived >= 0) {
@@ -39,6 +43,8 @@ public class VideoStreamService {
                             for (VideoStreamListener v : videoStreamListeners) {
                                 v.onVideoStreamData(buffer, bytesReceived);
                             }
+                        } else {
+                            outStream.write(magicPacket);
                         }
                     } catch (IOException e) {
                         e.printStackTrace();

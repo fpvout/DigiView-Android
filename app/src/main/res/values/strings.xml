@@ -22,6 +22,7 @@
     <string name="video_preset_aggressive">Aggressive</string>
     <string name="video_preset_legacy">Legacy</string>
     <string name="video_preset_legacy_buffered">Legacy Buffered</string>
+    <string name="video_preset_video_stream_service">Video Stream Service</string>
     <string name="enable_analytics">Enable Analytics</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="privacy_policy_summary">See what data we collect and how we use it</string>
@@ -40,6 +41,11 @@
     <string name="copyright">Copyright</string>
     <string name="open_source_license">Open-Source License</string>
     <string name="open_source_license_summary">MIT License</string>
-    <string name="video_preset_video_stream_service">Video Stream Service</string>
+
+    <string name="udpBroadcastTitle">UDP broadcast</string>
+    <string name="udpBroadcastEnabled">Enabled</string>
+    <string name="udpBroadcastAddress">Address</string>
+    <string name="udpBroadcastPort">Port</string>
+
 
 </resources>

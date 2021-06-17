@@ -47,6 +47,25 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="@string/udpBroadcastTitle">
+
+        <SwitchPreferenceCompat
+            app:defaultValue="false"
+            app:key="udpBroadcast"
+            app:title="@string/udpBroadcastEnabled" />
+
+        <EditTextPreference
+            app:defaultValue="192.168.1.255"
+            app:key="udpBroadcastAddress"
+            app:title="@string/udpBroadcastAddress" />
+
+        <EditTextPreference
+            app:defaultValue="8534"
+            app:key="udpBroadcastPort"
+            app:title="@string/udpBroadcastPort" />
+
+    </PreferenceCategory>
+
     <PreferenceCategory app:title="@string/links">
 
         <Preference

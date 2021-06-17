@@ -12,7 +12,7 @@ import com.google.android.exoplayer2.upstream.TransferListener;
 
 import usb.CircularByteBuffer;
 
-public class VideoStreamServiceDataSource implements DataSource {
+public class VideoStreamServiceDataSource implements DataSource, VideoStreamServiceListener {
     private static final int READ_BUFFER_SIZE = 50 * 1024 * 1024;
     private static final long READ_TIMEOUT = 200;
 

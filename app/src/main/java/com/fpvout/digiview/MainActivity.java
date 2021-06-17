@@ -20,8 +20,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.ActionBar;
@@ -29,6 +27,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.preference.PreferenceManager;
+
+import java.net.UnknownHostException;
 
 import io.sentry.SentryLevel;
 import io.sentry.android.core.SentryAndroid;
@@ -39,6 +39,7 @@ import static com.fpvout.digiview.VideoReaderExoplayer.VideoZoomedIn;
 public class MainActivity extends AppCompatActivity implements UsbDeviceListener {
     private static final String TAG = "DIGIVIEW";
     private static final String ShowWatermark = "ShowWatermark";
+    private static final String udpBroadcastEnabled = "udpBroadcastEnabled";
     UsbDeviceBroadcastReceiver usbDeviceBroadcastReceiver;
     UsbManager usbManager;
     UsbDevice usbDevice;
@@ -273,6 +274,13 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         mVideoReader.setUsbMaskConnection(mUsbMaskConnection);
         overlayView.hide();
         mVideoReader.start();
+        if (sharedPreferences.getBoolean(udpBroadcastEnabled, false)) {
+            try {
+                new VideoStreamUdpOutput(mUsbMaskConnection.getVideoStreamService());
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            }
+        }
         updateWatermark();
         autoHideSettingsButton();
         showOverlay(R.string.waiting_for_video, OverlayStatus.Connected);
@@ -342,7 +350,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         boolean dataCollectionReplied = preferences.getBoolean("dataCollectionReplied", false);
         if (!dataCollectionReplied) {
             Intent intent = new Intent(this, DataCollectionAgreementPopupActivity.class);
-            ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), (ActivityResultCallback<ActivityResult>) result -> {
+            ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getResultCode() == RESULT_OK) {
                     SentryAndroid.init(getApplicationContext(), options -> options.setBeforeSend((event, hint) -> {
                         if (SentryLevel.DEBUG.equals(event.getLevel()))

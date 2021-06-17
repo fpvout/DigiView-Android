@@ -263,7 +263,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     public void usbDeviceDetached() {
         Log.i(TAG, "USB - usbDevice detached");
         showOverlay(R.string.usb_device_detached_waiting, OverlayStatus.Disconnected);
-        this.onStop();
+        disconnect();
     }
 
 
@@ -303,14 +303,17 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     }
 
 
+    private void disconnect() {
+        mUsbMaskConnection.stop();
+        mVideoReader.stop();
+        usbConnected = false;
+    }
+
     @Override
     protected void onStop() {
         super.onStop();
         Log.d(TAG, "APP - On Stop");
-
-        mUsbMaskConnection.stop();
-        mVideoReader.stop();
-        usbConnected = false;
+        disconnect();
     }
 
     @Override

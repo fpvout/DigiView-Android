@@ -9,6 +9,7 @@ import android.os.Message;
 import android.util.Log;
 import android.view.SurfaceView;
 
+import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.preference.PreferenceManager;
 
@@ -18,6 +19,7 @@ import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.PlaybackException;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.extractor.Extractor;
@@ -27,7 +29,7 @@ import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSpec;
 import com.google.android.exoplayer2.util.NonNullApi;
-import com.google.android.exoplayer2.video.VideoListener;
+import com.google.android.exoplayer2.video.VideoSize;
 
 import usb.AndroidUSBInputStream;
 
@@ -76,7 +78,7 @@ public class VideoReaderExoplayer {
             Log.d(TAG, "preset: " + performancePreset);
 
             DataSource.Factory dataSourceFactory = () -> {
-                switch (performancePreset.dataSourceType){
+                switch (performancePreset.dataSourceType) {
                     case INPUT_STREAM:
                         return (DataSource) new InputStreamDataSource(context, dataSpec, inputStream);
                     case BUFFERED_INPUT_STREAM:
@@ -85,29 +87,31 @@ public class VideoReaderExoplayer {
                 }
             };
 
-            ExtractorsFactory extractorsFactory = () ->new Extractor[] {new H264Extractor(performancePreset.h264ReaderMaxSyncFrameSize, performancePreset.h264ReaderSampleTime)};
+            ExtractorsFactory extractorsFactory = () -> new Extractor[]{new H264Extractor(performancePreset.h264ReaderMaxSyncFrameSize, performancePreset.h264ReaderSampleTime)};
             MediaSource mediaSource = new ProgressiveMediaSource.Factory(dataSourceFactory, extractorsFactory).createMediaSource(MediaItem.fromUri(Uri.EMPTY));
             mPlayer.setMediaSource(mediaSource);
 
             mPlayer.prepare();
             mPlayer.play();
-            mPlayer.addListener(new ExoPlayer.EventListener() {
+            mPlayer.addListener(new Player.Listener() {
                 @Override
                 @NonNullApi
-                public void onPlayerError(ExoPlaybackException error) {
-                    switch (error.type) {
+                public void onPlayerErrorChanged(PlaybackException error) {
+                    ExoPlaybackException e = (ExoPlaybackException) error;
+                    Log.e(TAG, "onPlayerErrorChanged: "+ e.type);
+                    switch (e.type) {
                         case ExoPlaybackException.TYPE_SOURCE:
-                            Log.e(TAG, "PLAYER_SOURCE - TYPE_SOURCE: " + error.getSourceException().getMessage());
+                            Log.e(TAG, "PLAYER_SOURCE - TYPE_SOURCE: " + error.getMessage());
                             (new Handler(Looper.getMainLooper())).postDelayed(() -> restart(), 1000);
                             break;
                         case ExoPlaybackException.TYPE_REMOTE:
                             Log.e(TAG, "PLAYER_SOURCE - TYPE_REMOTE: " + error.getMessage());
                             break;
                         case ExoPlaybackException.TYPE_RENDERER:
-                            Log.e(TAG, "PLAYER_SOURCE - TYPE_RENDERER: " + error.getRendererException().getMessage());
+                            Log.e(TAG, "PLAYER_SOURCE - TYPE_RENDERER: " + error.getMessage());
                             break;
                         case ExoPlaybackException.TYPE_UNEXPECTED:
-                            Log.e(TAG, "PLAYER_SOURCE - TYPE_UNEXPECTED: " + error.getUnexpectedException().getMessage());
+                            Log.e(TAG, "PLAYER_SOURCE - TYPE_UNEXPECTED: " + error.getMessage());
                             break;
                     }
                 }
@@ -128,7 +132,7 @@ public class VideoReaderExoplayer {
                 }
             });
 
-            mPlayer.addVideoListener(new VideoListener() {
+            mPlayer.addListener(new Player.Listener() {
                 @Override
                 public void onRenderedFirstFrame() {
                     Log.d(TAG, "PLAYER_RENDER - FIRST FRAME");
@@ -136,10 +140,10 @@ public class VideoReaderExoplayer {
                 }
 
                 @Override
-                public void onVideoSizeChanged(int width, int height, int unappliedRotationDegrees, float pixelWidthHeightRatio) {
+                public void onVideoSizeChanged(@NonNull VideoSize videosize) {
                     if (!zoomedIn) {
                         ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) surfaceView.getLayoutParams();
-                        params.dimensionRatio = width + ":" + height;
+                        params.dimensionRatio = videosize.width + ":" + videosize.height;
                         surfaceView.setLayoutParams(params);
                     }
                 }

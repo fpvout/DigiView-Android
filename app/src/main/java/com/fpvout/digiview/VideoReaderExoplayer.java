@@ -26,7 +26,7 @@ import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSpec;
 import com.google.android.exoplayer2.util.NonNullApi;
-import com.google.android.exoplayer2.video.VideoListener;
+import com.google.android.exoplayer2.video.VideoSize;
 
 import usb.AndroidUSBInputStream;
 
@@ -88,34 +88,34 @@ public class VideoReaderExoplayer {
                 default:
                     return new VideoStreamServiceDataSource(dataSpec, mUsbMaskConnection.getVideoStreamService());
             }
-            };
+        };
 
-            ExtractorsFactory extractorsFactory = () ->new Extractor[] {new H264Extractor(performancePreset.h264ReaderMaxSyncFrameSize, performancePreset.h264ReaderSampleTime)};
-            MediaSource mediaSource = new ProgressiveMediaSource.Factory(dataSourceFactory, extractorsFactory).createMediaSource(MediaItem.fromUri(Uri.EMPTY));
-            mPlayer.setMediaSource(mediaSource);
+        ExtractorsFactory extractorsFactory = () -> new Extractor[]{new H264Extractor(performancePreset.h264ReaderMaxSyncFrameSize, performancePreset.h264ReaderSampleTime)};
+        MediaSource mediaSource = new ProgressiveMediaSource.Factory(dataSourceFactory, extractorsFactory).createMediaSource(MediaItem.fromUri(Uri.EMPTY));
+        mPlayer.setMediaSource(mediaSource);
 
-            mPlayer.prepare();
-            mPlayer.play();
-            mPlayer.addListener(new Player.EventListener() {
-                @Override
-                @NonNullApi
-                public void onPlayerError(ExoPlaybackException error) {
-                    switch (error.type) {
-                        case ExoPlaybackException.TYPE_SOURCE:
-                            Log.e(TAG, "PLAYER_SOURCE - TYPE_SOURCE: " + error.getSourceException().getMessage());
-                            (new Handler(Looper.getMainLooper())).postDelayed(() -> restart(), 1000);
-                            break;
-                        case ExoPlaybackException.TYPE_REMOTE:
-                            Log.e(TAG, "PLAYER_SOURCE - TYPE_REMOTE: " + error.getMessage());
-                            break;
-                        case ExoPlaybackException.TYPE_RENDERER:
-                            Log.e(TAG, "PLAYER_SOURCE - TYPE_RENDERER: " + error.getRendererException().getMessage());
-                            break;
-                        case ExoPlaybackException.TYPE_UNEXPECTED:
-                            Log.e(TAG, "PLAYER_SOURCE - TYPE_UNEXPECTED: " + error.getUnexpectedException().getMessage());
-                            break;
-                    }
+        mPlayer.prepare();
+        mPlayer.play();
+        mPlayer.addListener(new Player.Listener() {
+            @Override
+            @NonNullApi
+            public void onPlayerError(ExoPlaybackException error) {
+                switch (error.type) {
+                    case ExoPlaybackException.TYPE_SOURCE:
+                        Log.e(TAG, "PLAYER_SOURCE - TYPE_SOURCE: " + error.getSourceException().getMessage());
+                        (new Handler(Looper.getMainLooper())).postDelayed(() -> restart(), 1000);
+                        break;
+                    case ExoPlaybackException.TYPE_REMOTE:
+                        Log.e(TAG, "PLAYER_SOURCE - TYPE_REMOTE: " + error.getMessage());
+                        break;
+                    case ExoPlaybackException.TYPE_RENDERER:
+                        Log.e(TAG, "PLAYER_SOURCE - TYPE_RENDERER: " + error.getRendererException().getMessage());
+                        break;
+                    case ExoPlaybackException.TYPE_UNEXPECTED:
+                        Log.e(TAG, "PLAYER_SOURCE - TYPE_UNEXPECTED: " + error.getUnexpectedException().getMessage());
+                        break;
                 }
+            }
 
             @Override
             public void onPlaybackStateChanged(int state) {

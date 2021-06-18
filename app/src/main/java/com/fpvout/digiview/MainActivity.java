@@ -113,7 +113,10 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         mUsbMaskConnection = new UsbMaskConnection();
         Handler videoReaderEventListener = new Handler(this.getMainLooper(), msg -> onVideoReaderEvent((VideoReaderExoplayer.VideoReaderEventMessageCode) msg.obj));
 
-        mVideoReader = new VideoReaderExoplayer(fpvView, this, videoReaderEventListener);
+        SurfaceView surfaceVideoLeft = findViewById(R.id.surfaceViewLeft);
+        SurfaceView surfaceVideoRight = findViewById(R.id.surfaceViewRight);
+
+        mVideoReader = new VideoReaderExoplayer(fpvView, surfaceVideoLeft, surfaceVideoRight, this, videoReaderEventListener);
 
         if (!usbConnected) {
             if (searchDevice()) {

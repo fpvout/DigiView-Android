@@ -305,7 +305,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
                 Log.d(TAG, "APP - On Resume usbDevice device found");
                 connect();
             } else {
-                showOverlay(R.string.waiting_for_usb_device, OverlayStatus.Connected);
+                showOverlay(R.string.waiting_for_usb_device, OverlayStatus.Disconnected);
             }
         }
 

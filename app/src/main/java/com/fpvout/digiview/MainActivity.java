@@ -25,6 +25,8 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
 
+import com.fpvout.digiview.vr.views.VrView;
+
 import java.util.HashMap;
 
 import io.sentry.SentryLevel;
@@ -113,10 +115,9 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         mUsbMaskConnection = new UsbMaskConnection();
         Handler videoReaderEventListener = new Handler(this.getMainLooper(), msg -> onVideoReaderEvent((VideoReaderExoplayer.VideoReaderEventMessageCode) msg.obj));
 
-        SurfaceView surfaceVideoLeft = findViewById(R.id.surfaceViewLeft);
-        SurfaceView surfaceVideoRight = findViewById(R.id.surfaceViewRight);
+        VrView vrView = findViewById(R.id.vr_view);
 
-        mVideoReader = new VideoReaderExoplayer(fpvView, surfaceVideoLeft, surfaceVideoRight, this, videoReaderEventListener);
+        mVideoReader = new VideoReaderExoplayer(fpvView, vrView, this, videoReaderEventListener);
 
         if (!usbConnected) {
             if (searchDevice()) {

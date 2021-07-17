@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.fpvout.digiview.gles;
+package com.fpvout.digiview.vr.gles;
 
 import java.nio.FloatBuffer;
 

@@ -18,10 +18,11 @@ import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.preference.PreferenceManager;
 
-import com.fpvout.digiview.gles.EglCore;
-import com.fpvout.digiview.gles.FullFrameRect;
-import com.fpvout.digiview.gles.Texture2dProgram;
-import com.fpvout.digiview.gles.WindowSurface;
+import com.fpvout.digiview.vr.gles.EglCore;
+import com.fpvout.digiview.vr.gles.FullFrameRect;
+import com.fpvout.digiview.vr.gles.Texture2dProgram;
+import com.fpvout.digiview.vr.gles.WindowSurface;
+import com.fpvout.digiview.vr.views.VrView;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
@@ -32,23 +33,22 @@ import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.extractor.Extractor;
 import com.google.android.exoplayer2.extractor.ExtractorsFactory;
-import com.google.android.exoplayer2.source.LoopingMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSpec;
-import com.google.android.exoplayer2.upstream.RawResourceDataSource;
 import com.google.android.exoplayer2.util.NonNullApi;
 import com.google.android.exoplayer2.video.VideoListener;
 
 import usb.AndroidUSBInputStream;
 
-public class VideoReaderExoplayer implements SurfaceTexture.OnFrameAvailableListener {
+public class VideoReaderExoplayer {
     private static final String TAG = "DIGIVIEW";
     private Handler videoReaderEventListener;
     private SimpleExoPlayer mPlayer;
     static final String VideoPreset = "VideoPreset";
     private final SurfaceView surfaceView;
+    private final VrView vrView;
     private AndroidUSBInputStream inputStream;
     private UsbMaskConnection mUsbMaskConnection;
     private boolean zoomedIn;
@@ -58,35 +58,20 @@ public class VideoReaderExoplayer implements SurfaceTexture.OnFrameAvailableList
     static final String VREnabled = "VREnabled";
     private final SharedPreferences sharedPreferences;
 
-    // VR Additions
-    private SurfaceView surfaceViewLeft;
-    private SurfaceView surfaceViewRight;
-    private EglCore eglCore;
-    private FullFrameRect fullFrameBlit;
-    private int textureId = 0;
-    private SurfaceTexture videoSurfaceTexture;
-    private final float[] transformMatrix = new float[16];
-    private WindowSurface mainDisplaySurface;
-    private WindowSurface secondaryDisplaySurface;
-    private Surface surface;
-
     VideoReaderExoplayer(SurfaceView videoSurface,
-                         SurfaceView videoSurfaceLeft,
-                         SurfaceView videoSurfaceRight,
+                         VrView vrView,
                          Context c) {
         surfaceView = videoSurface;
-        surfaceViewLeft = videoSurfaceLeft;
-        surfaceViewRight = videoSurfaceRight;
+        this.vrView = vrView;
         context = c;
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(c);
     }
 
     VideoReaderExoplayer(SurfaceView videoSurface,
-                         SurfaceView videoSurfaceLeft,
-                         SurfaceView videoSurfaceRight,
+                         VrView vrView,
                          Context c,
                          Handler v) {
-        this(videoSurface, videoSurfaceLeft, videoSurfaceRight, c);
+        this(videoSurface, vrView, c);
         videoReaderEventListener = v;
     }
 
@@ -103,15 +88,11 @@ public class VideoReaderExoplayer implements SurfaceTexture.OnFrameAvailableList
         DefaultLoadControl loadControl = new DefaultLoadControl.Builder().setBufferDurationsMs(performancePreset.exoPlayerMinBufferMs, performancePreset.exoPlayerMaxBufferMs, performancePreset.exoPlayerBufferForPlaybackMs, performancePreset.exoPlayerBufferForPlaybackAfterRebufferMs).build();
         mPlayer = new SimpleExoPlayer.Builder(context).setLoadControl(loadControl).build();
         if (vrEnabled) {
-            surfaceViewLeft.setVisibility(View.VISIBLE);
-            surfaceViewRight.setVisibility(View.VISIBLE);
-            surfaceView.setVisibility(View.VISIBLE);
-            surfaceViewLeft.getHolder().addCallback(videoSurfaceCallbackLeft);
-            surfaceViewRight.getHolder().addCallback(videoSurfaceCallbackRight);
+            vrView.setVisibility(View.VISIBLE);
+            vrView.start(mPlayer);
         } else {
-            surfaceViewLeft.setVisibility(View.GONE);
-            surfaceViewRight.setVisibility(View.GONE);
-            surfaceView.setVisibility(View.VISIBLE);
+            vrView.stop();
+            vrView.setVisibility(View.GONE);
             mPlayer.setVideoSurfaceView(surfaceView);
         }
         mPlayer.setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
@@ -187,6 +168,7 @@ public class VideoReaderExoplayer implements SurfaceTexture.OnFrameAvailableList
                     ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) surfaceView.getLayoutParams();
                     params.dimensionRatio = width + ":" + height;
                     surfaceView.setLayoutParams(params);
+                    vrView.setAspect(width, height);
                 }
             }
         });
@@ -248,104 +230,8 @@ public class VideoReaderExoplayer implements SurfaceTexture.OnFrameAvailableList
             mPlayer.release();
 
         // VR Related teardown
-        if (surface != null) {
-            surface.release();
-            surface = null;
-        }
-
-        if (videoSurfaceTexture != null) {
-            videoSurfaceTexture.release();
-            videoSurfaceTexture = null;
-        }
-
-        if (mainDisplaySurface != null) {
-            mainDisplaySurface.release();
-            mainDisplaySurface = null;
-        }
-
-        if (secondaryDisplaySurface != null) {
-            secondaryDisplaySurface.release();
-            secondaryDisplaySurface = null;
-        }
-
-        if (fullFrameBlit != null) {
-            fullFrameBlit.release(false);
-            fullFrameBlit = null;
-        }
-
-        if (eglCore != null) {
-            eglCore.release();
-            eglCore = null;
-        }
+        vrView.stop();
     }
 
     public enum VideoReaderEventMessageCode {WAITING_FOR_VIDEO, VIDEO_PLAYING}
-
-    private SurfaceHolder.Callback videoSurfaceCallbackLeft = new SurfaceHolder.Callback() {
-        @Override
-        public void surfaceCreated(@NonNull SurfaceHolder holder) {
-            eglCore = new EglCore();
-
-            mainDisplaySurface = new WindowSurface(eglCore, holder.getSurface(), false);
-            mainDisplaySurface.makeCurrent();
-
-            fullFrameBlit = new FullFrameRect(new Texture2dProgram(Texture2dProgram.ProgramType.TEXTURE_EXT));
-            textureId = fullFrameBlit.createTextureObject();
-            videoSurfaceTexture = new SurfaceTexture(textureId);
-            videoSurfaceTexture.setOnFrameAvailableListener(VideoReaderExoplayer.this);
-            surface = new Surface(videoSurfaceTexture);
-            mPlayer.setVideoSurface(surface);
-        }
-
-        @Override
-        public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width, int height) {
-
-        }
-
-        @Override
-        public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
-
-        }
-    };
-
-    private SurfaceHolder.Callback videoSurfaceCallbackRight = new SurfaceHolder.Callback() {
-        @Override
-        public void surfaceCreated(@NonNull SurfaceHolder holder) {
-            secondaryDisplaySurface = new WindowSurface(eglCore, holder.getSurface(), false);
-        }
-
-        @Override
-        public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width, int height) {
-
-        }
-
-        @Override
-        public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
-
-        }
-    };
-
-    @Override
-    public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-        if (eglCore == null) {
-            return;
-        }
-
-        if (mainDisplaySurface != null) {
-            drawFrame(mainDisplaySurface, surfaceViewLeft.getWidth(), surfaceViewLeft.getHeight());
-        }
-
-        if (secondaryDisplaySurface != null) {
-            drawFrame(secondaryDisplaySurface, secondaryDisplaySurface.getWidth(), secondaryDisplaySurface.getHeight());
-        }
-    }
-
-    private void drawFrame(WindowSurface windowSurface, int viewWidth, int viewHeight) {
-        windowSurface.makeCurrent();
-        videoSurfaceTexture.updateTexImage();
-        videoSurfaceTexture.getTransformMatrix(transformMatrix);
-        GLES20.glViewport(0, 0, viewWidth, viewHeight);
-        fullFrameBlit.drawFrame(textureId, transformMatrix);
-        windowSurface.swapBuffers();
-    }
 }

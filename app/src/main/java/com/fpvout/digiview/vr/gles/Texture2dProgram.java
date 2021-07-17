@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.fpvout.digiview.gles;
+package com.fpvout.digiview.vr.gles;
 
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;

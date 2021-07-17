@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.fpvout.digiview.gles;
+package com.fpvout.digiview.vr.gles;
 
 /**
  * This class essentially represents a viewport-sized sprite that will be rendered with

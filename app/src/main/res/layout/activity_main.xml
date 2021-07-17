@@ -19,30 +19,16 @@
         app:layout_constraintTop_toTopOf="parent">
     </SurfaceView>
 
-    <SurfaceView
-        android:id="@+id/surfaceViewLeft"
+    <com.fpvout.digiview.vr.views.VrView
+        android:id="@+id/vr_view"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:visibility="gone"
-        app:layout_constraintEnd_toStartOf="@+id/middle_guide"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/middle_guide"
-        android:layout_width="1dp"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        app:layout_constraintGuide_percent=".50" />
-
-    <SurfaceView
-        android:id="@+id/surfaceViewRight"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/middle_guide" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
 
     <TextView
         android:id="@+id/watermarkView"

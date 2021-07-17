@@ -95,6 +95,7 @@ public class VideoReaderExoplayer {
             vrView.setVisibility(View.GONE);
             mPlayer.setVideoSurfaceView(surfaceView);
         }
+
         mPlayer.setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
         mPlayer.setWakeMode(C.WAKE_MODE_LOCAL);
 

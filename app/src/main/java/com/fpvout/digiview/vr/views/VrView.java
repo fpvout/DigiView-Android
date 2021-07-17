@@ -75,9 +75,20 @@ public class VrView extends FrameLayout implements SurfaceTexture.OnFrameAvailab
         this.mPlayer = mPlayer;
         surfaceViewLeft.getHolder().addCallback(videoSurfaceCallbackLeft);
         surfaceViewRight.getHolder().addCallback(videoSurfaceCallbackRight);
+        surfaceViewLeft.setVisibility(View.GONE);
+        surfaceViewRight.setVisibility(View.GONE);
+        surfaceViewLeft.post(new Runnable() {
+            @Override
+            public void run() {
+                surfaceViewLeft.setVisibility(View.VISIBLE);
+                surfaceViewRight.setVisibility(View.VISIBLE);
+            }
+        });
     }
 
     public void stop() {
+        surfaceViewLeft.getHolder().removeCallback(videoSurfaceCallbackLeft);
+        surfaceViewRight.getHolder().removeCallback(videoSurfaceCallbackRight);
         if (surface != null) {
             surface.release();
             surface = null;

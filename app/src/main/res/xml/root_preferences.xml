@@ -41,6 +41,12 @@
             app:summary="@string/full_screen_summary" />
 
         <SwitchPreferenceCompat
+            app:key="VREnabled"
+            app:title="@string/vr_enabled_mode"
+            app:defaultValue="false"
+            app:summary="@string/vr_enabled_summary" />
+
+        <SwitchPreferenceCompat
             app:key="ShowWatermark"
             app:title="@string/show_watermark"
             app:defaultValue="true" />

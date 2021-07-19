@@ -4,6 +4,7 @@
     package="com.fpvout.digiview">
 
     <uses-feature android:name="android.hardware.usb.host" />
+
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
@@ -12,8 +13,13 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Digiview"
-        >
+        android:theme="@style/Theme.Digiview">
+        <activity android:name=".tutorial.TutorialActivity">
+            <intent-filter>
+                <action android:name="digiview.start.tutorial.activity"/>
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".DataCollectionAgreementPopupActivity"
             android:label="@string/title_activity_data_collection"
@@ -21,7 +27,6 @@
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"></activity>
-
         <activity
             android:launchMode="singleTask"
             android:name="com.fpvout.digiview.MainActivity"
@@ -32,16 +37,16 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
             <intent-filter>
                 <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
                 <action android:name="android.hardware.usb.action.USB_DEVICE_DETACHED" />
             </intent-filter>
 
-            <meta-data android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
+            <meta-data
+                android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
                 android:resource="@xml/device_filter" />
-
-            <meta-data android:name="android.hardware.usb.action.USB_DEVICE_DETACHED"
+            <meta-data
+                android:name="android.hardware.usb.action.USB_DEVICE_DETACHED"
                 android:resource="@xml/device_filter" />
         </activity>
         <meta-data android:name="io.sentry.dsn" android:value="https://df6168678f2e4107abe5abb40cf3e648@o660067.ingest.sentry.io/5764247" />

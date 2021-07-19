@@ -6,5 +6,7 @@
     <color name="digiview_blue">#4776e6</color>
     <color name="digiview_blue_variant">#5A6CE6</color>
     <color name="digiview_purple">#8e54e9</color>
+    <color name="icon_color">#000000</color>
+    <color name="tutorial_background">#FFFFFF</color>
     <color name="digiview_purple_variant">#7C5CE8</color>
 </resources>

@@ -25,6 +25,8 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
 
+import com.fpvout.digiview.tutorial.TutorialActivity;
+
 import java.util.HashMap;
 
 import io.sentry.SentryLevel;
@@ -122,6 +124,9 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
                 showOverlay(R.string.waiting_for_usb_device, OverlayStatus.Disconnected);
             }
         }
+
+        // This only launches the tutorial at first start
+        launchTutorialActivity();
     }
 
     private void setupGestureDetectors() {
@@ -372,6 +377,28 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         usbConnected = false;
     }
 
+    /**
+     * Method to launch the TutorialActivity. The method automatically detects if this
+     * is the first launch using SharedPreferences. So, this method should be called at
+     * every start but only launches the TutorialActivity at first start.
+     */
+    private void launchTutorialActivity() {
+        // Constants, maybe move to global variables
+        final String SHARED_PREFERENCES = "digi_view_preferences";
+        final String TUTORIAL_SHOWN = "tutorial_shown";
+
+        // SharedPreference instant, maybe use global one
+        SharedPreferences preferences = getSharedPreferences(SHARED_PREFERENCES, MODE_PRIVATE);
+
+        boolean tutorialShown = preferences.getBoolean(TUTORIAL_SHOWN, false);
+
+        if (!tutorialShown) {
+            startActivity(new Intent(MainActivity.this, TutorialActivity.class));
+            // Save that tutorial was shown before
+            preferences.edit().putBoolean(TUTORIAL_SHOWN, true).apply();
+        }
+    }
+  
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

@@ -47,6 +47,16 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="@string/tutorial_title">
+
+        <Preference
+            android:title="@string/tutorial_preference_title">
+            <intent
+                android:action="digiview.start.tutorial.activity" />
+        </Preference>
+
+    </PreferenceCategory>
+
     <PreferenceCategory app:title="@string/links">
 
         <Preference

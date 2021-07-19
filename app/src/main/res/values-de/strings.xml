@@ -6,6 +6,16 @@
     <string name="usb_device_detached_waiting">USB Gerät getrennt\n\nWarte auf USB Gerät…</string>
     <string name="usb_device_found">USB Gerät gefunden.</string>
     <string name="waiting_for_video">Warte auf Video…</string>
+    <string name="tutorial_title">Tutorial</string>
+    <string name="tutorial_preference_title">Schau dir das Tutorial erneut an.</string>
+    <string name="tutorial_welcome_text">Willkommen zu DigiView! Diese App ermöglicht es dir den Videofeed deiner DJI FPV Brille V1 &amp; V2 auf deinem Smartphone abzuspielen.</string>
+    <string name="tutorial_power_up_goggles">1.) Starte deine FPV Brille</string>
+    <string name="tutorial_power_up_drone">2.) Starte deine Drohne</string>
+    <string name="tutorial_plug_in_usb">3.) Verbinde deine FPV Brille und dein Smartphone mit einem USB Kabel</string>
+    <string name="tutorial_auto_temp_control">Eventuell musst du die automatische Temperatur-Überwachung deiner Air Unit/Vista ausschalten. (im FPV Brillen-Menü: Einstellungen > Gerät)</string>
+    <string name="tutorial_usb_otg_enable">Bei manchen Smartphones ist es nötig USB OTG in den Android Einstellungen zu aktivieren.</string>
+    <string name="tutorial_touch_gestures">4.) Touch-Gesten benutzen</string>
+    <string name="tutorial_touch_gestures_explained">- Berühre den Bildschirm um das Menü-Overlay sichtbar zu machen.\n- Benutze die Zoom-Geste, um zwischen dem Originalsichtfeld und Abgeschnittenensichtfeld zu wechseln.</string>
     <string name="title_activity_data_collection">Datenerfassungsvereinbarung</string>
     <string name="data_collection_header">Absturzdaten an das DigiView-Team melden?</string>
     <string name="data_collection_text">Diese App wird wahrscheinlich seltener abstürzen als deine Drohne.\n Falls doch, würden wir gerne davon erfahren!\n\nWir verwenden Sentry, um Fehler zu verfolgen und diese App zu verbessern.</string>

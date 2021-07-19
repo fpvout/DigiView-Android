@@ -3,6 +3,16 @@
     <string name="digiview_feed">DigiView\nfeed</string>
     <string name="waiting_for_usb_device">Please Connect Goggles</string>
     <string name="usb_device_approved">USB device approved</string>
+    <string name="tutorial_title">Tutorial</string>
+    <string name="tutorial_preference_title">Have a second look at the tutorial.</string>
+    <string name="tutorial_welcome_text">Welcome to DigiView! This app allows you to display the video feed of your DJI FPV Goggles V1 &amp; V2 on your phone.</string>
+    <string name="tutorial_power_up_goggles">1.) Power up your goggles</string>
+    <string name="tutorial_power_up_drone">2.) Power up your drone</string>
+    <string name="tutorial_plug_in_usb">3.) Connect goggles and phone using an USB cable</string>
+    <string name="tutorial_auto_temp_control">You might need to disable "automatic temp control" on your Air Unit/Vista. (in goggle menu: Settings > Device)</string>
+    <string name="tutorial_usb_otg_enable">You may need to activate USB OTG in your Android settings.</string>
+    <string name="tutorial_touch_gestures">4.) Using touch gestures</string>
+    <string name="tutorial_touch_gestures_explained">- Tap on screen to toggle menu overlay.\n- Pinch in/out to toggle between original- and cropped-view.</string>
     <string name="usb_device_detached_waiting">Goggles Disconnected</string>
     <string name="usb_device_found">Goggles Connected</string>
     <string name="waiting_for_video">Waiting For Video…</string>
@@ -40,5 +50,4 @@
     <string name="copyright">Copyright</string>
     <string name="open_source_license">Open-Source License</string>
     <string name="open_source_license_summary">MIT License</string>
-
 </resources>

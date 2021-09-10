@@ -1,5 +1,6 @@
 plugins {
     id 'com.android.application'
+    id "com.starter.easylauncher" version "4.0.0"
 }
 
 android {
@@ -12,7 +13,7 @@ android {
                     keyAlias digiviewKeyAlias
                 }
                 catch (ex) {
-                        println("You should define mStoreFile, mStorePassword, mKeyPassword and mKeyAlias in ~/.gradle/gradle.properties.")
+                        println("You should define mStoreFile, mStorePassword, mKeyPassword and mKeyAlias in ~/.gradle/gradle.properties : "+ ex.message)
                 }
         }
     }
@@ -65,14 +66,14 @@ android {
 
 dependencies {
 
-    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'androidx.appcompat:appcompat:1.3.0'
     implementation 'com.google.android.material:material:1.3.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
-    implementation 'com.google.android.exoplayer:exoplayer:2.13.3'
+    implementation 'com.google.android.exoplayer:exoplayer:2.14.1'
     implementation 'io.sentry:sentry-android:4.3.0'
     implementation 'androidx.preference:preference:1.1.1'
 
-    testImplementation 'junit:junit:4.+'
+    testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 }

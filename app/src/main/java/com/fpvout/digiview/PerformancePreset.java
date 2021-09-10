@@ -1,19 +1,17 @@
 package com.fpvout.digiview;
 
+import androidx.annotation.NonNull;
+
 public class PerformancePreset {
-    int h264ReaderMaxSyncFrameSize = 131072;
-    int h264ReaderSampleTime = 10000;
-    int exoPlayerMinBufferMs = 500;
-    int exoPlayerMaxBufferMs = 2000;
-    int exoPlayerBufferForPlaybackMs = 17;
-    int exoPlayerBufferForPlaybackAfterRebufferMs = 17;
-    DataSourceType dataSourceType = DataSourceType.INPUT_STREAM;
+    int h264ReaderMaxSyncFrameSize;
+    int h264ReaderSampleTime;
+    int exoPlayerMinBufferMs;
+    int exoPlayerMaxBufferMs;
+    int exoPlayerBufferForPlaybackMs;
+    int exoPlayerBufferForPlaybackAfterRebufferMs;
+    DataSourceType dataSourceType;
 
-    private PerformancePreset(){
-
-    }
-
-    private PerformancePreset(int mH264ReaderMaxSyncFrameSize, int mH264ReaderSampleTime, int mExoPlayerMinBufferMs, int mExoPlayerMaxBufferMs, int mExoPlayerBufferForPlaybackMs, int mExoPlayerBufferForPlaybackAfterRebufferMs, DataSourceType mDataSourceType){
+    private PerformancePreset(int mH264ReaderMaxSyncFrameSize, int mH264ReaderSampleTime, int mExoPlayerMinBufferMs, int mExoPlayerMaxBufferMs, int mExoPlayerBufferForPlaybackMs, int mExoPlayerBufferForPlaybackAfterRebufferMs, DataSourceType mDataSourceType) {
         h264ReaderMaxSyncFrameSize = mH264ReaderMaxSyncFrameSize;
         h264ReaderSampleTime = mH264ReaderSampleTime;
         exoPlayerMinBufferMs = mExoPlayerMinBufferMs;
@@ -33,15 +31,12 @@ public class PerformancePreset {
                 return new PerformancePreset(30720, 200, 32768, 65536, 0, 0, DataSourceType.BUFFERED_INPUT_STREAM);
             case LEGACY_BUFFERED:
                 return new PerformancePreset(30720, 300, 32768, 65536, 34, 34, DataSourceType.BUFFERED_INPUT_STREAM);
+            case VIDEO_STREAM_SERVICE:
+                return new PerformancePreset(131072, 10000, 500, 2000, 17, 17, DataSourceType.VIDEO_STREAM_SERVICE);
             case DEFAULT:
             default:
                 return new PerformancePreset(131072, 10000, 500, 2000, 17, 17, DataSourceType.INPUT_STREAM);
         }
-    }
-
-    public enum DataSourceType {
-        INPUT_STREAM,
-        BUFFERED_INPUT_STREAM
     }
 
     static PerformancePreset getPreset(String p) {
@@ -54,21 +49,16 @@ public class PerformancePreset {
                 return getPreset(PresetType.LEGACY);
             case "new_legacy":
                 return getPreset(PresetType.LEGACY_BUFFERED);
+            case "video_stream_service":
+                return getPreset(PresetType.VIDEO_STREAM_SERVICE);
             case "default":
             default:
                 return getPreset(PresetType.DEFAULT);
         }
     }
 
-    public enum PresetType {
-        DEFAULT,
-        CONSERVATIVE,
-        AGGRESSIVE,
-        LEGACY,
-        LEGACY_BUFFERED
-    }
-
     @Override
+    @NonNull
     public String toString() {
         return "PerformancePreset{" +
                 "h264ReaderMaxSyncFrameSize=" + h264ReaderMaxSyncFrameSize +
@@ -79,5 +69,21 @@ public class PerformancePreset {
                 ", exoPlayerBufferForPlaybackAfterRebufferMs=" + exoPlayerBufferForPlaybackAfterRebufferMs +
                 ", dataSourceType=" + dataSourceType +
                 '}';
+    }
+
+    public enum PresetType {
+        DEFAULT,
+        CONSERVATIVE,
+        AGGRESSIVE,
+        LEGACY,
+        LEGACY_BUFFERED,
+        VIDEO_STREAM_SERVICE
+    }
+
+
+    public enum DataSourceType {
+        INPUT_STREAM,
+        BUFFERED_INPUT_STREAM,
+        VIDEO_STREAM_SERVICE
     }
 }

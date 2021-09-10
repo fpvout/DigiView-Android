@@ -6,11 +6,12 @@ import android.content.Intent;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 
+import static com.fpvout.digiview.UsbMaskConnection.ACTION_USB_PERMISSION;
+
 public class UsbDeviceBroadcastReceiver extends BroadcastReceiver {
-    private static final String ACTION_USB_PERMISSION = "com.fpvout.digiview.USB_PERMISSION";
     private final UsbDeviceListener listener;
 
-    public UsbDeviceBroadcastReceiver(UsbDeviceListener listener ){
+    public UsbDeviceBroadcastReceiver(UsbDeviceListener listener) {
         this.listener = listener;
     }
 
@@ -21,7 +22,7 @@ public class UsbDeviceBroadcastReceiver extends BroadcastReceiver {
             UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
 
             if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
-                if(device != null){
+                if (device != null) {
                     listener.usbDeviceApproved(device);
                 }
             }

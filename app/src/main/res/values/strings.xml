@@ -40,5 +40,6 @@
     <string name="copyright">Copyright</string>
     <string name="open_source_license">Open-Source License</string>
     <string name="open_source_license_summary">MIT License</string>
+    <string name="video_preset_video_stream_service">Video Stream Service</string>
 
 </resources>

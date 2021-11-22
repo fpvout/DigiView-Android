@@ -1,40 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="digiview_feed">DigiView\nfeed</string>
-    <string name="waiting_for_usb_device">En attente du périphérique USB…</string>
+    <string name="digiview_feed">DigiView\nflux</string>
+    <string name="waiting_for_usb_device">Veuillez connecter les lunettes</string>
     <string name="usb_device_approved">Périphérique USB approuvé</string>
-    <string name="usb_device_detached_waiting">Périphérique USB déconnecté\nEn attente du périphérique USB…</string>
-    <string name="usb_device_found">Périphérique USB trouvé.</string>
+    <string name="usb_device_detached_waiting">Lunettes déconnectées</string>
+    <string name="usb_device_found">Lunettes connectées</string>
     <string name="waiting_for_video">En attente de la vidéo…</string>
-    <string name="title_activity_data_collection">Collecte de données</string>
-    <string name="data_collection_header">Partager mes données et diagnostics de crashs avec l\'équipe de DigiView ?</string>
-    <string name="data_collection_text">Cette application crashera sûrement moins que votre drone. Mais si jamais elle plante, nous aimerions bien le savoir ! Nous utilisons Sentry pour tracker les erreurs et crashs de l\'application, contribuez à son amélioration en acceptant de partager ces données avec nous.</string>
-    <string name="data_collection_agree_button">Accepter</string>
-    <string name="data_collection_deny_button">Refuser</string>
+    <string name="title_activity_data_collection">Accord de collecte de données</string>
+    <string name="data_collection_deny_button">Non merci</string>
+    <string name="data_collection_agree_button">Bien sûr !</string>
+    <string name="data_collection_header" >Communiquer les données de plantage avec l\'équipe de DigiView ?</string>
+    <string name="data_collection_text">Cette application plantera sûrement moins que votre drone, mais si elle le fait, nous aimerions le savoir !</string>
     <string name="title_activity_settings">Paramètres</string>
+
+    <!-- Settings -->
     <string name="performance">Performance</string>
-    <string name="privacy">Vie privée</string>
-    <string name="video_preset">Preset vidéo</string>
-    <string name="video_preset_default">Default</string>
-    <string name="video_preset_conservative">Conservative</string>
-    <string name="video_preset_aggressive">Aggressive</string>
-    <string name="video_preset_legacy">Legacy</string>
-    <string name="enable_analytics">Collecte de données</string>
+    <string name="privacy">Vie Privée</string>
+    <string name="video_preset">Préréglage Vidéo</string>
+    <string name="video_preset_default">Défaut</string>
+    <string name="video_preset_conservative">Conservateur</string>
+    <string name="video_preset_aggressive">Agressif</string>
+    <string name="enable_analytics">Autoriser les analytiques</string>
     <string name="privacy_policy">Politique de confidentialité</string>
-    <string name="privacy_policy_summary">Voyez quelles données nous recoltons et comment nous les utilisons.</string>
-    <string name="video_player">Lecteur vidéo</string>
-    <string name="full_screen">Plein écran</string>
-    <string name="full_screen_summary">Peut aussi être activé en double tapant ou en pinçant l\'écran.</string>
+    <string name="privacy_policy_summary">Voyez quelles données nous récoltons et comment nous les utilisons</string>
+    <string name="video_player">Lecteur Vidéo</string>
+    <string name="full_screen">Plein Écran</string>
+    <string name="full_screen_summary">Peut aussi être activé en double tapant ou en pinçant le lecteur vidéo.</string>
     <string name="show_watermark">Afficher le logo DigiView en filigrane</string>
     <string name="links">Liens</string>
     <string name="our_website">Notre site internet</string>
-    <string name="discord_summary">Venez discuter avec nous sur Discord</string>
+    <string name="discord_summary">Venez discuter avec nous et les autres utilisateurs de DigiView</string>
     <string name="digiview_web_app">L\'application web DigiView</string>
     <string name="digiview_web_app_summary">Fonctionne sur Chrome et les navigateurs basés sur Chrome, même sur Android !</string>
-    <string name="github_summary">Tout notre code est Open-Source</string>
-    <string name="about">À propos</string>
-    <string name="app_Version">Version</string>
+    <string name="github_summary">Tout notre code est open-source</string>
+    <string name="about">À Propos</string>
+    <string name="app_Version">Version de l\'application</string>
     <string name="copyright">Copyright</string>
-    <string name="open_source_license">License Open-Source</string>
-    <string name="open_source_license_summary">License MIT</string>
+    <string name="open_source_license">Licence Open-Source</string>
+    <string name="open_source_license_summary">Licence MIT</string>
 </resources>

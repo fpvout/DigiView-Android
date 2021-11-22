@@ -80,6 +80,95 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     private static final String ShowWatermark = "ShowWatermark";
     private boolean overlayIsShown = false;
 
+    private void setupGestureDetectors() {
+        gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                toggleButton();
+                return super.onSingleTapConfirmed(e);
+            }
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                mVideoReader.toggleZoom();
+                return super.onDoubleTap(e);
+            }
+        });
+
+        scaleGestureDetector = new ScaleGestureDetector(this, new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+            @Override
+            public void onScaleEnd(ScaleGestureDetector detector) {
+                if (detector.getScaleFactor() < 1) {
+                    mVideoReader.zoomOut();
+                } else {
+                    mVideoReader.zoomIn();
+                }
+            }
+        });
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        gestureDetector.onTouchEvent(event);
+        scaleGestureDetector.onTouchEvent(event);
+
+        return super.onTouchEvent(event);
+    }
+
+    private void updateWatermark() {
+        if (overlayView.getVisibility() == View.VISIBLE) {
+            watermarkView.setAlpha(0);
+            return;
+        }
+
+        if (sharedPreferences.getBoolean(ShowWatermark, true)) {
+            watermarkView.setAlpha(0.3F);
+        } else {
+            watermarkView.setAlpha(0F);
+        }
+    }
+
+    private void updateVideoZoom() {
+        if (sharedPreferences.getBoolean(VideoZoomedIn, true)) {
+            mVideoReader.zoomIn();
+        } else {
+            mVideoReader.zoomOut();
+        }
+    }
+
+    private void cancelToolbarAnimation() {
+        Handler handler = toolbar.getHandler();
+        if (handler != null) {
+            toolbar.getHandler().removeCallbacksAndMessages(null);
+        }
+    }
+
+    private void toggleButton() {
+        if (overlayView.getVisibility() == View.VISIBLE) return;
+        // cancel any pending delayed animations first
+         cancelToolbarAnimation();
+
+        int translation = 0;
+        if (toolbarAlpha == 0.7f) {
+            toolbarAlpha = 0;
+            translation = 60;
+        } else {
+            toolbarAlpha = 0.7f;
+        }
+        updateDVRThumb();
+        toolbar.animate()
+                .alpha(toolbarAlpha)
+                .translationX(translation)
+                .setDuration(shortAnimationDuration)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        autoHideToolbar();
+                        updateDVRThumb();
+                    }
+                });
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -190,128 +279,6 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         }
     }
 
-    private void setupGestureDetectors() {
-        gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
-            @Override
-            public boolean onSingleTapConfirmed(MotionEvent e) {
-                toggleButton();
-                return super.onSingleTapConfirmed(e);
-            }
-
-            @Override
-            public boolean onDoubleTap(MotionEvent e) {
-                mVideoReader.toggleZoom();
-                return super.onDoubleTap(e);
-            }
-        });
-
-        scaleGestureDetector = new ScaleGestureDetector(this, new ScaleGestureDetector.SimpleOnScaleGestureListener() {
-            @Override
-            public void onScaleEnd(ScaleGestureDetector detector) {
-                if (detector.getScaleFactor() < 1) {
-                    mVideoReader.zoomOut();
-                } else {
-                    mVideoReader.zoomIn();
-                }
-            }
-        });
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        gestureDetector.onTouchEvent(event);
-        scaleGestureDetector.onTouchEvent(event);
-
-        return super.onTouchEvent(event);
-    }
-
-    private void updateWatermark() {
-        if (overlayView.getVisibility() == View.VISIBLE) {
-            watermarkView.setAlpha(0);
-            return;
-        }
-
-        if (sharedPreferences.getBoolean(ShowWatermark, true)) {
-            watermarkView.setAlpha(0.3F);
-        } else {
-            watermarkView.setAlpha(0F);
-        }
-    }
-
-    private void updateVideoZoom() {
-        if (sharedPreferences.getBoolean(VideoZoomedIn, true)) {
-            mVideoReader.zoomIn();
-        } else {
-            mVideoReader.zoomOut();
-        }
-    }
-
-    private void cancelToolbarAnimation() {
-        Handler handler = toolbar.getHandler();
-        if (handler != null) {
-            toolbar.getHandler().removeCallbacksAndMessages(null);
-        }
-    }
-
-    private void toggleButton() {
-        if (overlayView.getVisibility() == View.VISIBLE) return;
-        // cancel any pending delayed animations first
-         cancelToolbarAnimation();
-
-        int translation = 0;
-        if (toolbarAlpha == 0.7f) {
-            toolbarAlpha = 0;
-            translation = 60;
-        } else {
-            toolbarAlpha = 0.7f;
-        }
-        updateDVRThumb();
-        toolbar.animate()
-                .alpha(toolbarAlpha)
-                .translationX(translation)
-                .setDuration(shortAnimationDuration)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        autoHideToolbar();
-                        updateDVRThumb();
-                    }
-                });
-    }
-
-    private void autoHideToolbar() {
-        if (overlayView.getVisibility() == View.VISIBLE) return;
-        if (overlayIsShown) return;
-
-        toolbar.postDelayed(() -> {
-            toolbarAlpha = 0;
-            toolbar.animate()
-                        .alpha(0)
-                        .translationX(60)
-                    .setDuration(shortAnimationDuration);
-        }, 3000);
-    }
-
-    private void showOverlay(int textId, OverlayStatus connected) {
-        overlayView.show(textId, connected);
-        overlayIsShown = true;
-        toolbar.setTranslationX(0);
-        toolbar.setAlpha(1);
-        updateWatermark();
-        autoHideToolbar();
-        updateVideoZoom();
-
-    }
-
-    private void hideOverlay() {
-        overlayView.hide();
-        overlayIsShown = false;
-        updateWatermark();
-        autoHideToolbar();
-        updateVideoZoom();
-    }
-
-
     @Override
     public void usbDeviceApproved(UsbDevice device) {
         Log.i(TAG, "USB - usbDevice approved");
@@ -419,6 +386,24 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         }
     }
 
+    private void showOverlay(int textId, OverlayStatus connected) {
+        overlayView.show(textId, connected);
+        overlayIsShown = true;
+        toolbar.setTranslationX(0);
+        toolbar.setAlpha(1);
+        updateWatermark();
+        autoHideToolbar();
+        updateVideoZoom();
+
+    }
+
+    private void hideOverlay() {
+        overlayView.hide();
+        overlayIsShown = false;
+        updateWatermark();
+        autoHideToolbar();
+        updateVideoZoom();
+    }
 
     @Override
     protected void onStop() {
@@ -448,6 +433,19 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         mUsbMaskConnection.stop();
         mVideoReader.stop();
         usbConnected = false;
+    }
+
+    private void autoHideToolbar() {
+        if (overlayView.getVisibility() == View.VISIBLE) return;
+        if (overlayIsShown) return;
+
+        toolbar.postDelayed(() -> {
+            toolbarAlpha = 0;
+            toolbar.animate()
+                    .alpha(0)
+                    .translationX(60)
+                    .setDuration(shortAnimationDuration);
+        }, 3000);
     }
 
     private void checkDataCollectionAgreement() {

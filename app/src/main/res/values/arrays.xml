@@ -1,5 +1,4 @@
 <resources>
-    <!-- Reply Preference -->
     <string-array name="video_preset_titles">
         <item>@string/video_preset_default</item>
         <item>@string/video_preset_conservative</item>
@@ -14,5 +13,129 @@
         <item>aggressive</item>
         <item>legacy</item>
         <item>legacy_buffered</item>
+    </string-array>
+
+    <string-array name="stream_audio_source_titles">
+        <item>@string/stream_audio_source_default</item>
+        <item>@string/stream_audio_source_mic</item>
+        <item>@string/stream_audio_source_cam</item>
+        <item>@string/stream_audio_source_communication</item>
+    </string-array>
+
+    <string-array name="stream_audio_source_values">
+        <item>default</item>
+        <item>mic</item>
+        <item>cam</item>
+        <item>communication</item>
+    </string-array>
+
+    <string-array name="stream_resolution_titles">
+        <item>240p</item>
+        <item>360p</item>
+        <item>480p</item>
+        <item>720p (default)</item>
+        <item>1080p</item>
+    </string-array>
+
+    <string-array name="stream_resolution_values">
+        <item>240p</item>
+        <item>360p</item>
+        <item>480p</item>
+        <item>720p</item>
+        <item>1080p</item>
+    </string-array>
+
+    <string-array name="stream_framerate_titles">
+        <item>15 fps</item>
+        <item>24 fps</item>
+        <item>25 fps</item>
+        <item>30 fps</item>
+        <item>60 fps (default)</item>
+    </string-array>
+
+    <string-array name="stream_framerate_values">
+        <item>15</item>
+        <item>24</item>
+        <item>25</item>
+        <item>30</item>
+        <item>60</item>
+    </string-array>
+
+    <string-array name="stream_max_bitrate_titles">
+        <item>300 kbps</item>
+        <item>500 kbps</item>
+        <item>700 kbps</item>
+        <item>1000 kbps</item>
+        <item>1500 kbps</item>
+        <item>2000 kbps</item>
+        <item>2500 kbps (default)</item>
+        <item>3500 kbps</item>
+        <item>4000 kbps</item>
+        <item>5000 kbps</item>
+        <item>6000 kbps</item>
+        <item>7000 kbps</item>
+        <item>8000 kbps</item>
+        <item>10000 kbps</item>
+        <item>15000 kbps</item>
+        <item>20000 kbps</item>
+        <item>25000 kbps</item>
+    </string-array>
+
+    <string-array name="stream_max_bitrate_values">
+        <item>300</item>
+        <item>500</item>
+        <item>700</item>
+        <item>1000</item>
+        <item>1500</item>
+        <item>2000</item>
+        <item>2500</item>
+        <item>3500</item>
+        <item>4000</item>
+        <item>5000</item>
+        <item>6000</item>
+        <item>7000</item>
+        <item>8000</item>
+        <item>10000</item>
+        <item>15000</item>
+        <item>20000</item>
+        <item>25000</item>
+    </string-array>
+
+    <string-array name="stream_audio_sample_rate_titles">
+        <item>8 KHz</item>
+        <item>11025 Hz</item>
+        <item>16 KHz</item>
+        <item>22050 Hz</item>
+        <item>32000 Hz</item>
+        <item>44100 Hz (default)</item>
+        <item>48 KHz</item>
+        <item>96 KHz</item>
+    </string-array>
+
+    <string-array name="stream_audio_sample_rate_values">
+        <item>8khz</item>
+        <item>11025hz</item>
+        <item>16khz</item>
+        <item>22050hz</item>
+        <item>32000hz</item>
+        <item>44100hz</item>
+        <item>48khz</item>
+        <item>96khz</item>
+    </string-array>
+
+    <string-array name="stream_audio_bitrate_titles">
+        <item>64 kbps</item>
+        <item>96 kbps</item>
+        <item>128 kbps (default)</item>
+        <item>192 kbps</item>
+        <item>320 kbps</item>
+    </string-array>
+
+    <string-array name="stream_audio_bitrate_values">
+        <item>64</item>
+        <item>96</item>
+        <item>128</item>
+        <item>192</item>
+        <item>320</item>
     </string-array>
 </resources>

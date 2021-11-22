@@ -47,6 +47,94 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="@string/streaming" app:summary="Streaming will record your entire screen">
+
+        <EditTextPreference
+            app:key="StreamRtmpUrl"
+            app:title="@string/stream_rtmp_url"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            app:key="StreamRtmpKey"
+            app:title="@string/stream_rtmp_key" />
+
+        <EditTextPreference
+            app:key="StreamRtmpUsername"
+            app:title="@string/stream_rtmp_username"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            app:key="StreamRtmpPassword"
+            app:title="@string/stream_rtmp_password" />
+
+        <ListPreference
+            app:key="StreamResolution"
+            app:defaultValue="720p"
+            app:title="@string/stream_resolution"
+            app:entries="@array/stream_resolution_titles"
+            app:entryValues="@array/stream_resolution_values"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            app:key="StreamFramerate"
+            app:defaultValue="60"
+            app:title="@string/stream_framerate"
+            app:entries="@array/stream_framerate_titles"
+            app:entryValues="@array/stream_framerate_values"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            app:key="StreamMaxBitrate"
+            app:defaultValue="2500"
+            app:title="@string/stream_max_bitrate"
+            app:entries="@array/stream_max_bitrate_titles"
+            app:entryValues="@array/stream_max_bitrate_values"
+            app:useSimpleSummaryProvider="true" />
+
+        <SwitchPreferenceCompat
+            app:key="StreamPortrait"
+            app:defaultValue="false"
+            app:title="@string/stream_portrait"
+            app:summary="@string/stream_portrait_summary" />
+
+        <SwitchPreferenceCompat
+            app:key="StreamRecordAudio"
+            app:defaultValue="true"
+            app:title="@string/stream_record_audio"
+            app:summary="@string/stream_record_audio_summary" />
+
+        <SwitchPreferenceCompat
+            app:key="StreamAudioStereo"
+            app:defaultValue="true"
+            app:title="@string/stream_audio_stereo"
+            app:summary="@string/stream_audio_stereo_summary" />
+
+        <ListPreference
+            app:key="StreamAudioSource"
+            app:defaultValue="default"
+            app:title="@string/stream_audio_source"
+            app:entries="@array/stream_audio_source_titles"
+            app:entryValues="@array/stream_audio_source_values"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            app:key="StreamAudioSampleRate"
+            app:defaultValue="44100hz"
+            app:title="@string/stream_audio_sample_rate"
+            app:entries="@array/stream_audio_sample_rate_titles"
+            app:entryValues="@array/stream_audio_sample_rate_values"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            app:key="StreamAudioBitrate"
+            app:defaultValue="128"
+            app:title="@string/stream_audio_bitrate"
+            app:entries="@array/stream_audio_bitrate_titles"
+            app:entryValues="@array/stream_audio_bitrate_values"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
     <PreferenceCategory app:title="@string/links">
 
         <Preference

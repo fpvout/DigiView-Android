@@ -40,5 +40,31 @@
     <string name="copyright">Copyright</string>
     <string name="open_source_license">Open-Source License</string>
     <string name="open_source_license_summary">MIT License</string>
+    <string name="streaming">Streaming</string>
+    <string name="stream_rtmp_url">RTMP Url</string>
+    <string name="stream_rtmp_key">RTMP Key</string>
+    <string name="stream_rtmp_username">RTMP Username</string>
+    <string name="stream_rtmp_password">RTMP Password</string>
+    <string name="stream_record_audio">Record audio</string>
+    <string name="stream_audio_source">Audio source</string>
+    <string name="stream_audio_source_default">Default</string>
+    <string name="stream_audio_source_mic">Mic</string>
+    <string name="stream_audio_source_cam">Camera</string>
+    <string name="stream_audio_source_communication">Communication</string>
+    <string name="stream_audio_source_performance">Performance</string>
+    <string name="stream_audio_source_internal">Internal audio</string>
+    <string name="stream_resolution">Output Resolution</string>
+    <string name="stream_framerate">Output Framerate</string>
+    <string name="stream_max_bitrate">Output Max Bitrate</string>
+    <string name="rtmp_connection_failed">Failed to connect to RTMP server</string>
+    <string name="rtmp_auth_error">RTMP authentication failed</string>
+    <string name="rtmp_settings_empty">Please, check your streaming RTMP URL and Key</string>
+    <string name="stream_record_audio_summary">Audio recording can be muted during live</string>
+    <string name="stream_audio_stereo">Stereo audio</string>
+    <string name="stream_audio_stereo_summary">Only if your device or the audio source supports it</string>
+    <string name="stream_audio_sample_rate">Audio sample rate</string>
+    <string name="stream_audio_bitrate">Audio bitrate</string>
+    <string name="stream_portrait">Force portrait mode</string>
+    <string name="stream_portrait_summary">Your video stream will be rotated in portrait mode</string>
 
 </resources>

@@ -1,13 +1,16 @@
 package com.fpvout.digiview;
 
+import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.LayoutTransition;
+import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
@@ -20,26 +23,43 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.preference.PreferenceManager;
+
+import com.fpvout.digiview.streaming.StreamingService;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import net.ossrs.rtmp.ConnectCheckerRtmp;
 
 import java.util.HashMap;
 
 import io.sentry.SentryLevel;
 import io.sentry.android.core.SentryAndroid;
 
-import static com.fpvout.digiview.VideoReaderExoplayer.VideoZoomedIn;
-
-public class MainActivity extends AppCompatActivity implements UsbDeviceListener {
-    private static final String ACTION_USB_PERMISSION = "com.fpvout.digiview.USB_PERMISSION";
+public class MainActivity extends AppCompatActivity implements UsbDeviceListener, ActivityCompat.OnRequestPermissionsResultCallback {
     private static final String TAG = "DIGIVIEW";
+    private static final String ACTION_USB_PERMISSION = "com.fpvout.digiview.USB_PERMISSION";
+    private static final int DATA_COLLECTION_AGREEMENT = 1;
+    private static final int MEDIA_PROJECTION_PERMISSION = 2;
+    private static final int RECORD_AUDIO_PERMISSION = 3;
     private static final int VENDOR_ID = 11427;
     private static final int PRODUCT_ID = 31;
     private int shortAnimationDuration;
-    private float buttonAlpha = 1;
-    private View settingsButton;
+    private FloatingActionButton settingsButton;
+    private FloatingActionButton liveButton;
+    private FloatingActionButton muteButton;
+    private TextView bitrateTextview;
     private View watermarkView;
     private OverlayView overlayView;
     PendingIntent permissionIntent;
@@ -54,6 +74,60 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     private ScaleGestureDetector scaleGestureDetector;
     private SharedPreferences sharedPreferences;
     private static final String ShowWatermark = "ShowWatermark";
+    private final Runnable hideButtonsRunnable = new Runnable() {
+        @Override
+        public void run() {
+            toggleView(settingsButton, false);
+            toggleView(liveButton, false);
+            toggleView(muteButton, false);
+            toggleView(bitrateTextview, false);
+        }
+    };
+    private final ConnectCheckerRtmp connectChecker = new ConnectCheckerRtmp() {
+        @Override
+        public void onConnectionSuccessRtmp() {
+            updateLiveButtonIcon();
+        }
+
+        @Override
+        public void onConnectionFailedRtmp(String reason) {
+            stopService(new Intent(getApplicationContext(), StreamingService.class));
+            updateLiveButtonIcon();
+            runOnUiThread(() -> {
+                Toast.makeText(getApplicationContext(), getString(R.string.rtmp_connection_failed), Toast.LENGTH_SHORT).show();
+            });
+        }
+
+        @Override
+        public void onNewBitrateRtmp(long bitrate) {
+            runOnUiThread(() -> {
+                bitrateTextview.setVisibility(View.VISIBLE);
+                bitrateTextview.setText(String.format("%s kbps", bitrate / 1024));
+            });
+        }
+
+        @Override
+        public void onDisconnectRtmp() {
+            updateLiveButtonIcon();
+            runOnUiThread(() -> {
+                bitrateTextview.setText("");
+                bitrateTextview.setVisibility(View.GONE);
+            });
+        }
+
+        @Override
+        public void onAuthErrorRtmp() {
+            updateLiveButtonIcon();
+            runOnUiThread(() -> {
+                Toast.makeText(getApplicationContext(), getString(R.string.rtmp_auth_error), Toast.LENGTH_SHORT).show();
+            });
+        }
+
+        @Override
+        public void onAuthSuccessRtmp() {
+            updateLiveButtonIcon();
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,11 +169,37 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         fpvView = findViewById(R.id.fpvView);
 
         settingsButton = findViewById(R.id.settingsButton);
-        settingsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(v.getContext(), SettingsActivity.class);
-                v.getContext().startActivity(intent);
+        settingsButton.setOnClickListener(v -> {
+            Intent intent = new Intent(v.getContext(), SettingsActivity.class);
+            v.getContext().startActivity(intent);
+        });
+
+        bitrateTextview = findViewById(R.id.bitrateText);
+        StreamingService.init(this, connectChecker);
+
+        muteButton = findViewById(R.id.muteButton);
+        muteButton.setOnClickListener(v -> {
+            StreamingService.toggleMute();
+            updateLiveButtonIcon();
+        });
+
+        liveButton = findViewById(R.id.liveButton);
+        liveButton.setOnClickListener(v -> {
+            if (!StreamingService.isStreaming()) {
+                if (sharedPreferences.getString("StreamRtmpUrl", "").isEmpty() || sharedPreferences.getString("StreamRtmpKey", "").isEmpty()) {
+                    Toast.makeText(this, getString(R.string.rtmp_settings_empty), Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent(v.getContext(), SettingsActivity.class);
+                    v.getContext().startActivity(intent);
+                } else {
+                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+                        startActivityForResult(StreamingService.sendIntent(), MEDIA_PROJECTION_PERMISSION);
+                    } else {
+                        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, RECORD_AUDIO_PERMISSION);
+                    }
+                }
+            } else {
+                stopService(new Intent(this, StreamingService.class));
+                this.updateLiveButtonIcon();
             }
         });
 
@@ -124,11 +224,94 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         }
     }
 
+    private void toggleFullOverlay() {
+        if (overlayView.getAlpha() > 0.0f) return;
+
+        toggleView(settingsButton, hideButtonsRunnable);
+        toggleView(liveButton, hideButtonsRunnable);
+        if (StreamingService.isStreaming()) {
+            toggleView(bitrateTextview, hideButtonsRunnable);
+            toggleView(muteButton, hideButtonsRunnable);
+        }
+    }
+
+    private void hideFullOverlay() {
+        toggleView(watermarkView, sharedPreferences.getBoolean(ShowWatermark, true), 0.3f);
+
+        toggleView(settingsButton, false);
+        toggleView(liveButton, false);
+        toggleView(muteButton, false);
+        toggleView(bitrateTextview, false);
+        toggleView(overlayView, false);
+    }
+
+    private void showFullOverlay() {
+        toggleView(watermarkView, false);
+
+        toggleView(settingsButton, true);
+        toggleView(liveButton, true);
+        if (StreamingService.isStreaming()) {
+            toggleView(muteButton, true);
+            toggleView(bitrateTextview, true);
+        }
+    }
+
+    private void toggleView(View view, @Nullable Runnable runnable) {
+        toggleView(view, view.getAlpha() == 0.0f, 1.0f, runnable);
+    }
+
+    private void toggleView(FloatingActionButton view, @Nullable Runnable runnable) {
+        toggleView(view, view.getVisibility() != View.VISIBLE, runnable);
+    }
+
+    private void toggleView(View view, boolean visible) {
+        toggleView(view, visible, 1.0f, null);
+    }
+
+    private void toggleView(FloatingActionButton view, boolean visible) {
+        toggleView(view, visible, null);
+    }
+
+    private void toggleView(View view, boolean visible, float visibleAlpha) {
+        toggleView(view, visible, visibleAlpha, null);
+    }
+
+    private void toggleView(View view, boolean visible, float visibleAlpha, @Nullable Runnable runnable) {
+        if (!visible) {
+            view.removeCallbacks(runnable);
+            view.animate().cancel();
+            view.animate()
+                    .alpha(0)
+                    .setDuration(shortAnimationDuration)
+                    .setListener(null);
+        } else {
+            view.removeCallbacks(runnable);
+            view.animate().cancel();
+            view.animate()
+                    .alpha(visibleAlpha)
+                    .setDuration(shortAnimationDuration);
+            view.postDelayed(runnable, 3000);
+        }
+    }
+
+    private void toggleView(FloatingActionButton view, boolean visible, @Nullable Runnable runnable) {
+        if (view.getHandler() != null) {
+            view.getHandler().removeCallbacksAndMessages(null);
+        }
+
+        if (!visible) {
+            view.hide();
+        } else {
+            view.show();
+            view.postDelayed(runnable, 3000);
+        }
+    }
+
     private void setupGestureDetectors() {
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onSingleTapConfirmed(MotionEvent e) {
-                toggleSettingsButton();
+                toggleFullOverlay();
                 return super.onSingleTapConfirmed(e);
             }
 
@@ -157,81 +340,6 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         scaleGestureDetector.onTouchEvent(event);
 
         return super.onTouchEvent(event);
-    }
-
-    private void updateWatermark() {
-        if (overlayView.getVisibility() == View.VISIBLE) {
-            watermarkView.setAlpha(0);
-            return;
-        }
-
-        if (sharedPreferences.getBoolean(ShowWatermark, true)) {
-            watermarkView.setAlpha(0.3F);
-        } else {
-            watermarkView.setAlpha(0F);
-        }
-    }
-
-    private void updateVideoZoom() {
-        if (sharedPreferences.getBoolean(VideoZoomedIn, true)) {
-            mVideoReader.zoomIn();
-        } else {
-            mVideoReader.zoomOut();
-        }
-    }
-
-    private void cancelButtonAnimation() {
-        Handler handler = settingsButton.getHandler();
-        if (handler != null) {
-            settingsButton.getHandler().removeCallbacksAndMessages(null);
-        }
-    }
-
-    private void showSettingsButton() {
-        cancelButtonAnimation();
-
-        if (overlayView.getVisibility() == View.VISIBLE) {
-            buttonAlpha = 1;
-            settingsButton.setAlpha(1);
-        }
-    }
-
-    private void toggleSettingsButton() {
-        if (buttonAlpha == 1 && overlayView.getVisibility() == View.VISIBLE) return;
-
-        // cancel any pending delayed animations first
-        cancelButtonAnimation();
-
-        if (buttonAlpha == 1) {
-            buttonAlpha = 0;
-        } else {
-            buttonAlpha = 1;
-        }
-
-        settingsButton.animate()
-                .alpha(buttonAlpha)
-                .setDuration(shortAnimationDuration)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        autoHideSettingsButton();
-                    }
-                });
-    }
-
-    private void autoHideSettingsButton() {
-        if (overlayView.getVisibility() == View.VISIBLE) return;
-        if (buttonAlpha == 0) return;
-
-        settingsButton.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                buttonAlpha = 0;
-                settingsButton.animate()
-                        .alpha(0)
-                        .setDuration(shortAnimationDuration);
-            }
-        }, 3000);
     }
 
     @Override
@@ -276,10 +384,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         usbConnected = true;
         mUsbMaskConnection.setUsbDevice(usbManager.openDevice(usbDevice), usbDevice);
         mVideoReader.setUsbMaskConnection(mUsbMaskConnection);
-        overlayView.hide();
         mVideoReader.start();
-        updateWatermark();
-        autoHideSettingsButton();
         showOverlay(R.string.waiting_for_video, OverlayStatus.Connected);
     }
 
@@ -308,11 +413,6 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
                 showOverlay(R.string.waiting_for_usb_device, OverlayStatus.Connected);
             }
         }
-
-        settingsButton.setAlpha(1);
-        autoHideSettingsButton();
-        updateWatermark();
-        updateVideoZoom();
     }
 
     private boolean onVideoReaderEvent(VideoReaderExoplayer.VideoReaderEventMessageCode m) {
@@ -321,22 +421,15 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
             showOverlay(R.string.waiting_for_video, OverlayStatus.Connected);
         } else if (VideoReaderExoplayer.VideoReaderEventMessageCode.VIDEO_PLAYING.equals(m)) {
             Log.d(TAG, "event: VIDEO_PLAYING");
-            hideOverlay();
+            hideFullOverlay();
         }
         return false; // false to continue listening
     }
 
     private void showOverlay(int textId, OverlayStatus connected) {
+        toggleView(overlayView, true);
+        showFullOverlay();
         overlayView.show(textId, connected);
-        updateWatermark();
-        showSettingsButton();
-    }
-
-    private void hideOverlay() {
-        overlayView.hide();
-        updateWatermark();
-        showSettingsButton();
-        autoHideSettingsButton();
     }
 
     private void disconnect() {
@@ -379,7 +472,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         boolean dataCollectionAccepted = preferences.getBoolean("dataCollectionAccepted", false);
 
-        if (requestCode == 1) { // Data Collection agreement Activity
+        if (requestCode == DATA_COLLECTION_AGREEMENT) { // Data Collection agreement Activity
             if (resultCode == RESULT_OK && dataCollectionAccepted) {
                 SentryAndroid.init(this, options -> options.setBeforeSend((event, hint) -> {
                     if (SentryLevel.DEBUG.equals(event.getLevel()))
@@ -388,9 +481,23 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
                         return event;
                 }));
             }
-
         }
-    } //onActivityResult
+
+        if (data != null && (requestCode == MEDIA_PROJECTION_PERMISSION && resultCode == Activity.RESULT_OK)) {
+            StreamingService.setMediaProjectionData(resultCode, data);
+            Intent intent = new Intent(this, StreamingService.class);
+            startService(intent);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == RECORD_AUDIO_PERMISSION && ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+            startActivityForResult(StreamingService.sendIntent(), MEDIA_PROJECTION_PERMISSION);
+        }
+    }
 
     private void checkDataCollectionAgreement() {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -398,7 +505,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         boolean dataCollectionReplied = preferences.getBoolean("dataCollectionReplied", false);
         if (!dataCollectionReplied) {
             Intent intent = new Intent(this, DataCollectionAgreementPopupActivity.class);
-            startActivityForResult(intent, 1);
+            startActivityForResult(intent, DATA_COLLECTION_AGREEMENT);
         } else if (dataCollectionAccepted) {
             SentryAndroid.init(this, options -> options.setBeforeSend((event, hint) -> {
                 if (SentryLevel.DEBUG.equals(event.getLevel()))
@@ -407,7 +514,23 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
                     return event;
             }));
         }
-
     }
 
+    private void updateLiveButtonIcon() {
+        runOnUiThread(() -> {
+            if (StreamingService.isStreaming()) {
+                if (StreamingService.isMuted()) {
+                    muteButton.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_microphone_slash_solid, this.getTheme()));
+                } else {
+                    muteButton.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_microphone_solid, this.getTheme()));
+                }
+
+                toggleView(muteButton, true, overlayView.getAlpha() > 0.0f ? null : hideButtonsRunnable);
+                liveButton.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.exo_icon_stop, this.getTheme()));
+            } else {
+                toggleView(muteButton, false);
+                liveButton.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_live_icon, this.getTheme()));
+            }
+        });
+    }
 }

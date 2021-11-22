@@ -3,6 +3,8 @@ package com.fpvout.digiview;
 import android.content.Context;
 import android.net.Uri;
 
+import androidx.annotation.NonNull;
+
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSpec;
@@ -13,8 +15,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class InputStreamDataSource implements DataSource {
-    private Context context;
-    private DataSpec dataSpec;
+    private final Context context;
+    private final DataSpec dataSpec;
     private InputStream inputStream;
     private long bytesRemaining;
     private boolean opened;
@@ -26,7 +28,7 @@ public class InputStreamDataSource implements DataSource {
     }
 
     @Override
-    public void addTransferListener(TransferListener transferListener) {
+    public void addTransferListener(@NonNull TransferListener transferListener) {
 
     }
 

@@ -21,7 +21,7 @@ package usb;
 public class CircularByteBuffer {
 
 	// Variables.
-	private byte[] buffer;
+	private final byte[] buffer;
 
 	private int readIndex;
 	private int writeIndex;

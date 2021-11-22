@@ -1,7 +1,8 @@
 package com.fpvout.digiview;
 
+import androidx.annotation.NonNull;
+
 import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.extractor.Extractor;
 import com.google.android.exoplayer2.extractor.ExtractorInput;
 import com.google.android.exoplayer2.extractor.ExtractorOutput;
@@ -9,14 +10,15 @@ import com.google.android.exoplayer2.extractor.ExtractorsFactory;
 import com.google.android.exoplayer2.extractor.PositionHolder;
 import com.google.android.exoplayer2.extractor.SeekMap;
 import com.google.android.exoplayer2.extractor.ts.H264Reader;
+import com.google.android.exoplayer2.extractor.ts.SeiReader;
 import com.google.android.exoplayer2.extractor.ts.TsPayloadReader;
 import com.google.android.exoplayer2.util.ParsableByteArray;
-import com.google.android.exoplayer2.extractor.ts.SeiReader;
 
 import java.io.IOException;
 import java.util.ArrayList;
 
 import static com.google.android.exoplayer2.extractor.ts.TsPayloadReader.FLAG_DATA_ALIGNMENT_INDICATOR;
+
 /**
  * Extracts data from H264 bitstreams.
  */
@@ -49,18 +51,18 @@ public final class H264Extractor implements Extractor {
         MAX_SYNC_FRAME_SIZE = mMaxSyncFrameSize;
         sampleTime = mSampleTime;
         this.firstSampleTimestampUs = firstSampleTimestampUs;
-        reader = new H264Reader(new SeiReader(new ArrayList<Format>()),false,true);
+        reader = new H264Reader(new SeiReader(new ArrayList<>()), false, true);
         sampleData = new ParsableByteArray(MAX_SYNC_FRAME_SIZE);
     }
 
     // Extractor implementation.
     @Override
-    public boolean sniff(ExtractorInput input) throws IOException {
+    public boolean sniff(@NonNull ExtractorInput input) {
         return true;
     }
 
     @Override
-    public void init(ExtractorOutput output) {
+    public void init(@NonNull ExtractorOutput output) {
         reader.createTracks(output, new TsPayloadReader.TrackIdGenerator(0, 1));
         output.endTracks();
         output.seekMap(new SeekMap.Unseekable(C.TIME_UNSET));
@@ -78,7 +80,7 @@ public final class H264Extractor implements Extractor {
     }
 
     @Override
-    public int read(ExtractorInput input, PositionHolder seekPosition) throws IOException {
+    public int read(ExtractorInput input, @NonNull PositionHolder seekPosition) throws IOException {
         int bytesRead = input.read(sampleData.getData(), 0, MAX_SYNC_FRAME_SIZE);
         if (bytesRead == C.RESULT_END_OF_INPUT) {
             return RESULT_END_OF_INPUT;

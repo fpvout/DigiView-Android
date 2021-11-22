@@ -15,12 +15,12 @@
  */
 package usb;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.util.Log;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * This class acts as a wrapper to read data from the USB Interface in Android
@@ -34,12 +34,12 @@ public class AndroidUSBInputStream extends InputStream {
 	private static final int READ_TIMEOUT = 100;
 
 	// Variables.
-	private UsbDeviceConnection usbConnection;
+	private final UsbDeviceConnection usbConnection;
 
-	private UsbEndpoint receiveEndPoint;
+	private final UsbEndpoint receiveEndPoint;
 	private final UsbEndpoint sendEndPoint;
 
-	private boolean working = false;
+	private final boolean working = false;
 
 
 	/**

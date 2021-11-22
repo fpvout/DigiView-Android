@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.SurfaceView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.preference.PreferenceManager;
 
@@ -21,7 +22,6 @@ import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.PlaybackException;
 import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.extractor.Extractor;
 import com.google.android.exoplayer2.extractor.ExtractorsFactory;
 import com.google.android.exoplayer2.source.MediaSource;
@@ -36,7 +36,7 @@ import usb.AndroidUSBInputStream;
 public class VideoReaderExoplayer {
     private static final String TAG = "DIGIVIEW";
     private Handler videoReaderEventListener;
-    private SimpleExoPlayer mPlayer;
+    private ExoPlayer mPlayer;
     static final String VideoPreset = "VideoPreset";
     private final SurfaceView surfaceView;
     private AndroidUSBInputStream inputStream;
@@ -67,19 +67,19 @@ public class VideoReaderExoplayer {
         zoomedIn = sharedPreferences.getBoolean(VideoZoomedIn, true);
         performancePreset = PerformancePreset.getPreset(sharedPreferences.getString(VideoPreset, "default"));
 
-            DefaultLoadControl loadControl = new DefaultLoadControl.Builder().setBufferDurationsMs(performancePreset.exoPlayerMinBufferMs, performancePreset.exoPlayerMaxBufferMs, performancePreset.exoPlayerBufferForPlaybackMs, performancePreset.exoPlayerBufferForPlaybackAfterRebufferMs).build();
-            mPlayer = new SimpleExoPlayer.Builder(context).setLoadControl(loadControl).build();
-            mPlayer.setVideoSurfaceView(surfaceView);
-            mPlayer.setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
-            mPlayer.setWakeMode(C.WAKE_MODE_LOCAL);
+        DefaultLoadControl loadControl = new DefaultLoadControl.Builder().setBufferDurationsMs(performancePreset.exoPlayerMinBufferMs, performancePreset.exoPlayerMaxBufferMs, performancePreset.exoPlayerBufferForPlaybackMs, performancePreset.exoPlayerBufferForPlaybackAfterRebufferMs).build();
+        mPlayer = new ExoPlayer.Builder(context).setLoadControl(loadControl).build();
+        mPlayer.setVideoSurfaceView(surfaceView);
+        mPlayer.setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
+        mPlayer.setWakeMode(C.WAKE_MODE_LOCAL);
 
-            DataSpec dataSpec = new DataSpec(Uri.EMPTY, 0, C.LENGTH_UNSET);
+        DataSpec dataSpec = new DataSpec(Uri.EMPTY, 0, C.LENGTH_UNSET);
 
-            Log.d(TAG, "preset: " + performancePreset);
+        Log.d(TAG, "preset: " + performancePreset);
 
-            DataSource.Factory dataSourceFactory = () -> {
-                switch (performancePreset.dataSourceType) {
-                    case INPUT_STREAM:
+        DataSource.Factory dataSourceFactory = () -> {
+            switch (performancePreset.dataSourceType) {
+                case INPUT_STREAM:
                         return (DataSource) new InputStreamDataSource(context, dataSpec, inputStream);
                     case BUFFERED_INPUT_STREAM:
                     default:
@@ -96,9 +96,13 @@ public class VideoReaderExoplayer {
             mPlayer.addListener(new Player.Listener() {
                 @Override
                 @NonNullApi
-                public void onPlayerErrorChanged(PlaybackException error) {
+                public void onPlayerErrorChanged(@Nullable PlaybackException error) {
+                    if (error == null) {
+                        Log.e(TAG, "PLAYER_SOURCE - TYPE_UNEXPECTED: no message");
+                        return;
+                    }
                     ExoPlaybackException e = (ExoPlaybackException) error;
-                    Log.e(TAG, "onPlayerErrorChanged: "+ e.type);
+                    Log.e(TAG, "onPlayerErrorChanged: " + e.type);
                     switch (e.type) {
                         case ExoPlaybackException.TYPE_SOURCE:
                             Log.e(TAG, "PLAYER_SOURCE - TYPE_SOURCE: " + error.getMessage());

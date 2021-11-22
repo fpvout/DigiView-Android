@@ -3,6 +3,7 @@ package com.fpvout.digiview;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.LayoutTransition;
+import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -21,6 +22,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
@@ -55,74 +58,21 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     private SharedPreferences sharedPreferences;
     private static final String ShowWatermark = "ShowWatermark";
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Log.d(TAG, "APP - On Create");
-        setContentView(R.layout.activity_main);
+    ActivityResultLauncher<Intent> launchDataCollectionActivity = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(), result -> {
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                boolean dataCollectionAccepted = preferences.getBoolean("dataCollectionAccepted", false);
 
-        // check Data Collection agreement
-        checkDataCollectionAgreement();
-
-        // Hide top bar and status bar
-        View decorView = getWindow().getDecorView();
-        decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_FULLSCREEN);
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.hide();
-        }
-
-        // Prevent screen from sleeping
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
-        usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
-        permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
-        usbDeviceBroadcastReceiver = new UsbDeviceBroadcastReceiver(this);
-
-        IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
-        registerReceiver(usbDeviceBroadcastReceiver, filter);
-        IntentFilter filterDetached = new IntentFilter(UsbManager.ACTION_USB_DEVICE_DETACHED);
-        registerReceiver(usbDeviceBroadcastReceiver, filterDetached);
-
-        shortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
-        watermarkView = findViewById(R.id.watermarkView);
-        overlayView = findViewById(R.id.overlayView);
-        fpvView = findViewById(R.id.fpvView);
-
-        settingsButton = findViewById(R.id.settingsButton);
-        settingsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(v.getContext(), SettingsActivity.class);
-                v.getContext().startActivity(intent);
-            }
-        });
-
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-
-        // Enable resizing animations
-        ((ViewGroup) findViewById(R.id.mainLayout)).getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
-
-        setupGestureDetectors();
-
-        mUsbMaskConnection = new UsbMaskConnection();
-        Handler videoReaderEventListener = new Handler(this.getMainLooper(), msg -> onVideoReaderEvent((VideoReaderExoplayer.VideoReaderEventMessageCode) msg.obj));
-
-        mVideoReader = new VideoReaderExoplayer(fpvView, this, videoReaderEventListener);
-
-        if (!usbConnected) {
-            if (searchDevice()) {
-                connect();
-            } else {
-                showOverlay(R.string.waiting_for_usb_device, OverlayStatus.Disconnected);
-            }
-        }
-    }
+                if (result.getResultCode() == Activity.RESULT_OK && dataCollectionAccepted) {
+                    Log.d(TAG, "launchDataCollectionActivity: " + dataCollectionAccepted);
+                    SentryAndroid.init(getApplicationContext(), options -> options.setBeforeSend((event, hint) -> {
+                        if (SentryLevel.DEBUG.equals(event.getLevel()))
+                            return null;
+                        else
+                            return event;
+                    }));
+                }
+            });
 
     private void setupGestureDetectors() {
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
@@ -219,19 +169,70 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
                 });
     }
 
-    private void autoHideSettingsButton() {
-        if (overlayView.getVisibility() == View.VISIBLE) return;
-        if (buttonAlpha == 0) return;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Log.d(TAG, "APP - On Create");
+        setContentView(R.layout.activity_main);
 
-        settingsButton.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                buttonAlpha = 0;
-                settingsButton.animate()
-                        .alpha(0)
-                        .setDuration(shortAnimationDuration);
+        // check Data Collection agreement
+        checkDataCollectionAgreement();
+
+        // Hide top bar and status bar
+        View decorView = getWindow().getDecorView();
+        decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.hide();
+        }
+
+        // Prevent screen from sleeping
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
+        permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
+        usbDeviceBroadcastReceiver = new UsbDeviceBroadcastReceiver(this);
+
+        IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
+        registerReceiver(usbDeviceBroadcastReceiver, filter);
+        IntentFilter filterDetached = new IntentFilter(UsbManager.ACTION_USB_DEVICE_DETACHED);
+        registerReceiver(usbDeviceBroadcastReceiver, filterDetached);
+
+        shortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
+        watermarkView = findViewById(R.id.watermarkView);
+        overlayView = findViewById(R.id.overlayView);
+        fpvView = findViewById(R.id.fpvView);
+
+        settingsButton = findViewById(R.id.settingsButton);
+        settingsButton.setOnClickListener(v -> {
+            Intent intent = new Intent(v.getContext(), SettingsActivity.class);
+            v.getContext().startActivity(intent);
+        });
+
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        // Enable resizing animations
+        ((ViewGroup) findViewById(R.id.mainLayout)).getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
+
+        setupGestureDetectors();
+
+        mUsbMaskConnection = new UsbMaskConnection();
+        Handler videoReaderEventListener = new Handler(this.getMainLooper(), msg -> onVideoReaderEvent((VideoReaderExoplayer.VideoReaderEventMessageCode) msg.obj));
+
+        mVideoReader = new VideoReaderExoplayer(fpvView, this, videoReaderEventListener);
+
+        if (!usbConnected) {
+            if (searchDevice()) {
+                connect();
+            } else {
+                showOverlay(R.string.waiting_for_usb_device, OverlayStatus.Disconnected);
             }
-        }, 3000);
+        }
     }
 
     @Override
@@ -372,25 +373,17 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         usbConnected = false;
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+    private void autoHideSettingsButton() {
+        if (overlayView.getVisibility() == View.VISIBLE) return;
+        if (buttonAlpha == 0) return;
 
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        boolean dataCollectionAccepted = preferences.getBoolean("dataCollectionAccepted", false);
-
-        if (requestCode == 1) { // Data Collection agreement Activity
-            if (resultCode == RESULT_OK && dataCollectionAccepted) {
-                SentryAndroid.init(this, options -> options.setBeforeSend((event, hint) -> {
-                    if (SentryLevel.DEBUG.equals(event.getLevel()))
-                        return null;
-                    else
-                        return event;
-                }));
-            }
-
-        }
-    } //onActivityResult
+        settingsButton.postDelayed(() -> {
+            buttonAlpha = 0;
+            settingsButton.animate()
+                    .alpha(0)
+                    .setDuration(shortAnimationDuration);
+        }, 3000);
+    }
 
     private void checkDataCollectionAgreement() {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -398,7 +391,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         boolean dataCollectionReplied = preferences.getBoolean("dataCollectionReplied", false);
         if (!dataCollectionReplied) {
             Intent intent = new Intent(this, DataCollectionAgreementPopupActivity.class);
-            startActivityForResult(intent, 1);
+            launchDataCollectionActivity.launch(intent);
         } else if (dataCollectionAccepted) {
             SentryAndroid.init(this, options -> options.setBeforeSend((event, hint) -> {
                 if (SentryLevel.DEBUG.equals(event.getLevel()))
@@ -407,7 +400,6 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
                     return event;
             }));
         }
-
     }
 
 }

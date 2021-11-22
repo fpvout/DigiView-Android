@@ -1,5 +1,7 @@
 package com.fpvout.digiview;
 
+import androidx.annotation.NonNull;
+
 public class PerformancePreset {
     int h264ReaderMaxSyncFrameSize = 131072;
     int h264ReaderSampleTime = 10000;
@@ -68,6 +70,7 @@ public class PerformancePreset {
         LEGACY_BUFFERED
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "PerformancePreset{" +

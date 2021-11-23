@@ -1,6 +1,8 @@
 package com.fpvout.digiview;
 
+import android.content.Context;
 import android.net.Uri;
+
 import androidx.annotation.NonNull;
 
 import com.google.android.exoplayer2.C;
@@ -13,11 +15,14 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class InputStreamDataSource implements DataSource {
+    private final Context context;
     private final DataSpec dataSpec;
     private InputStream inputStream;
+    private long bytesRemaining;
     private boolean opened;
 
-    public InputStreamDataSource(DataSpec dataSpec, InputStream inputStream) {
+    public InputStreamDataSource(Context context, DataSpec dataSpec, InputStream inputStream) {
+        this.context = context;
         this.dataSpec = dataSpec;
         this.inputStream = inputStream;
     }
@@ -29,7 +34,6 @@ public class InputStreamDataSource implements DataSource {
 
     @Override
     public long open(DataSpec dataSpec) throws IOException {
-        long bytesRemaining;
         try {
             long skipped = inputStream.skip(dataSpec.position);
             if (skipped < dataSpec.position)
@@ -49,7 +53,7 @@ public class InputStreamDataSource implements DataSource {
     }
 
     @Override
-    public int read(@NonNull byte[] buffer, int offset, int readLength) throws IOException {
+    public int read(byte[] buffer, int offset, int readLength) throws IOException {
         return inputStream.read(buffer, offset, readLength);
     }
 

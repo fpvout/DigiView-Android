@@ -21,6 +21,7 @@
     <string name="video_preset_conservative">保守</string>
     <string name="video_preset_aggressive">激进</string>
     <string name="video_preset_legacy">传统</string>
+    <string name="video_preset_legacy_buffered">传统 + 缓冲</string>
     <string name="enable_analytics">开启数据分析</string>
     <string name="privacy_policy">隐私策略</string>
     <string name="privacy_policy_summary">查看我们收集数据的内容以及我们如何使用它们</string>

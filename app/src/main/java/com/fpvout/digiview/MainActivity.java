@@ -4,6 +4,8 @@ import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.LayoutTransition;
+import android.app.Activity;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -39,6 +41,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.core.app.ActivityCompat;
@@ -57,15 +60,19 @@ import java.util.HashMap;
 import static com.fpvout.digiview.VideoReaderExoplayer.VideoZoomedIn;
 
 public class MainActivity extends AppCompatActivity implements UsbDeviceListener {
+    private static final String ACTION_USB_PERMISSION = "com.fpvout.digiview.USB_PERMISSION";
     private static final String TAG = "DIGIVIEW";
+    private static final int VENDOR_ID = 11427;
+    private static final int PRODUCT_ID = 31;
     private int shortAnimationDuration;
-    private float toolbarAlpha = 0.7f;
+    private float buttonAlpha = 1;
     private View settingsButton;
     private View recordButton;
     private ImageButton thumbnail;
     private RelativeLayout toolbar;
     private View watermarkView;
     private OverlayView overlayView;
+    PendingIntent permissionIntent;
     UsbDeviceBroadcastReceiver usbDeviceBroadcastReceiver;
     UsbManager usbManager;
     UsbDevice usbDevice;
@@ -80,11 +87,27 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     private static final String ShowWatermark = "ShowWatermark";
     private boolean overlayIsShown = false;
 
+    ActivityResultLauncher<Intent> launchDataCollectionActivity = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(), result -> {
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                boolean dataCollectionAccepted = preferences.getBoolean("dataCollectionAccepted", false);
+
+                if (result.getResultCode() == Activity.RESULT_OK && dataCollectionAccepted) {
+                    Log.d(TAG, "launchDataCollectionActivity: " + dataCollectionAccepted);
+                    SentryAndroid.init(getApplicationContext(), options -> options.setBeforeSend((event, hint) -> {
+                        if (SentryLevel.DEBUG.equals(event.getLevel()))
+                            return null;
+                        else
+                            return event;
+                    }));
+                }
+            });
+
     private void setupGestureDetectors() {
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onSingleTapConfirmed(MotionEvent e) {
-                toggleButton();
+                toggleSettingsButton();
                 return super.onSingleTapConfirmed(e);
             }
 
@@ -136,34 +159,44 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         }
     }
 
-    private void cancelToolbarAnimation() {
-        Handler handler = toolbar.getHandler();
+    private void cancelButtonAnimation() {
+        Handler handler = settingsButton.getHandler();
         if (handler != null) {
-            toolbar.getHandler().removeCallbacksAndMessages(null);
+            settingsButton.getHandler().removeCallbacksAndMessages(null);
         }
     }
 
-    private void toggleButton() {
-        if (overlayView.getVisibility() == View.VISIBLE) return;
+    private void showSettingsButton() {
+        cancelButtonAnimation();
+
+        if (overlayView.getVisibility() == View.VISIBLE) {
+            buttonAlpha = 1;
+            settingsButton.setAlpha(1);
+        }
+    }
+
+    private void toggleSettingsButton() {
+        if (buttonAlpha == 1 && overlayView.getVisibility() == View.VISIBLE) return;
+
         // cancel any pending delayed animations first
-         cancelToolbarAnimation();
+        cancelButtonAnimation();
 
         int translation = 0;
-        if (toolbarAlpha == 0.7f) {
-            toolbarAlpha = 0;
+        if (buttonAlpha == 1) {
+            buttonAlpha = 0;
             translation = 60;
         } else {
-            toolbarAlpha = 0.7f;
+            buttonAlpha = 1;
         }
         updateDVRThumb();
-        toolbar.animate()
-                .alpha(toolbarAlpha)
+        settingsButton.animate()
+                .alpha(buttonAlpha)
                 .translationX(translation)
                 .setDuration(shortAnimationDuration)
                 .setListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
-                        autoHideToolbar();
+                        autoHideSettingsButton();
                         updateDVRThumb();
                     }
                 });
@@ -179,7 +212,17 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         checkDataCollectionAgreement();
 
         // Hide top bar and status bar
-        setFullscreen();
+        View decorView = getWindow().getDecorView();
+        decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.hide();
+        }
 
         thumbnail = findViewById(R.id.thumbnail);
         thumbnail.setOnClickListener(view    -> {
@@ -211,11 +254,12 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
             }
         });
 
+
         // Prevent screen from sleeping
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
-        // Register app for auto launch
+        permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
         usbDeviceBroadcastReceiver = new UsbDeviceBroadcastReceiver(this);
 
         IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
@@ -223,29 +267,28 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         IntentFilter filterDetached = new IntentFilter(UsbManager.ACTION_USB_DEVICE_DETACHED);
         registerReceiver(usbDeviceBroadcastReceiver, filterDetached);
 
+        shortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
         watermarkView = findViewById(R.id.watermarkView);
         overlayView = findViewById(R.id.overlayView);
         fpvView = findViewById(R.id.fpvView);
+
         settingsButton = findViewById(R.id.settingsButton);
+        settingsButton.setOnClickListener(v -> {
+            Intent intent = new Intent(v.getContext(), SettingsActivity.class);
+            v.getContext().startActivity(intent);
+        });
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        shortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
         // Enable resizing animations
         ((ViewGroup) findViewById(R.id.mainLayout)).getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
 
         setupGestureDetectors();
 
-        settingsButton.setOnClickListener(v -> {
-            Intent intent = new Intent(v.getContext(), SettingsActivity.class);
-            v.getContext().startActivity(intent);
-        });
-
-        mVideoReader = new VideoReaderExoplayer(fpvView, this);
-        mVideoReader.setVideoPlayingEventListener(this::hideOverlay);
-        mVideoReader.setVideoWaitingEventListener(() -> showOverlay(R.string.waiting_for_video, OverlayStatus.Connected));
-
         mUsbMaskConnection = new UsbMaskConnection();
+        Handler videoReaderEventListener = new Handler(this.getMainLooper(), msg -> onVideoReaderEvent((VideoReaderExoplayer.VideoReaderEventMessageCode) msg.obj));
+
+        mVideoReader = new VideoReaderExoplayer(fpvView, this, videoReaderEventListener);
 
         dvr = DVR.getInstance(this, true, new Handler(message -> {
             updateDVRThumb();
@@ -254,29 +297,12 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         updateDVRThumb();
 
         if (!usbConnected) {
-            usbDevice = UsbMaskConnection.searchDevice(usbManager, getApplicationContext());
-            if (usbDevice != null) {
-                Log.i(TAG, "USB - usbDevice attached");
-                showOverlay(R.string.usb_device_found, OverlayStatus.Connected);
+            if (searchDevice()) {
                 connect();
             } else {
                 showOverlay(R.string.waiting_for_usb_device, OverlayStatus.Disconnected);
             }
-        }
-    }
-
-    private void setFullscreen() {
-        WindowInsetsControllerCompat insetsControllerCompat = new WindowInsetsControllerCompat(getWindow(), getWindow().getDecorView());
-        insetsControllerCompat.hide(WindowInsetsCompat.Type.statusBars()
-                | WindowInsetsCompat.Type.navigationBars()
-                | WindowInsetsCompat.Type.captionBar()
-                | WindowInsetsCompat.Type.ime()
-        );
-        insetsControllerCompat.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.hide();
-        }
+        };
     }
 
     @Override
@@ -291,7 +317,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     public void usbDeviceDetached() {
         Log.i(TAG, "USB - usbDevice detached");
         showOverlay(R.string.usb_device_detached_waiting, OverlayStatus.Disconnected);
-        this.onStop();
+        disconnect();
     }
 
     private void updateDVRThumb() {
@@ -306,6 +332,28 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         }
     }
 
+    private boolean searchDevice() {
+        HashMap<String, UsbDevice> deviceList = usbManager.getDeviceList();
+        if (deviceList.size() <= 0) {
+            usbDevice = null;
+            return false;
+        }
+
+        for (UsbDevice device : deviceList.values()) {
+            if (device.getVendorId() == VENDOR_ID && device.getProductId() == PRODUCT_ID) {
+                if (usbManager.hasPermission(device)) {
+                    Log.i(TAG, "USB - usbDevice attached");
+                    showOverlay(R.string.usb_device_found, OverlayStatus.Connected);
+                    usbDevice = device;
+                    return true;
+                }
+
+                usbManager.requestPermission(device, permissionIntent);
+            }
+        }
+
+        return false;
+    }
 
     private void connect() {
         usbConnected = true;
@@ -315,7 +363,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         mVideoReader.start();
         updateDVRThumb();
         updateWatermark();
-        autoHideToolbar();
+        autoHideSettingsButton();
         showOverlay(R.string.waiting_for_video, OverlayStatus.Connected);
     }
 
@@ -324,9 +372,21 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         super.onResume();
         Log.d(TAG, "APP - On Resume");
 
-        setFullscreen();
+        View decorView = getWindow().getDecorView();
+        decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.hide();
+        }
 
-        autoHideToolbar();
+
+        settingsButton.setAlpha(1);
+        autoHideSettingsButton();
         updateWatermark();
         updateVideoZoom();
 
@@ -359,7 +419,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
             if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
                     == PackageManager.PERMISSION_GRANTED &&
                     checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    == PackageManager.PERMISSION_GRANTED &&
+                            == PackageManager.PERMISSION_GRANTED &&
                     checkSelfPermission(Manifest.permission.RECORD_AUDIO)
                             == PackageManager.PERMISSION_GRANTED) {
                 return true;
@@ -386,33 +446,45 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         }
     }
 
+    private boolean onVideoReaderEvent(VideoReaderExoplayer.VideoReaderEventMessageCode m) {
+        if (VideoReaderExoplayer.VideoReaderEventMessageCode.WAITING_FOR_VIDEO.equals(m)) {
+            Log.d(TAG, "event: WAITING_FOR_VIDEO");
+            showOverlay(R.string.waiting_for_video, OverlayStatus.Connected);
+        } else if (VideoReaderExoplayer.VideoReaderEventMessageCode.VIDEO_PLAYING.equals(m)) {
+            Log.d(TAG, "event: VIDEO_PLAYING");
+            hideOverlay();
+        }
+        return false; // false to continue listening
+    }
+
     private void showOverlay(int textId, OverlayStatus connected) {
         overlayView.show(textId, connected);
         overlayIsShown = true;
-        toolbar.setTranslationX(0);
-        toolbar.setAlpha(1);
+        settingsButton.setTranslationX(0);
+        settingsButton.setAlpha(1);
         updateWatermark();
-        autoHideToolbar();
-        updateVideoZoom();
-
+        showSettingsButton();
     }
 
     private void hideOverlay() {
         overlayView.hide();
         overlayIsShown = false;
         updateWatermark();
-        autoHideToolbar();
-        updateVideoZoom();
+        showSettingsButton();
+        autoHideSettingsButton();
+    }
+
+    private void disconnect() {
+        mUsbMaskConnection.stop();
+        mVideoReader.stop();
+        usbConnected = false;
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         Log.d(TAG, "APP - On Stop");
-
-        mUsbMaskConnection.stop();
-        mVideoReader.stop();
-        usbConnected = false;
+        disconnect();
     }
 
     @Override
@@ -435,13 +507,13 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         usbConnected = false;
     }
 
-    private void autoHideToolbar() {
+    private void autoHideSettingsButton() {
         if (overlayView.getVisibility() == View.VISIBLE) return;
-        if (overlayIsShown) return;
+        if (buttonAlpha == 0) return;
 
-        toolbar.postDelayed(() -> {
-            toolbarAlpha = 0;
-            toolbar.animate()
+        settingsButton.postDelayed(() -> {
+            buttonAlpha = 0;
+            settingsButton.animate()
                     .alpha(0)
                     .translationX(60)
                     .setDuration(shortAnimationDuration);
@@ -454,20 +526,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         boolean dataCollectionReplied = preferences.getBoolean("dataCollectionReplied", false);
         if (!dataCollectionReplied) {
             Intent intent = new Intent(this, DataCollectionAgreementPopupActivity.class);
-            ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), (ActivityResultCallback<ActivityResult>) result -> {
-                if (result.getResultCode() == RESULT_OK) {
-                    SentryAndroid.init(getApplicationContext(), options -> options.setBeforeSend((event, hint) -> {
-                        if (SentryLevel.DEBUG.equals(event.getLevel()))
-                            return null;
-                        else
-                            return event;
-                    }));
-                }
-                setFullscreen();
-            });
-            activityResultLauncher.launch(intent);
-
-
+            launchDataCollectionActivity.launch(intent);
         } else if (dataCollectionAccepted) {
             SentryAndroid.init(this, options -> options.setBeforeSend((event, hint) -> {
                 if (SentryLevel.DEBUG.equals(event.getLevel()))
@@ -478,4 +537,5 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         }
 
     }
+
 }

@@ -1,5 +1,6 @@
 package com.fpvout.digiview;
 
+import android.content.Context;
 import android.net.Uri;
 
 import androidx.annotation.NonNull;
@@ -20,8 +21,10 @@ public class InputStreamBufferedDataSource implements DataSource {
     private static final String ERROR_THREAD_NOT_INITIALIZED = "Read thread not initialized, call first 'startReadThread()'";
     private static final long READ_TIMEOUT = 200;
 
+    private final Context context;
     private final DataSpec dataSpec;
     private InputStream inputStream;
+    private long bytesRemaining;
     private boolean opened;
 
     private CircularByteBuffer readBuffer;
@@ -29,7 +32,8 @@ public class InputStreamBufferedDataSource implements DataSource {
     private boolean working;
 
 
-    public InputStreamBufferedDataSource(DataSpec dataSpec, InputStream inputStream) {
+    public InputStreamBufferedDataSource(Context context, DataSpec dataSpec, InputStream inputStream) {
+        this.context = context;
         this.dataSpec = dataSpec;
         this.inputStream = inputStream;
         startReadThread();
@@ -42,7 +46,6 @@ public class InputStreamBufferedDataSource implements DataSource {
 
     @Override
     public long open(DataSpec dataSpec) throws IOException {
-        long bytesRemaining;
         try {
             long skipped = inputStream.skip(dataSpec.position);
             if (skipped < dataSpec.position)
@@ -62,7 +65,7 @@ public class InputStreamBufferedDataSource implements DataSource {
     }
 
     @Override
-    public int read(@NonNull byte[] buffer, int offset, int readLength) throws IOException {
+    public int read(byte[] buffer, int offset, int readLength) throws IOException {
         if (readBuffer == null)
             throw new IOException(ERROR_THREAD_NOT_INITIALIZED);
 

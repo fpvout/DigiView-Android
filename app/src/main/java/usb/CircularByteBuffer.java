@@ -1,18 +1,3 @@
-/*
- * Copyright 2019, Digi International Inc.
- *
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, you can obtain one at http://mozilla.org/MPL/2.0/.
- *
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES 
- * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF 
- * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR 
- * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES 
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN 
- * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
- * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- */
 package usb;
 
 /**
@@ -58,7 +43,7 @@ public class CircularByteBuffer {
 	 * @throws NullPointerException if {@code data == null}.
 	 * 
 	 * @see #read(byte[], int, int)
-	 * @see #skip(int)
+	//	 * @see #skip(int)
 	 */
 	public synchronized int write(byte[] data, int offset, int numBytes) {
 		if (data == null)
@@ -105,8 +90,8 @@ public class CircularByteBuffer {
 	 * @throws IllegalArgumentException if {@code offset < 0} or
 	 *                                  if {@code numBytes < 1}.
 	 * @throws NullPointerException if {@code data == null}.
-	 * 
-	 * @see #skip(int)
+	 *
+	//	 * @see #skip(int)
 	 * @see #write(byte[], int, int)
 	 */
 	public synchronized int read(byte[] data, int offset, int numBytes) {
@@ -135,54 +120,53 @@ public class CircularByteBuffer {
 		} else {
 			System.arraycopy(buffer, getReadIndex(), data, offset, buffer.length - getReadIndex());
 			System.arraycopy(buffer, 0, data, offset + buffer.length - getReadIndex(), numBytes - (buffer.length - getReadIndex()));
-			readIndex = numBytes-(buffer.length - getReadIndex());
+			readIndex = numBytes - (buffer.length - getReadIndex());
 		}
-		
+
 		// If we have read all bytes, set the buffer as empty.
 		if (readIndex == writeIndex)
 			empty = true;
-		
+
 		return numBytes;
 	}
 
-	/**
-	 * Skips the given number of bytes from the circular byte buffer.
-	 * 
-	 * @param numBytes Number of bytes to skip.
-	 * @return The number of bytes actually skipped.
-	 * 
-	 * @throws IllegalArgumentException if {@code numBytes < 1}.
-	 * 
-	 * @see #read(byte[], int, int)
-	 * @see #write(byte[], int, int)
-	 */
-	public synchronized int skip(int numBytes) {
-		if (numBytes < 1)
-			throw new IllegalArgumentException("Number of bytes to skip must be greater than 0.");
-		
-		// If we are empty, return 0.
-		if (empty)
-			return 0;
-		
-		if (availableToRead() < numBytes)
-			return skip(availableToRead());
-		if (numBytes < buffer.length - getReadIndex())
-			readIndex = getReadIndex() + numBytes;
-		else
-			readIndex = numBytes - (buffer.length - getReadIndex());
-		
-		// If we have skipped all bytes, set the buffer as empty.
-		if (readIndex == writeIndex)
-			empty = true;
-		
-		return numBytes;
-	}
+//	/**
+//	 * Skips the given number of bytes from the circular byte buffer.
+//	 *
+//	 * @param numBytes Number of bytes to skip.
+//	 * @return The number of bytes actually skipped.
+//	 *
+//	 * @throws IllegalArgumentException if {@code numBytes < 1}.
+//	 *
+//	 * @see #read(byte[], int, int)
+//	 * @see #write(byte[], int, int)
+//	 */
+//	public synchronized int skip(int numBytes) {
+//		if (numBytes < 1)
+//			throw new IllegalArgumentException("Number of bytes to skip must be greater than 0.");
+//
+//		// If we are empty, return 0.
+//		if (empty)
+//			return 0;
+//
+//		if (availableToRead() < numBytes)
+//			return skip(availableToRead());
+//		if (numBytes < buffer.length - getReadIndex())
+//			readIndex = getReadIndex() + numBytes;
+//		else
+//			readIndex = numBytes - (buffer.length - getReadIndex());
+//
+//		// If we have skipped all bytes, set the buffer as empty.
+//		if (readIndex == writeIndex)
+//			empty = true;
+//
+//		return numBytes;
+//	}
 
 	/**
 	 * Returns the available number of bytes to read from the byte buffer.
-	 * 
+	 *
 	 * @return The number of bytes in the buffer available for reading.
-	 * 
 	 * @see #getCapacity()
 	 * @see #read(byte[], int, int)
 	 */
@@ -212,22 +196,22 @@ public class CircularByteBuffer {
 	private int getWriteIndex() {
 		return writeIndex;
 	}
-	
+
 	/**
 	 * Returns the circular byte buffer capacity.
-	 * 
+	 *
 	 * @return The circular byte buffer capacity.
 	 */
 	public int getCapacity() {
 		return buffer.length;
 	}
-	
-	/**
-	 * Clears the circular buffer.
-	 */
-	public void clearBuffer() {
-		empty = true;
-		readIndex = 0;
-		writeIndex = 0;
-	}
+
+//	/**
+//	 * Clears the circular buffer.
+//	 */
+//	public void clearBuffer() {
+//		empty = true;
+//		readIndex = 0;
+//		writeIndex = 0;
+//	}
 }

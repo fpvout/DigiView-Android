@@ -18,9 +18,11 @@ package usb;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.util.Log;
+import com.fpvout.digiview.helpers.DataListener;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 /**
  * This class acts as a wrapper to read data from the USB Interface in Android
@@ -40,15 +42,15 @@ public class AndroidUSBInputStream extends InputStream {
 	private final UsbEndpoint sendEndPoint;
 
 	private final boolean working = false;
-
+	private DataListener inputListener = null;
 
 	/**
 	 * Class constructor. Instantiates a new {@code AndroidUSBInputStream}
 	 * object with the given parameters.
 	 *
 	 * @param readEndpoint The USB end point to use to read data from.
-	 * @param connection The USB connection to use to read data from.
-	 *
+	 * @param sendEndpoint The USB end point to use to sent data to.
+	 * @param connection   The USB connection to use to read data from.
 	 * @see UsbDeviceConnection
 	 * @see UsbEndpoint
 	 */
@@ -61,7 +63,7 @@ public class AndroidUSBInputStream extends InputStream {
 	@Override
 	public int read() throws IOException {
 		byte[] buffer = new byte[131072];
-		return read(buffer, 0,  buffer.length);
+		return read(buffer, 0, buffer.length);
 	}
 
 	@Override
@@ -72,12 +74,23 @@ public class AndroidUSBInputStream extends InputStream {
 			Log.d(TAG, "received buffer empty, sending magic packet again...");
 			usbConnection.bulkTransfer(sendEndPoint, "RMVT".getBytes(), "RMVT".getBytes().length, 2000);
 			receivedBytes = usbConnection.bulkTransfer(receiveEndPoint, buffer, buffer.length, READ_TIMEOUT);
+		} else {
+			if (inputListener != null) {
+				byte[] bufferCopy = Arrays.copyOf(buffer, buffer.length);
+				this.inputListener.calllback(bufferCopy, offset, bufferCopy.length);
+			}
 		}
 		return receivedBytes;
 	}
 
+	public void setInputStreamListener(DataListener inputListener) {
+		this.inputListener = inputListener;
+	}
+
 
 	@Override
-	public void close() throws IOException {}
+	public void close() throws IOException {
+		super.close();
+	}
 
 }

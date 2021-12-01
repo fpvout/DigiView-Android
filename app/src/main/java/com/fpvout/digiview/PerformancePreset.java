@@ -70,8 +70,8 @@ public class PerformancePreset {
         LEGACY_BUFFERED
     }
 
-    @NonNull
     @Override
+    @NonNull
     public String toString() {
         return "PerformancePreset{" +
                 "h264ReaderMaxSyncFrameSize=" + h264ReaderMaxSyncFrameSize +

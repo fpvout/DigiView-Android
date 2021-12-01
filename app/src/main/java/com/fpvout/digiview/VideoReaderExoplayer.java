@@ -28,7 +28,6 @@ import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSpec;
-import com.google.android.exoplayer2.util.NonNullApi;
 import com.google.android.exoplayer2.video.VideoSize;
 
 import usb.AndroidUSBInputStream;
@@ -40,12 +39,13 @@ public class VideoReaderExoplayer {
     static final String VideoPreset = "VideoPreset";
     private final SurfaceView surfaceView;
     private AndroidUSBInputStream inputStream;
-        private UsbMaskConnection mUsbMaskConnection;
+    private UsbMaskConnection mUsbMaskConnection;
     private boolean zoomedIn;
     private final Context context;
     private PerformancePreset performancePreset = PerformancePreset.getPreset(PerformancePreset.PresetType.DEFAULT);
     static final String VideoZoomedIn = "VideoZoomedIn";
     private final SharedPreferences sharedPreferences;
+    private boolean streaming = false;
 
     VideoReaderExoplayer(SurfaceView videoSurface, Context c) {
         surfaceView = videoSurface;
@@ -95,7 +95,6 @@ public class VideoReaderExoplayer {
             mPlayer.play();
             mPlayer.addListener(new Player.Listener() {
                 @Override
-                @NonNullApi
                 public void onPlayerErrorChanged(@Nullable PlaybackException error) {
                     if (error == null) {
                         Log.e(TAG, "PLAYER_SOURCE - TYPE_UNEXPECTED: no message");
@@ -105,6 +104,7 @@ public class VideoReaderExoplayer {
                     Log.e(TAG, "onPlayerErrorChanged: " + e.type);
                     switch (e.type) {
                         case ExoPlaybackException.TYPE_SOURCE:
+                            streaming = false;
                             Log.e(TAG, "PLAYER_SOURCE - TYPE_SOURCE: " + error.getMessage());
                             (new Handler(Looper.getMainLooper())).postDelayed(() -> restart(), 1000);
                             break;
@@ -121,7 +121,7 @@ public class VideoReaderExoplayer {
                 }
 
                 @Override
-                public void onPlaybackStateChanged(@NonNullApi int state) {
+                public void onPlaybackStateChanged(@NonNull int state) {
                     switch (state) {
                         case Player.STATE_IDLE:
                         case Player.STATE_READY:

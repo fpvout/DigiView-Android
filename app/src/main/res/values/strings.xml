@@ -40,5 +40,12 @@
     <string name="copyright">Copyright</string>
     <string name="open_source_license">Open-Source License</string>
     <string name="open_source_license_summary">MIT License</string>
-
+    <string name="connectButtonText">Connect</string>
+    <string name="recording_started">recording started</string>
+    <string name="recording_stopped">recording stopped</string>
+    <string name="no_dvr_video">No stream! recording could not be started</string>
+    <string name="saved_dvr">dvr has been saved</string>
+    <string name="dvr_merge_audio_video">merging audio and video of the dvr</string>
+    <string name="storage_rights_required">Storage access is required.</string>
+    <string name="repair_dvr">repairing dvrs ...</string>
 </resources>

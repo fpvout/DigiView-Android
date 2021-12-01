@@ -70,6 +70,10 @@ dependencies {
     implementation 'com.google.android.material:material:1.4.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.2'
     implementation 'com.google.android.exoplayer:exoplayer:2.16.1'
+    implementation 'org.mp4parser:isoparser:1.9.39'
+    implementation 'org.mp4parser:muxer:1.9.39'
+    compile 'org.slf4j:slf4j-nop:1.7.25'
+    implementation 'org.jcodec:jcodec:0.2.5'
     implementation 'io.sentry:sentry-android:4.3.0'
     implementation 'androidx.preference:preference:1.1.1'
 

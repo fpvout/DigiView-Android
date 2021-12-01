@@ -18,10 +18,9 @@ import android.hardware.usb.UsbManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Message;
+import android.os.Handler;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
-import android.os.Handler;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -34,28 +33,21 @@ import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.view.WindowInsetsCompat;
-import androidx.core.view.WindowInsetsControllerCompat;
-import androidx.core.app.ActivityCompat;
-import io.sentry.SentryLevel;
-import io.sentry.android.core.SentryAndroid;
 
-import static com.fpvout.digiview.UsbMaskConnection.ACTION_USB_PERMISSION;
 import com.fpvout.digiview.dvr.DVR;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.HashMap;
 
+import io.sentry.SentryLevel;
+import io.sentry.android.core.SentryAndroid;
 
 import static com.fpvout.digiview.VideoReaderExoplayer.VideoZoomedIn;
 
@@ -93,7 +85,6 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
                 boolean dataCollectionAccepted = preferences.getBoolean("dataCollectionAccepted", false);
 
                 if (result.getResultCode() == Activity.RESULT_OK && dataCollectionAccepted) {
-                    Log.d(TAG, "launchDataCollectionActivity: " + dataCollectionAccepted);
                     SentryAndroid.init(getApplicationContext(), options -> options.setBeforeSend((event, hint) -> {
                         if (SentryLevel.DEBUG.equals(event.getLevel()))
                             return null;
@@ -107,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onSingleTapConfirmed(MotionEvent e) {
-                toggleSettingsButton();
+                toggleToolbar();
                 return super.onSingleTapConfirmed(e);
             }
 
@@ -160,22 +151,22 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     }
 
     private void cancelButtonAnimation() {
-        Handler handler = settingsButton.getHandler();
+        Handler handler = toolbar.getHandler();
         if (handler != null) {
-            settingsButton.getHandler().removeCallbacksAndMessages(null);
+            toolbar.getHandler().removeCallbacksAndMessages(null);
         }
     }
 
-    private void showSettingsButton() {
+    private void showToolbar() {
         cancelButtonAnimation();
 
         if (overlayView.getVisibility() == View.VISIBLE) {
             buttonAlpha = 1;
-            settingsButton.setAlpha(1);
+            toolbar.setAlpha(1);
         }
     }
 
-    private void toggleSettingsButton() {
+    private void toggleToolbar() {
         if (buttonAlpha == 1 && overlayView.getVisibility() == View.VISIBLE) return;
 
         // cancel any pending delayed animations first
@@ -189,14 +180,14 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
             buttonAlpha = 1;
         }
         updateDVRThumb();
-        settingsButton.animate()
+        toolbar.animate()
                 .alpha(buttonAlpha)
                 .translationX(translation)
                 .setDuration(shortAnimationDuration)
                 .setListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
-                        autoHideSettingsButton();
+                        autoHideToolbar();
                         updateDVRThumb();
                     }
                 });
@@ -302,7 +293,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
             } else {
                 showOverlay(R.string.waiting_for_usb_device, OverlayStatus.Disconnected);
             }
-        };
+        }
     }
 
     @Override
@@ -363,7 +354,7 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         mVideoReader.start();
         updateDVRThumb();
         updateWatermark();
-        autoHideSettingsButton();
+        autoHideToolbar();
         showOverlay(R.string.waiting_for_video, OverlayStatus.Connected);
     }
 
@@ -385,8 +376,8 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         }
 
 
-        settingsButton.setAlpha(1);
-        autoHideSettingsButton();
+        toolbar.setAlpha(1);
+        autoHideToolbar();
         updateWatermark();
         updateVideoZoom();
 
@@ -460,18 +451,18 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
     private void showOverlay(int textId, OverlayStatus connected) {
         overlayView.show(textId, connected);
         overlayIsShown = true;
-        settingsButton.setTranslationX(0);
-        settingsButton.setAlpha(1);
+        toolbar.setTranslationX(0);
+        toolbar.setAlpha(1);
         updateWatermark();
-        showSettingsButton();
+        showToolbar();
     }
 
     private void hideOverlay() {
         overlayView.hide();
         overlayIsShown = false;
         updateWatermark();
-        showSettingsButton();
-        autoHideSettingsButton();
+        showToolbar();
+        autoHideToolbar();
     }
 
     private void disconnect() {
@@ -507,13 +498,13 @@ public class MainActivity extends AppCompatActivity implements UsbDeviceListener
         usbConnected = false;
     }
 
-    private void autoHideSettingsButton() {
+    private void autoHideToolbar() {
         if (overlayView.getVisibility() == View.VISIBLE) return;
         if (buttonAlpha == 0) return;
 
-        settingsButton.postDelayed(() -> {
+        toolbar.postDelayed(() -> {
             buttonAlpha = 0;
-            settingsButton.animate()
+            toolbar.animate()
                     .alpha(0)
                     .translationX(60)
                     .setDuration(shortAnimationDuration);

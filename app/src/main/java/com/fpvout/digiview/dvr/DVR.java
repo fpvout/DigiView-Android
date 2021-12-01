@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.media.MediaRecorder;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.widget.ImageButton;
 import android.widget.Toast;
@@ -23,27 +22,27 @@ import java.util.Calendar;
 
 public class DVR {
     private final Activity activity;
-    private boolean recordAmbientAudio;
+    private final boolean recordAmbientAudio;
     private MediaRecorder recorder;
     private boolean recording = false;
     private static DVR instance;
     private static final String DVR_LOG_TAG = "DVR";
     private String defaultFolder = "";
-    private String ambietAudio;
+    private final StreamDumper streamDumper;
     private String videoFile;
     private String dvrFile;
     private String fileName;
-    private StreamDumper streamDumper;
-    private UsbMaskConnection connection;
+    private final UsbMaskConnection connection;
+    private String ambientAudio;
     private static Handler updateAfterRecord;
     public static final String LATEST_THUMB_FILE = "latest.jpeg";
 
-    DVR(Activity activity, boolean recordAmbientAudio, Handler updateAfterRecord, UsbMaskConnection connection){
+    DVR(Activity activity, boolean recordAmbientAudio, Handler updateAfterRecord, UsbMaskConnection connection) {
         this.activity = activity;
         this.connection = connection;
         this.recordAmbientAudio = recordAmbientAudio;
-        this.updateAfterRecord = updateAfterRecord;
-        defaultFolder =  Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/" + this.activity.getApplicationInfo().loadLabel(this.activity.getPackageManager()).toString();
+        DVR.updateAfterRecord = updateAfterRecord;
+        defaultFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/" + this.activity.getApplicationInfo().loadLabel(this.activity.getPackageManager()).toString();
         streamDumper = new StreamDumper(activity, defaultFolder);
     }
 
@@ -101,8 +100,8 @@ public class DVR {
 
                 fileName = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss")
                         .format(Calendar.getInstance().getTime());
-                ambietAudio = "/DigiView_" + fileName + ".aac";
-                videoFile ="/DigiView_"+fileName+".h264";
+                ambientAudio = "/DigiView_" + fileName + ".aac";
+                videoFile = "/DigiView_" + fileName + ".h264";
                 dvrFile = "/DigiView_" + fileName + ".mp4";
 
                 Log.d(DVR_LOG_TAG, "creating folder for dvr saving ...");
@@ -111,10 +110,10 @@ public class DVR {
                     objFolder.mkdir();
 
                 Log.d(DVR_LOG_TAG, "start recording ...");
-                streamDumper.init(videoFile, ambietAudio, dvrFile);
+                streamDumper.init(videoFile, ambientAudio, dvrFile);
                 if (recordAmbientAudio) {
                     Log.d(DVR_LOG_TAG, "starting ambient recording ...");
-                    recorder.setOutputFile(defaultFolder + ambietAudio);
+                    recorder.setOutputFile(defaultFolder + ambientAudio);
                     try {
                         recorder.prepare();
                         recorder.start();   // Ambient Audio Recording is now started

@@ -15,11 +15,11 @@ public class OverlayView extends ConstraintLayout {
     public OverlayView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        inflate(getContext(),R.layout.backdrop_view,this);
+        inflate(getContext(),R.layout.overlay_view,this);
 
-        textView = findViewById(R.id.backdrop_text);
+        textView = findViewById(R.id.overlay_text);
 
-        imageView = findViewById(R.id.backdrop_image);
+        imageView = findViewById(R.id.overlay_image);
     }
 
     public void hide(){

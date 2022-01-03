@@ -4,6 +4,7 @@
 | Samsung   | Galaxy S20    | Latest            | Yes           | Unknown       | No        | Yes       | Fast      ||
 | Samsung   | S7 Edge       | 8.0.0             | Unknown       | Yes           | Unknown   | Yes       | ~220ms    ||
 | Google    | Pixel 4XL     | 11                | Yes           | Unknown       | Unknown   | Yes       | ~150ms    ||
+| Google    | Nexus 7 (2012)| 7.1.2             | Unknown       | Yes           | Yes       | Yes       | ~1000+ms   | Very high latency but still good enough to show spectators. |
 | Essential | PH-1          | 10                | Yes           | Unknown       | No        | Yes       | 200-2000ms||
 | Samsung   | S20 5G        | 11                | Yes           | Unknown       | No        | Yes       | 200-300ms ||
 | Fairphone | 3             | 10                | Unknown       | Yes           | Yes       | Unknown   | 5+ seconds||
